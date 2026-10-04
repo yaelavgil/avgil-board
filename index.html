@@ -111,6 +111,14 @@ h1{font-family:'Karantina','Assistant',sans-serif; font-weight:700; font-size:26
 .chkbox:checked{background:var(--olive); border-color:var(--olive)} .chkbox:checked::after{color:#fff}
 .chktxt{flex:1; min-width:0; font-size:14px; line-height:1.45}
 .chktxt b{font-weight:800}
+.refs{display:flex; flex-wrap:wrap; gap:5px; margin-top:7px; align-items:center}
+.ref{
+  border:1px solid var(--line); background:var(--card); color:var(--olive-ink);
+  border-radius:99px; padding:3px 10px; font:inherit; font-size:12px; font-weight:700;
+  cursor:pointer; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.ref:hover{border-color:var(--olive); background:var(--olive-soft)}
+.refnote{font-size:12px; color:var(--muted); font-weight:700}
 .chkdone{font-size:12px; color:var(--muted); font-weight:700; margin-top:10px}
 .dsclose{position:sticky; bottom:0; width:100%; margin-top:14px; border:none; background:var(--olive); color:#fff; border-radius:12px; padding:13px; font:inherit; font-weight:800; font-size:15px; cursor:pointer}
 
@@ -123,18 +131,20 @@ h1{font-family:'Karantina','Assistant',sans-serif; font-weight:700; font-size:26
 .who button.on{background:var(--on); border-color:var(--on); color:var(--on-ink)}
 
 /* days */
-.days{display:flex; gap:6px; overflow-x:auto; padding:1px 0 8px; scrollbar-width:none; -webkit-overflow-scrolling:touch}
+.days{display:flex; gap:6px; overflow-x:auto; overflow-y:visible; padding:9px 5px 8px; margin:-8px -5px 0;
+       scrollbar-width:none; -webkit-overflow-scrolling:touch}
 .days::-webkit-scrollbar{display:none}
 .daychip{
   flex:0 0 auto; border:1.5px solid var(--line); background:var(--card); color:var(--ink);
-  border-radius:12px; padding:5px 10px 6px; font:inherit; cursor:pointer; text-align:center;
-  min-width:56px; line-height:1.15; position:relative;
+  border-radius:12px; padding:6px 11px 7px; font:inherit; cursor:pointer; text-align:center;
+  min-width:58px; line-height:1.2; position:relative;
 }
-.daychip b{display:block; font-size:11px; font-weight:700; color:var(--muted)}
+.daychip b{display:block; font-size:10.5px; font-weight:700; color:var(--muted); white-space:nowrap}
 .daychip i{display:block; font-style:normal; font-size:15px; font-weight:800; font-variant-numeric:tabular-nums}
 .daychip .n{
-  position:absolute; top:-6px; inset-inline-start:-5px; background:var(--olive); color:#fff;
-  font-size:10px; font-weight:800; border-radius:99px; min-width:17px; padding:1px 4px;
+  position:absolute; top:-7px; inset-inline-start:-4px; background:var(--olive); color:#fff;
+  font-size:10px; font-weight:800; border-radius:99px; min-width:17px; padding:1px 5px;
+  line-height:1.35; box-shadow:0 0 0 2px var(--bg);
 }
 .daychip.on{border-color:var(--olive); background:var(--olive-soft)}
 .daychip.on b{color:var(--olive-ink)}
@@ -511,15 +521,44 @@ function renderPinned(){
     bar.appendChild(row);
   });
 }
+/* items carry references to the full task they came from — show them as
+   names you can tap, not as the raw ids they are stored under */
+function splitRefs(txt){
+  const m=txt.match(/\s*\*\(([^)]+)\)\*\s*$/);
+  if(!m)return {body:txt, ids:[], note:''};
+  const parts=m[1].split('·');
+  const ids=parts[0].split(',').map(x=>x.trim()).filter(x=>/^[a-z]+\d+$/i.test(x));
+  let note=parts.slice(1).join('·').trim();
+  if(!ids.length&&!note)note=parts[0].trim();
+  return {body:txt.slice(0,m.index).trim(), ids, note};
+}
+function shortTitle(id){
+  const t=byId(id); if(!t)return null;
+  let s=t.title.replace(/[🔴🟠🟡🔵✅⛔📦🔧🗑️👤🔁]/g,'').replace(/\s+/g,' ').trim();
+  s=s.split(/\s[—–]\s/)[0];
+  return s.length>26?s.slice(0,25)+'…':s;
+}
 /* a task's items are live data, not text — tick one and it moves to the bottom */
 function checklistEl(id,onChange){
   const t=byId(id); if(!t||!Array.isArray(t.items)||!t.items.length)return null;
   const wrap=el('<div class="chk"></div>');
   const open=t.items.filter(i=>!i.done), closed=t.items.filter(i=>i.done);
   const row=it=>{
+    const {body,ids,note}=splitRefs(it.t);
     const r=el(`<label class="chkrow lv${it.lv||2} ${it.done?'off':''}">
       <input type="checkbox" class="chkbox" ${it.done?'checked':''}>
-      <span class="chktxt">${md(it.t).replace(/<\/?div>/g,'')}</span></label>`);
+      <span class="chktxt">${md(body).replace(/<\/?div>/g,'')}</span></label>`);
+    const refs=ids.map(x=>[x,shortTitle(x)]).filter(([,n])=>n);
+    if(refs.length||note){
+      const bar=el('<div class="refs"></div>');
+      refs.forEach(([rid,name])=>{
+        const b=el(`<button type="button" class="ref">↗ ${esc(name)}</button>`);
+        b.onclick=ev=>{ ev.preventDefault(); ev.stopPropagation(); openDetail(rid); };
+        bar.appendChild(b);
+      });
+      if(note)bar.appendChild(el(`<span class="refnote">${esc(note)}</span>`));
+      r.querySelector('.chktxt').appendChild(bar);
+    }
     r.querySelector('.chkbox').onchange=e=>{
       const cur=byId(id); if(!cur||!Array.isArray(cur.items))return;
       const tgt=cur.items.find(x=>x.k===it.k);
@@ -547,6 +586,7 @@ function checklistEl(id,onChange){
 }
 function openDetail(id){
   const t=byId(id); if(!t)return;
+  ui.detail=id;
   const box=document.getElementById('dsin');
   box.innerHTML=`<div class="dsgrip"></div><h3>${esc(t.title)}</h3>`;
   const chk=checklistEl(id,()=>openDetail(id));
