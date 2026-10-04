@@ -75,7 +75,8 @@ h1{font-family:'Karantina','Assistant',sans-serif; font-weight:700; font-size:26
 }
 .pinrow:active{transform:scale(.985)}
 .pinrow .t{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-.pinrow .c{background:var(--pom); color:#fff; border-radius:99px; font-size:11px; font-weight:800; padding:1px 7px; flex:0 0 auto}
+.pinrow .c{background:var(--pom); color:#fff; border-radius:99px; font-size:11px; font-weight:800; padding:2px 8px; flex:0 0 auto; white-space:nowrap}
+.pinrow .c2{background:var(--card); color:var(--muted); border:1px solid var(--line); border-radius:99px; font-size:11px; font-weight:800; padding:1px 8px; flex:0 0 auto; white-space:nowrap}
 .pinrow .go{color:var(--amber); font-size:12px; flex:0 0 auto}
 /* ---- detail sheet ---- */
 .dsheet{position:fixed; inset:0; z-index:65; background:rgba(20,20,16,.55); display:none}
@@ -102,13 +103,13 @@ h1{font-family:'Karantina','Assistant',sans-serif; font-weight:700; font-size:26
 .chkrow.off{opacity:.5; background:transparent; border-style:dashed}
 .chkrow.off .chktxt{text-decoration:line-through; text-decoration-color:var(--done)}
 .chkbox{
-  appearance:none; flex:0 0 auto; width:22px; height:22px; margin-top:1px;
+  display:block; flex:0 0 auto; width:22px; height:22px; margin-top:1px;
   border:2px solid var(--line); border-radius:50%; background:transparent; cursor:pointer; position:relative;
   transition:background .16s, border-color .16s;
 }
 .chkbox::after{content:'✓'; position:absolute; inset:0; display:grid; place-items:center; color:var(--line); font-size:12px; font-weight:800; transition:color .16s}
 .chkrow:hover .chkbox{border-color:var(--olive)} .chkrow:hover .chkbox::after{color:var(--olive)}
-.chkbox:checked{background:var(--olive); border-color:var(--olive)} .chkbox:checked::after{color:#fff}
+.chkbox[data-on]{background:var(--olive); border-color:var(--olive)} .chkbox[data-on]::after{color:#fff}
 .chktxt{flex:1; min-width:0; font-size:14px; line-height:1.45}
 .chktxt b{font-weight:800}
 .refs{display:flex; flex-wrap:wrap; gap:5px; margin-top:7px; align-items:center}
@@ -125,7 +126,34 @@ h1{font-family:'Karantina','Assistant',sans-serif; font-weight:700; font-size:26
   margin:1px 2px; vertical-align:baseline;
 }
 .reflink:hover{border-color:var(--olive); background:var(--olive-soft)}
+.tel{display:inline-flex; align-items:center; gap:0; margin:1px 2px; vertical-align:baseline; border:1px solid var(--line); border-radius:99px; overflow:hidden; background:var(--card)}
+.tel a{display:inline-block; padding:2px 10px; font-size:12.5px; font-weight:700; color:var(--ink); text-decoration:none; white-space:nowrap}
+.tel a+a{border-inline-start:1px solid var(--line); color:#1f8a4c; padding:2px 9px}
+.tel a:hover{background:var(--olive-soft)}
+.links{display:flex; flex-wrap:wrap; gap:6px; margin:10px 0 2px}
+.lnk{display:inline-flex; align-items:center; gap:5px; border:1px solid var(--line); background:var(--card);
+     color:var(--olive-ink); border-radius:10px; padding:6px 11px; font-size:12.5px; font-weight:700; text-decoration:none}
+.lnk:hover{border-color:var(--olive); background:var(--olive-soft)}
 .chkdone{font-size:12px; color:var(--muted); font-weight:700; margin-top:10px}
+.sheettop{display:flex; align-items:center; gap:8px; margin-bottom:10px}
+.sheettop .back{flex:1; text-align:start; border:none; background:transparent; color:var(--olive-ink);
+  font:inherit; font-size:13.5px; font-weight:800; cursor:pointer; padding:4px 0}
+.sheettop .x{flex:0 0 auto; width:34px; height:34px; border:1px solid var(--line); background:var(--card);
+  color:var(--muted); border-radius:50%; font-size:17px; font-weight:700; cursor:pointer; line-height:1}
+.sheettop .x:hover{border-color:var(--pom); color:var(--pom)}
+.itemtxt{font-size:16px; line-height:1.5; font-weight:600}
+.itemtxt b{font-weight:800}
+.anslbl{font-size:12px; font-weight:800; color:var(--muted); margin:14px 0 5px}
+.ansbox{width:100%; border:1.5px solid var(--line); background:var(--bg); color:var(--ink);
+  border-radius:11px; padding:11px 12px; font:inherit; font-size:15px; min-height:92px; resize:vertical; outline:none}
+.ansbox:focus{border-color:var(--olive)}
+.ansview{background:var(--olive-soft); border-radius:11px; padding:11px 13px; font-size:14.5px; line-height:1.5}
+.ansmeta{font-size:11.5px; color:var(--muted); font-weight:700; margin-top:6px}
+.itembtns{display:flex; gap:8px; margin-top:14px}
+.itembtns button{flex:1; border:none; border-radius:12px; padding:13px; font:inherit; font-weight:800; font-size:15px; cursor:pointer}
+.itembtns .done{background:var(--olive); color:#fff}
+.itembtns .reopen{background:transparent; border:1.5px solid var(--line); color:var(--ink)}
+.chkrow{user-select:none}
 .dsclose{position:sticky; bottom:0; width:100%; margin-top:14px; border:none; background:var(--olive); color:#fff; border-radius:12px; padding:13px; font:inherit; font-weight:800; font-size:15px; cursor:pointer}
 
 /* who */
@@ -414,18 +442,40 @@ function byId(id){return tasks.find(t=>t.id===id)}
    `*(r06 · הערה)*` becomes a chip carrying the task's real name plus the note,
    so a reference reads as a destination rather than as a code. */
 function refsToChips(html){
-  return html.replace(/\*\(([^)]+)\)\*/g,(whole,inner)=>{
+  const slots=[];
+  const keep=h=>{ slots.push(h); return '\u0000'+(slots.length-1)+'\u0000'; };
+  const chip=id=>{
+    const n=shortTitle(id);
+    return n?keep(`<span class="reflink" data-ref="${id}">\u2197 ${esc(n)}</span>`):null;
+  };
+  /* the explicit form first: *(r06 · note)* */
+  html=html.replace(/\*\(([^)]+)\)\*/g,(whole,inner)=>{
     const parts=inner.split('·');
-    const ids=parts[0].split(',').map(x=>x.trim()).filter(x=>/^[a-z]+\d+$/i.test(x));
+    const ids=parts[0].split(',').map(x=>x.trim()).filter(x=>/^[a-z]+\d+$/.test(x));
     if(!ids.length)return whole;
-    const note=parts.slice(1).join('·').trim();
-    const chips=ids.map(id=>{
-      const n=shortTitle(id);
-      return n?`<span class="reflink" data-ref="${id}">↗ ${esc(n)}</span>`:'';
-    }).filter(Boolean).join('');
+    const chips=ids.map(chip).filter(Boolean).join('');
     if(!chips)return whole;
+    const note=parts.slice(1).join('·').trim();
     return chips+(note?` <span class="refnote">${esc(note)}</span>`:'');
   });
+  /* then any bare id still sitting in the prose — only if it names a real task,
+     so colour codes like LR404 or NWC 033 are never mistaken for one */
+  html=html.replace(/\b([a-z]{1,4}\d{1,15})\b/g,m=>chip(m)||m);
+  /* Israeli phone numbers — tap to call, or straight to WhatsApp on a mobile.
+     The leading 0 plus a valid prefix keeps bank accounts, invoice numbers
+     and dates from being mistaken for phones. */
+  html=html.replace(/\b(0(?:5\d|7\d|[2-4]|[89]))-?(\d{7})\b/g,(m,pre,rest)=>{
+    const digits=pre+rest;
+    const pretty=pre+'-'+rest;
+    const mob=/^05/.test(digits);
+    return keep('<span class="tel"><a href="tel:'+digits+'">\ud83d\udcde '+pretty+'</a>'+
+      (mob?'<a href="https://wa.me/972'+digits.slice(1)+'" target="_blank" rel="noopener">\ud83d\udcac</a>':'')+
+      '</span>');
+  });
+  /* tidy the brackets and connectors left around a chip */
+  html=html.replace(/[(\[]\s*(\u0000\d+\u0000(?:\s*[,ו]?\s*\u0000\d+\u0000)*)\s*[)\]]/g,'$1');
+  html=html.replace(/([\u05d0-\u05ea])-(\u0000\d+\u0000)/g,'$1 $2');
+  return html.replace(/\u0000(\d+)\u0000/g,(x,i)=>slots[i]);
 }
 function md(s){
   return refsToChips(esc(s||'')
@@ -556,12 +606,15 @@ function renderPinned(){
   tasks.filter(t=>t.ongoing&&!t.done)
        .sort((a,z)=>(a.order||0)-(z.order||0))
        .forEach(t=>{
-    const urgent=Array.isArray(t.items)
-      ? t.items.filter(i=>!i.done&&(i.lv||2)===1).length
-      : ((t.notes||'').match(/🔴/g)||[]).length;
+    const items=Array.isArray(t.items)?t.items:null;
+    const open=items?items.filter(i=>!i.done).length:0;
+    const urgent=items ? items.filter(i=>!i.done&&(i.lv||2)===1).length
+                       : ((t.notes||'').match(/🔴/g)||[]).length;
+    /* a bare number reads as nothing — say what is being counted */
     const row=el(`<button class="pinrow">
-      <span>🔁</span><span class="t">${esc(t.title.replace(/^🔁\s*/,''))}</span>
-      ${urgent?`<span class="c">${urgent}</span>`:''}<span class="go">▸</span></button>`);
+      <span>🔁</span><span class="t">${esc(t.title.replace(/^🔁\s*/,'').split(/\s[—–]\s/)[0])}</span>
+      ${urgent?`<span class="c">${urgent} דחוף</span>`:''}
+      ${items?`<span class="c2">${open} פתוח</span>`:''}<span class="go">▸</span></button>`);
     row.onclick=()=>openDetail(t.id);
     bar.appendChild(row);
   });
@@ -584,16 +637,37 @@ function shortTitle(id){
   return s.length>26?s.slice(0,25)+'…':s;
 }
 /* a task's items are live data, not text — tick one and it moves to the bottom */
+/* attachments a task carries: {label, url} — plans, quotes, sites */
+function linksEl(t){
+  if(!Array.isArray(t.links)||!t.links.length)return null;
+  const w=el('<div class="links"></div>');
+  t.links.forEach(l=>{
+    if(!l||!l.url)return;
+    const ic=/\.pdf($|\?)/i.test(l.url)?'📄'
+      :/\.(png|jpe?g|webp|gif|heic)($|\?)/i.test(l.url)?'🖼'
+      :/drive\.google|docs\.google/.test(l.url)?'📁'
+      :/wa\.me|whatsapp/.test(l.url)?'💬':'🔗';
+    const a=el(`<a class="lnk" target="_blank" rel="noopener">${ic} ${esc(l.label||l.url)}</a>`);
+    a.href=l.url; a.onclick=e=>e.stopPropagation();
+    w.appendChild(a);
+  });
+  return w.children.length?w:null;
+}
 function checklistEl(id,onChange){
   const t=byId(id); if(!t||!Array.isArray(t.items)||!t.items.length)return null;
   const wrap=el('<div class="chk"></div>');
   const open=t.items.filter(i=>!i.done), closed=t.items.filter(i=>i.done);
   const row=it=>{
     const {body,ids,note}=splitRefs(it.t);
-    const r=el(`<label class="chkrow lv${it.lv||2} ${it.done?'off':''}">
-      <input type="checkbox" class="chkbox" ${it.done?'checked':''}>
-      <span class="chktxt">${md(body).replace(/<\/?div>/g,'')}</span></label>`);
+    const r=el(`<div class="chkrow lv${it.lv||2} ${it.done?'off':''}">
+      <span class="chkbox" ${it.done?'data-on="1"':''}></span>
+      <span class="chktxt">${md(body).replace(/<\/?div>/g,'')}</span></div>`);
+    r.onclick=ev=>{ if(ev.target.closest('.reflink,.tel,a'))return; openItem(id,it.k); };
     const refs=ids.map(x=>[x,shortTitle(x)]).filter(([,n])=>n);
+    if(it.ans){
+      const a=el(`<div class="ansview" style="margin-top:7px;font-size:13px">${md(it.ans).replace(/<\/?div>/g,' ')}</div>`);
+      r.querySelector('.chktxt').appendChild(a);
+    }
     if(refs.length||note){
       const bar=el('<div class="refs"></div>');
       refs.forEach(([rid,name])=>{
@@ -604,21 +678,11 @@ function checklistEl(id,onChange){
       if(note)bar.appendChild(el(`<span class="refnote">${esc(note)}</span>`));
       r.querySelector('.chktxt').appendChild(bar);
     }
-    r.querySelector('.chkbox').onchange=e=>{
-      const cur=byId(id); if(!cur||!Array.isArray(cur.items))return;
-      const tgt=cur.items.find(x=>x.k===it.k);
-      if(!tgt)return;
-      tgt.done=e.target.checked;
-      tgt.doneAt=e.target.checked?Date.now():0;
-      save(cur,true);
-      renderPinned();                        /* the badge counts open red items */
-      toast(e.target.checked?'סומן כסגור ✓':'הוחזר לרשימה');
-      if(onChange)onChange();
-    };
     return r;
   };
   if(open.length){
-    wrap.appendChild(el(`<div class="chkhead">פתוח · ${open.length}</div>`));
+    const urg=open.filter(i=>(i.lv||2)===1).length;
+    wrap.appendChild(el(`<div class="chkhead">פתוח · ${open.length}${urg?` · מתוכם ${urg} דחופים`:''}</div>`));
     open.sort((a,z)=>(a.lv||2)-(z.lv||2)).forEach(i=>wrap.appendChild(row(i)));
   }else{
     wrap.appendChild(el('<div class="chkhead">הכל סגור 🎉</div>'));
@@ -629,13 +693,79 @@ function checklistEl(id,onChange){
   }
   return wrap;
 }
-function openDetail(id){
-  const t=byId(id); if(!t)return;
-  ui.detail=id;
+function openItem(taskId,key){ ui.view={task:taskId,item:key}; paintSheet(); }
+function openDetail(id){ ui.view={task:id,item:null}; paintSheet(); }
+function sheetTop(box,backLabel,onBack){
+  const bar=el('<div class="sheettop"></div>');
+  const b=el(`<button class="back">${backLabel?'‹ '+esc(backLabel):''}</button>`);
+  if(onBack)b.onclick=onBack;
+  const x=el('<button class="x" aria-label="סגירה">✕</button>');
+  x.onclick=closeDetail;
+  bar.appendChild(b); bar.appendChild(x); box.appendChild(bar);
+}
+function paintSheet(){
+  const v=ui.view||{}; const t=byId(v.task);
+  if(!t){ closeDetail(); return; }
   const box=document.getElementById('dsin');
-  box.innerHTML=`<div class="dsgrip"></div><h3>${esc(t.title)}</h3>`;
+  box.innerHTML='<div class="dsgrip"></div>';
+  if(v.item){ paintItem(box,t,v.item); }
+  else { paintTask(box,t); }
+  document.getElementById('dsheet').classList.add('on');
+  box.scrollTop=0;
+}
+/* one sub-topic, in full, with room for the answer */
+function paintItem(box,t,key){
+  const it=(t.items||[]).find(x=>x.k===key);
+  if(!it){ openDetail(t.id); return; }
+  sheetTop(box,'חזרה לרשימה',()=>openDetail(t.id));
+  const {body,ids,note}=splitRefs(it.t);
+  box.appendChild(el(`<div class="itemtxt">${md(body).replace(/<\/?div>/g,'')}</div>`));
+  if(note)box.appendChild(el(`<div class="ansmeta">${esc(note)}</div>`));
+  const refs=ids.map(x=>[x,shortTitle(x)]).filter(([,n])=>n);
+  if(refs.length){
+    const bar=el('<div class="refs"></div>');
+    refs.forEach(([rid,name])=>{
+      const b=el(`<button type="button" class="ref">↗ ${esc(name)}</button>`);
+      b.onclick=()=>openDetail(rid);
+      bar.appendChild(b);
+    });
+    box.appendChild(bar);
+  }
+  box.appendChild(el('<div class="anslbl">מה נופר ענתה?</div>'));
+  const ta=el('<textarea class="ansbox" placeholder="התשובה נשמרת ונשארת לתיעוד — גם אחרי שהנושא נסגר…"></textarea>');
+  ta.value=it.ans||'';
+  box.appendChild(ta);
+  if(it.done&&it.doneAt){
+    box.appendChild(el(`<div class="ansmeta">נסגר ב-${new Date(it.doneAt).toLocaleDateString('he-IL',{day:'numeric',month:'numeric'})}</div>`));
+  }
+  const btns=el('<div class="itembtns"></div>');
+  const commit=(markDone)=>{
+    const cur=byId(t.id); const tgt=(cur.items||[]).find(x=>x.k===key); if(!tgt)return;
+    tgt.ans=ta.value.trim();
+    tgt.done=markDone;
+    tgt.doneAt=markDone?(tgt.doneAt||Date.now()):0;
+    save(cur,true); renderPinned();
+    toast(markDone?'נסגר ונשמר ✓':'הוחזר לרשימה');
+    openDetail(t.id);
+  };
+  if(!it.done){
+    const d=el('<button class="done">✓ סגירה עם התשובה</button>');
+    d.onclick=()=>commit(true); btns.appendChild(d);
+  }else{
+    const r=el('<button class="reopen">↩ החזרה לרשימה</button>');
+    r.onclick=()=>commit(false); btns.appendChild(r);
+    const sv=el('<button class="done">שמירת התשובה</button>');
+    sv.onclick=()=>commit(true); btns.appendChild(sv);
+  }
+  box.appendChild(btns);
+}
+function paintTask(box,t){
+  const id=t.id;
+  sheetTop(box,'',null);
+  box.appendChild(el(`<h3>${esc(t.title)}</h3>`));
   const chk=checklistEl(id,()=>openDetail(id));
   if(chk)box.appendChild(chk);
+  const lk=linksEl(t); if(lk)box.appendChild(lk);
   box.appendChild(el(`<div class="notes">${md(t.notes)}</div>`));
   const acts=el('<div class="acts" style="border:0;padding-top:12px"></div>');
   if(t.wa){
@@ -652,12 +782,17 @@ function openDetail(id){
   box.appendChild(acts);
   const close=el('<button class="dsclose">סגירה</button>');
   close.onclick=closeDetail; box.appendChild(close);
-  document.getElementById('dsheet').classList.add('on');
-  box.scrollTop=0;
 }
-function closeDetail(){ document.getElementById('dsheet').classList.remove('on'); }
-document.getElementById('dsheet').onclick=e=>{ if(e.target.id==='dsheet')closeDetail(); };
-addEventListener('keydown',e=>{ if(e.key==='Escape')closeDetail(); });
+function closeDetail(){ ui.view=null; document.getElementById('dsheet').classList.remove('on'); }
+/* tapping outside steps back one level, then closes */
+document.getElementById('dsheet').onclick=e=>{
+  if(e.target.id!=='dsheet')return;
+  if(ui.view&&ui.view.item)openDetail(ui.view.task); else closeDetail();
+};
+addEventListener('keydown',e=>{
+  if(e.key!=='Escape')return;
+  if(ui.view&&ui.view.item)openDetail(ui.view.task); else closeDetail();
+});
 
 function renderWho(){
   const bar=document.getElementById('who'); bar.innerHTML='';
@@ -819,6 +954,8 @@ function taskEl(t){
   if(open){
     const chk=checklistEl(t.id,()=>render());
     if(chk)node.querySelector('.tbody').insertBefore(chk,node.querySelector('.acts'));
+    const lk=linksEl(t);
+    if(lk)node.querySelector('.tbody').insertBefore(lk,node.querySelector('.acts'));
     const acts=node.querySelector('.acts');
     if(!t.ongoing){
       acts.appendChild(el('<span class="lbl">דחייה:</span>'));
