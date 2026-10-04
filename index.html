@@ -294,8 +294,17 @@ nav.bar .add:active{transform:scale(.95)}
   display:flex; flex-direction:column; gap:10px; max-width:620px; margin:0 auto;
 }
 .sheetin h3{font-family:'Karantina','Assistant',sans-serif; font-size:26px; font-weight:700}
-.sheetin input{width:100%; border:1.5px solid var(--line); background:var(--bg); color:var(--ink); border-radius:11px; padding:12px; font:inherit; font-size:16px; outline:none}
-.sheetin input:focus{border-color:var(--olive)}
+.sheetin{max-height:92vh; overflow:auto}
+.sheetin input,.sheetin textarea{width:100%; border:1.5px solid var(--line); background:var(--bg); color:var(--ink); border-radius:11px; padding:12px; font:inherit; font-size:16px; outline:none}
+.sheetin textarea{min-height:76px; resize:vertical; font-size:14.5px; line-height:1.5}
+.sheetin input:focus,.sheetin textarea:focus{border-color:var(--olive)}
+.frow{display:flex; gap:6px; align-items:center; flex-wrap:wrap}
+.frow .flbl{font-size:12px; font-weight:800; color:var(--muted); width:100%}
+.frow>span{display:contents}
+#newD{width:auto; flex:1; min-width:130px; padding:8px 10px; font-size:15px}
+#newOng.on{border-color:var(--amber); background:var(--amber-soft); color:var(--amber)}
+.justadded{animation:flash 1.6s ease}
+@keyframes flash{0%,55%{box-shadow:0 0 0 3px var(--olive)}100%{box-shadow:var(--shadow)}}
 .sheetin .go{background:var(--olive); color:#fff; border:none; border-radius:12px; padding:13px; font:inherit; font-weight:800; font-size:16px; cursor:pointer}
 .sheetin .cancel{background:transparent; border:none; color:var(--muted); font:inherit; font-weight:700; cursor:pointer; padding:4px}
 
@@ -335,8 +344,15 @@ nav.bar .add:active{transform:scale(.95)}
 
 <div class="sheet" id="sheet">
   <div class="sheetin">
+    <div class="dsgrip"></div>
     <h3>משימה חדשה</h3>
-    <input id="newT" type="text" placeholder="מה צריך לעשות?" enterkeyhint="done">
+    <input id="newT" type="text" placeholder="מה צריך לעשות?" enterkeyhint="next">
+    <textarea id="newN" placeholder="פרטים נוספים (לא חובה)…"></textarea>
+    <div class="frow"><span class="flbl">אחראי</span><span id="newOwner"></span></div>
+    <div class="frow"><span class="flbl">מתי</span><span id="newWhen"></span>
+      <input type="date" id="newD"></div>
+    <div class="frow"><span class="flbl">קטגוריה</span><span id="newCat"></span></div>
+    <div class="frow"><button type="button" class="catbtn" id="newOng">🔁 משימה חוזרת — תמיד למעלה</button></div>
     <button class="go" id="newGo">הוספה</button>
     <button class="cancel" id="newX">ביטול</button>
   </div>
@@ -899,22 +915,66 @@ function renderCatRow(){
   });
   document.querySelector('.toolrow').after(row);
 }
+const draft={owner:null, due:null, cat:null, ongoing:false};
+function chipRow(host,opts,get,set){
+  host.innerHTML='';
+  opts.forEach(([val,label])=>{
+    const b=el(`<button type="button" class="catbtn ${get()===val?'on':''}">${label}</button>`);
+    b.onclick=()=>{ set(get()===val?null:val); paintDraft(); };
+    host.appendChild(b);
+  });
+}
+function paintDraft(){
+  chipRow(document.getElementById('newOwner'), OWNERS.map(o=>[o,o]),
+          ()=>draft.owner, v=>draft.owner=v);
+  chipRow(document.getElementById('newWhen'),
+          [['t','היום'],['m','מחר'],['w','עוד שבוע']],
+          ()=>draft.due===todayStr()?'t':draft.due===addDays(1)?'m':draft.due===addDays(7)?'w':null,
+          v=>draft.due = v==='t'?todayStr() : v==='m'?addDays(1) : v==='w'?addDays(7) : null);
+  chipRow(document.getElementById('newCat'), Object.entries(CATS),
+          ()=>draft.cat, v=>draft.cat=v);
+  document.getElementById('newD').value=draft.due||'';
+  document.getElementById('newOng').classList.toggle('on',draft.ongoing);
+}
 function openSheet(){
+  draft.owner = (ui.owner&&ui.owner!=='שנינו') ? ui.owner : 'יעל';   /* ברירת מחדל: את */
+  draft.due   = todayStr();                                          /* ברירת מחדל: היום */
+  draft.cat=null; draft.ongoing=false;
+  document.getElementById('newT').value='';
+  document.getElementById('newN').value='';
+  paintDraft();
   document.getElementById('sheet').classList.add('on');
   setTimeout(()=>document.getElementById('newT').focus(),60);
 }
-function closeSheet(){ document.getElementById('sheet').classList.remove('on'); document.getElementById('newT').value=''; }
+function closeSheet(){ document.getElementById('sheet').classList.remove('on'); }
+document.getElementById('newD').onchange=e=>{ draft.due=e.target.value||null; paintDraft(); };
+document.getElementById('newOng').onclick=()=>{ draft.ongoing=!draft.ongoing; if(draft.ongoing)draft.due=null; paintDraft(); };
 document.getElementById('newX').onclick=closeSheet;
 document.getElementById('sheet').onclick=e=>{ if(e.target.id==='sheet')closeSheet(); };
 document.getElementById('newGo').onclick=addTask;
-document.getElementById('newT').addEventListener('keydown',e=>{if(e.key==='Enter')addTask()});
+document.getElementById('newT').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('newN').focus()});
 function addTask(){
-  const inp=document.getElementById('newT'); const v=inp.value.trim(); if(!v)return;
-  const t={id:'t'+Date.now()+Math.floor(Math.random()*99), title:v, notes:'', cat:null, due:null,
-    list: ui.tab==='today'?'now':ui.tab==='all'?'later':'week',
-    order:Math.max(0,...tasks.map(x=>x.order||0))+10, done:false,
-    owner: ui.owner&&ui.owner!=='שנינו'?ui.owner:null};
-  tasks.push(t); closeSheet(); save(t); toast('נוספה ✓');
+  const v=document.getElementById('newT').value.trim(); if(!v)return;
+  const t={id:'t'+Date.now()+Math.floor(Math.random()*99), title:v,
+    notes:document.getElementById('newN').value.trim(),
+    cat:draft.cat, due:draft.ongoing?null:draft.due,
+    list:'now', order:Math.max(0,...tasks.map(x=>x.order||0))+10,
+    done:false, owner:draft.owner, ongoing:draft.ongoing};
+  tasks.push(t); closeSheet();
+  /* a new task must never land somewhere the current view hides it */
+  ui.days.clear(); ui.q=''; ui.cats.clear(); ui.showCats=false;
+  const q=document.getElementById('q'); if(q)q.value='';
+  if(ui.owner && t.owner!==ui.owner && t.owner!=='שנינו')ui.owner=null;
+  if(!t.ongoing){
+    const b=bucketOf(t);
+    ui.tab = b==='hot'?'today' : (b==='week'?'week':'all');
+  }
+  save(t);
+  toast(t.ongoing?'נוספה כמשימה חוזרת ✓':'נוספה ✓');
+  setTimeout(()=>{
+    const n=[...document.querySelectorAll('.task')].find(c=>c.querySelector('.ttl').textContent.trim()===v);
+    if(n){ n.classList.add('justadded'); n.scrollIntoView({block:'center',behavior:'smooth'}); }
+  },120);
 }
 addEventListener('scroll',()=>{
   document.getElementById('top').classList.toggle('stuck',scrollY>4);
