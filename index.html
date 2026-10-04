@@ -88,6 +88,30 @@ h1{font-family:'Karantina','Assistant',sans-serif; font-weight:700; font-size:29
 .dsgrip{width:40px; height:4px; border-radius:99px; background:var(--line); margin:0 auto 12px}
 .dsin h3{font-size:19px; font-weight:800; line-height:1.3; margin-bottom:10px}
 .dsin .notes{font-size:14.5px}
+/* ---- interactive checklist inside a task ---- */
+.chk{display:flex; flex-direction:column; gap:5px; margin:10px 0 4px}
+.chkhead{font-size:12px; font-weight:800; color:var(--muted); margin:8px 0 1px}
+.chkrow{
+  display:flex; align-items:flex-start; gap:9px; padding:9px 10px; border-radius:11px;
+  border:1px solid var(--edge); background:var(--bg); cursor:pointer; position:relative;
+}
+.chkrow::before{content:''; position:absolute; inset-inline-start:0; top:8px; bottom:8px; width:3px; border-radius:3px}
+.chkrow.lv1::before{background:var(--pom)}
+.chkrow.lv2::before{background:var(--amber)}
+.chkrow.lv3::before{background:var(--done)}
+.chkrow.off{opacity:.5; background:transparent; border-style:dashed}
+.chkrow.off .chktxt{text-decoration:line-through; text-decoration-color:var(--done)}
+.chkbox{
+  appearance:none; flex:0 0 auto; width:22px; height:22px; margin-top:1px;
+  border:2px solid var(--line); border-radius:50%; background:transparent; cursor:pointer; position:relative;
+  transition:background .16s, border-color .16s;
+}
+.chkbox::after{content:'✓'; position:absolute; inset:0; display:grid; place-items:center; color:var(--line); font-size:12px; font-weight:800; transition:color .16s}
+.chkrow:hover .chkbox{border-color:var(--olive)} .chkrow:hover .chkbox::after{color:var(--olive)}
+.chkbox:checked{background:var(--olive); border-color:var(--olive)} .chkbox:checked::after{color:#fff}
+.chktxt{flex:1; min-width:0; font-size:14px; line-height:1.45}
+.chktxt b{font-weight:800}
+.chkdone{font-size:12px; color:var(--muted); font-weight:700; margin-top:10px}
 .dsclose{position:sticky; bottom:0; width:100%; margin-top:14px; border:none; background:var(--olive); color:#fff; border-radius:12px; padding:13px; font:inherit; font-weight:800; font-size:15px; cursor:pointer}
 
 /* who */
@@ -477,7 +501,9 @@ function renderPinned(){
   tasks.filter(t=>t.ongoing&&!t.done)
        .sort((a,z)=>(a.order||0)-(z.order||0))
        .forEach(t=>{
-    const urgent=((t.notes||'').match(/🔴/g)||[]).length;
+    const urgent=Array.isArray(t.items)
+      ? t.items.filter(i=>!i.done&&(i.lv||2)===1).length
+      : ((t.notes||'').match(/🔴/g)||[]).length;
     const row=el(`<button class="pinrow">
       <span>🔁</span><span class="t">${esc(t.title.replace(/^🔁\s*/,''))}</span>
       ${urgent?`<span class="c">${urgent}</span>`:''}<span class="go">▸</span></button>`);
@@ -485,11 +511,47 @@ function renderPinned(){
     bar.appendChild(row);
   });
 }
+/* a task's items are live data, not text — tick one and it moves to the bottom */
+function checklistEl(id,onChange){
+  const t=byId(id); if(!t||!Array.isArray(t.items)||!t.items.length)return null;
+  const wrap=el('<div class="chk"></div>');
+  const open=t.items.filter(i=>!i.done), closed=t.items.filter(i=>i.done);
+  const row=it=>{
+    const r=el(`<label class="chkrow lv${it.lv||2} ${it.done?'off':''}">
+      <input type="checkbox" class="chkbox" ${it.done?'checked':''}>
+      <span class="chktxt">${md(it.t).replace(/<\/?div>/g,'')}</span></label>`);
+    r.querySelector('.chkbox').onchange=e=>{
+      const cur=byId(id); if(!cur||!Array.isArray(cur.items))return;
+      const tgt=cur.items.find(x=>x.k===it.k);
+      if(!tgt)return;
+      tgt.done=e.target.checked;
+      tgt.doneAt=e.target.checked?Date.now():0;
+      save(cur,true);
+      renderPinned();                        /* the badge counts open red items */
+      toast(e.target.checked?'סומן כסגור ✓':'הוחזר לרשימה');
+      if(onChange)onChange();
+    };
+    return r;
+  };
+  if(open.length){
+    wrap.appendChild(el(`<div class="chkhead">פתוח · ${open.length}</div>`));
+    open.sort((a,z)=>(a.lv||2)-(z.lv||2)).forEach(i=>wrap.appendChild(row(i)));
+  }else{
+    wrap.appendChild(el('<div class="chkhead">הכל סגור 🎉</div>'));
+  }
+  if(closed.length){
+    wrap.appendChild(el(`<div class="chkdone">נסגר · ${closed.length}</div>`));
+    closed.forEach(i=>wrap.appendChild(row(i)));
+  }
+  return wrap;
+}
 function openDetail(id){
   const t=byId(id); if(!t)return;
   const box=document.getElementById('dsin');
-  box.innerHTML=`<div class="dsgrip"></div><h3>${esc(t.title)}</h3>
-    <div class="notes">${md(t.notes)}</div>`;
+  box.innerHTML=`<div class="dsgrip"></div><h3>${esc(t.title)}</h3>`;
+  const chk=checklistEl(id,()=>openDetail(id));
+  if(chk)box.appendChild(chk);
+  box.appendChild(el(`<div class="notes">${md(t.notes)}</div>`));
   const acts=el('<div class="acts" style="border:0;padding-top:12px"></div>');
   if(t.wa){
     const c=el('<button class="wa">📋 העתקת הודעה'+(t.waTo?' ל'+esc(t.waTo):'')+'</button>');
@@ -670,6 +732,8 @@ function taskEl(t){
   node.querySelector('.chev').onclick=e=>{e.stopPropagation();toggle()};
 
   if(open){
+    const chk=checklistEl(t.id,()=>render());
+    if(chk)node.querySelector('.tbody').insertBefore(chk,node.querySelector('.acts'));
     const acts=node.querySelector('.acts');
     if(!t.ongoing){
       acts.appendChild(el('<span class="lbl">דחייה:</span>'));
