@@ -119,6 +119,12 @@ h1{font-family:'Karantina','Assistant',sans-serif; font-weight:700; font-size:26
 }
 .ref:hover{border-color:var(--olive); background:var(--olive-soft)}
 .refnote{font-size:12px; color:var(--muted); font-weight:700}
+.reflink{
+  display:inline-block; border:1px solid var(--line); background:var(--card); color:var(--olive-ink);
+  border-radius:99px; padding:1px 9px; font-size:12px; font-weight:700; cursor:pointer;
+  margin:1px 2px; vertical-align:baseline;
+}
+.reflink:hover{border-color:var(--olive); background:var(--olive-soft)}
 .chkdone{font-size:12px; color:var(--muted); font-weight:700; margin-top:10px}
 .dsclose{position:sticky; bottom:0; width:100%; margin-top:14px; border:none; background:var(--olive); color:#fff; border-radius:12px; padding:13px; font:inherit; font-weight:800; font-size:15px; cursor:pointer}
 
@@ -388,9 +394,25 @@ function esc(s){return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>
 function el(h){const d=document.createElement('div');d.innerHTML=h.trim();return d.firstElementChild}
 function byId(id){return tasks.find(t=>t.id===id)}
 
-/* notes: a deliberately small markdown subset */
+/* notes: a deliberately small markdown subset.
+   `*(r06 · הערה)*` becomes a chip carrying the task's real name plus the note,
+   so a reference reads as a destination rather than as a code. */
+function refsToChips(html){
+  return html.replace(/\*\(([^)]+)\)\*/g,(whole,inner)=>{
+    const parts=inner.split('·');
+    const ids=parts[0].split(',').map(x=>x.trim()).filter(x=>/^[a-z]+\d+$/i.test(x));
+    if(!ids.length)return whole;
+    const note=parts.slice(1).join('·').trim();
+    const chips=ids.map(id=>{
+      const n=shortTitle(id);
+      return n?`<span class="reflink" data-ref="${id}">↗ ${esc(n)}</span>`:'';
+    }).filter(Boolean).join('');
+    if(!chips)return whole;
+    return chips+(note?` <span class="refnote">${esc(note)}</span>`:'');
+  });
+}
 function md(s){
-  return esc(s||'')
+  return refsToChips(esc(s||'')
     .replace(/`([^`]+)`/g,'<code>$1</code>')
     .replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>')
     .replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>')
@@ -398,8 +420,15 @@ function md(s){
       const t=l.trim();
       if(/^[•·]\s?/.test(t))return '<div class="li">'+t.replace(/^[•·]\s?/,'')+'</div>';
       return '<div>'+(t||'&nbsp;')+'</div>';
-    }).join('');
+    }).join(''));
 }
+/* one delegated handler covers every chip the renderer ever emits */
+addEventListener('click',e=>{
+  const r=e.target.closest&&e.target.closest('.reflink');
+  if(!r)return;
+  e.preventDefault(); e.stopPropagation();
+  openDetail(r.dataset.ref);
+},true);
 function bucketOf(t){
   if(t.done)return 'done';
   if(t.ongoing)return 'ongoing';
