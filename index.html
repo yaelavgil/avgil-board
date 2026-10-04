@@ -1,4 +1,4 @@
-<title>הלוח של האבגילים</title>
+<title>לוח של האבגילים המשפצים</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -60,7 +60,7 @@ header.top{
 }
 header.top.stuck{border-color:var(--line)}
 .titlerow{display:flex; align-items:center; justify-content:space-between; gap:10px}
-h1{font-family:'Karantina','Assistant',sans-serif; font-weight:700; font-size:29px; line-height:1; letter-spacing:.5px}
+h1{font-family:'Karantina','Assistant',sans-serif; font-weight:700; font-size:26px; line-height:1; letter-spacing:.5px}
 .sync{font-size:11px; font-weight:700; color:var(--muted); display:flex; align-items:center; gap:5px; white-space:nowrap}
 .sync .dot{width:7px; height:7px; border-radius:99px; background:var(--olive)}
 .sync.off .dot{background:var(--muted)} .sync.off{color:var(--muted)}
@@ -299,7 +299,7 @@ nav.bar .add:active{transform:scale(.95)}
 <div class="wrap">
   <header class="top" id="top">
     <div class="titlerow">
-      <h1>הלוח של האבגילים</h1>
+      <h1>לוח של האבגילים המשפצים</h1>
       <div class="sync off" id="sync"><span class="dot"></span><span id="syncT">מתחבר…</span></div>
     </div>
     <div class="datel" id="datel"></div>
@@ -852,6 +852,7 @@ addEventListener('scroll',()=>{
 },{passive:true});
 
 /* ================= boot ================= */
+closeDetail();          /* never start with a sheet showing */
 render();
 
 async function pull(){
