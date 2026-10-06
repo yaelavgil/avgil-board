@@ -151,6 +151,30 @@ h1{font-family:'Karantina','Assistant',sans-serif; font-weight:700; font-size:26
 .lnk{display:inline-flex; align-items:center; gap:5px; border:1px solid var(--line); background:var(--card);
      color:var(--olive-ink); border-radius:10px; padding:6px 11px; font-size:12.5px; font-weight:700; text-decoration:none}
 .lnk:hover{border-color:var(--olive); background:var(--olive-soft)}
+/* linked sub-tasks */
+.subhead{font-size:12px; font-weight:800; color:var(--muted); margin:16px 0 6px}
+.subrow{
+  display:flex; align-items:center; gap:9px; width:100%; text-align:start; cursor:pointer;
+  border:1px solid var(--edge); background:var(--bg); border-radius:11px; padding:9px 11px; font:inherit;
+}
+.subrow:hover{border-color:var(--olive)}
+.subrow.off{opacity:.5; border-style:dashed}
+.subrow .st{flex:0 0 auto; width:9px; height:9px; border-radius:50%; background:var(--muted)}
+.subrow .st.late{background:var(--pom)} .subrow .st.soon{background:var(--olive)} .subrow .st.ok{background:var(--done)}
+.subrow .n{flex:1; min-width:0; font-size:14px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.subrow .d{flex:0 0 auto; font-size:11.5px; font-weight:700; color:var(--muted)}
+.subs{display:flex; flex-direction:column; gap:5px}
+.parentchip{
+  display:inline-flex; align-items:center; gap:4px; background:var(--amber-soft); color:var(--amber);
+  border-radius:99px; padding:2px 9px; font-size:11.5px; font-weight:800; max-width:100%;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.linkbtn{width:100%; margin-top:12px; border:1.5px dashed var(--line); background:transparent; color:var(--olive-ink);
+  border-radius:12px; padding:11px; font:inherit; font-weight:800; font-size:14px; cursor:pointer}
+.linkbtn:hover{border-color:var(--olive); background:var(--olive-soft)}
+.picksearch{width:100%; border:1.5px solid var(--line); background:var(--bg); color:var(--ink);
+  border-radius:11px; padding:10px 12px; font:inherit; font-size:15px; outline:none; margin-bottom:10px}
+.picksearch:focus{border-color:var(--olive)}
 .chkdone{font-size:12px; color:var(--muted); font-weight:700; margin-top:10px}
 .sheettop{display:flex; align-items:center; gap:8px; margin-bottom:10px}
 .sheettop .back{flex:1; text-align:start; border:none; background:transparent; color:var(--olive-ink);
@@ -462,6 +486,7 @@ function addDays(n){const d=new Date();d.setDate(d.getDate()+n);return d.getFull
 function esc(s){return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function el(h){const d=document.createElement('div');d.innerHTML=h.trim();return d.firstElementChild}
 function byId(id){return tasks.find(t=>t.id===id)}
+function childrenOf(id){return tasks.filter(t=>t.parent===id).sort((a,z)=>(a.done?1:0)-(z.done?1:0)||(a.due||'9')<(z.due||'9')?-1:1)}
 
 /* notes: a deliberately small markdown subset.
    `*(r06 · הערה)*` becomes a chip carrying the task's real name plus the note,
@@ -665,7 +690,8 @@ function renderPinned(){
        .sort((a,z)=>(a.order||0)-(z.order||0))
        .forEach(t=>{
     const items=Array.isArray(t.items)?t.items:null;
-    const open=items?items.filter(i=>!i.done).length:0;
+    const kids=childrenOf(t.id);
+    const open=(items?items.filter(i=>!i.done).length:0)+kids.filter(k=>!k.done).length;
     const urgent=items ? items.filter(i=>!i.done&&(i.lv||2)===1).length
                        : ((t.notes||'').match(/🔴/g)||[]).length;
     /* a bare number reads as nothing — say what is being counted */
@@ -761,12 +787,44 @@ function sheetTop(box,backLabel,onBack){
   x.onclick=closeDetail;
   bar.appendChild(b); bar.appendChild(x); box.appendChild(bar);
 }
+function openPick(id){ ui.view={task:id,item:null,pick:true}; paintSheet(); }
+function paintPick(box,t){
+  sheetTop(box,'חזרה למשימה',()=>openDetail(t.id));
+  box.appendChild(el('<h3>שיוך כתת־משימה</h3>'));
+  box.appendChild(el(`<div class="ansmeta" style="margin-bottom:10px">${esc(t.title)}</div>`));
+  const q=el('<input class="picksearch" type="search" placeholder="חיפוש משימת־אב…">');
+  box.appendChild(q);
+  const list=el('<div class="subs"></div>'); box.appendChild(list);
+  const draw=()=>{
+    list.innerHTML='';
+    const term=q.value.trim();
+    if(t.parent){
+      const off=el('<button class="subrow"><span class="st late"></span><span class="n">ניתוק מהמשימה הנוכחית</span></button>');
+      off.onclick=()=>{ const c=byId(t.id); delete c.parent; save(c,true); toast('נותק'); openDetail(t.id); };
+      list.appendChild(off);
+    }
+    tasks.filter(x=>x.id!==t.id && !x.done && x.parent!==t.id)
+      .filter(x=>!term||x.title.includes(term))
+      .sort((a,z)=>(z.ongoing?1:0)-(a.ongoing?1:0))
+      .slice(0,25)
+      .forEach(x=>{
+        const r=el(`<button class="subrow ${x.id===t.parent?'off':''}">
+          <span class="st ${x.ongoing?'soon':''}"></span>
+          <span class="n">${x.ongoing?'🔁 ':''}${esc(x.title.replace(/^[🔴🟠🟡🔵✅⛔📦🔧🗑️👤🔁]\s*/,''))}</span>
+          <span class="d">${x.id===t.parent?'נוכחי':''}</span></button>`);
+        r.onclick=()=>{ const c=byId(t.id); c.parent=x.id; save(c,true); toast('שויכה ✓'); openDetail(t.id); };
+        list.appendChild(r);
+      });
+  };
+  q.oninput=draw; draw();
+}
 function paintSheet(){
   const v=ui.view||{}; const t=byId(v.task);
   if(!t){ closeDetail(); return; }
   const box=document.getElementById('dsin');
   box.innerHTML='<div class="dsgrip"></div>';
-  if(v.item){ paintItem(box,t,v.item); }
+  if(v.pick){ paintPick(box,t); }
+  else if(v.item){ paintItem(box,t,v.item); }
   else { paintTask(box,t); }
   document.getElementById('dsheet').classList.add('on');
   box.scrollTop=0;
@@ -824,6 +882,30 @@ function paintTask(box,t){
   const chk=checklistEl(id,()=>openDetail(id));
   if(chk)box.appendChild(chk);
   const lk=linksEl(t); if(lk)box.appendChild(lk);
+
+  const kids=childrenOf(id);
+  if(kids.length){
+    const openN=kids.filter(k=>!k.done).length;
+    box.appendChild(el(`<div class="subhead">תתי־משימות · ${openN} פתוחות מתוך ${kids.length}</div>`));
+    const wrap=el('<div class="subs"></div>');
+    kids.forEach(k=>{
+      const du=daysUntil(k.due);
+      const cls=k.done?'ok':(du!==null&&du<0?'late':(du!==null&&du<=1?'soon':''));
+      const r=el(`<button class="subrow ${k.done?'off':''}">
+        <span class="st ${cls}"></span>
+        <span class="n">${esc(k.title.replace(/^[🔴🟠🟡🔵✅⛔📦🔧🗑️👤🔁]\s*/,''))}</span>
+        <span class="d">${k.done?'✓':(k.due?fmtDate(k.due):'')}</span></button>`);
+      r.onclick=()=>openDetail(k.id);
+      wrap.appendChild(r);
+    });
+    box.appendChild(wrap);
+  }
+
+  const par=t.parent?byId(t.parent):null;
+  const lb=el(`<button class="linkbtn">${par?'↳ משויכת ל־'+esc(shortTitle(t.parent)||'')+' · שינוי':'⇗ שיוך כתת־משימה'}</button>`);
+  lb.onclick=()=>openPick(id);
+  box.appendChild(lb);
+
   box.appendChild(el(`<div class="notes">${md(t.notes)}</div>`));
   const acts=el('<div class="acts" style="border:0;padding-top:12px"></div>');
   if(t.wa){
@@ -845,11 +927,11 @@ function closeDetail(){ ui.view=null; document.getElementById('dsheet').classLis
 /* tapping outside steps back one level, then closes */
 document.getElementById('dsheet').onclick=e=>{
   if(e.target.id!=='dsheet')return;
-  if(ui.view&&ui.view.item)openDetail(ui.view.task); else closeDetail();
+  if(ui.view&&(ui.view.item||ui.view.pick))openDetail(ui.view.task); else closeDetail();
 };
 addEventListener('keydown',e=>{
   if(e.key!=='Escape')return;
-  if(ui.view&&ui.view.item)openDetail(ui.view.task); else closeDetail();
+  if(ui.view&&(ui.view.item||ui.view.pick))openDetail(ui.view.task); else closeDetail();
 });
 
 function renderWho(){
@@ -972,6 +1054,7 @@ function taskEl(t){
         ${dateChip(t)}
         ${t.owner?`<span class="pill own">${t.owner}</span>`:''}
         ${t.cat?`<span class="pill cat ${t.cat}">${CATS[t.cat]||''}</span>`:''}
+        ${t.parent&&byId(t.parent)?`<span class="parentchip">↳ ${esc(shortTitle(t.parent)||'')}</span>`:''}
       </div>
       ${hasN?`<div class="notes ${open?'':'clamp'}">${md(t.notes)}</div>`:''}
       ${open?'<div class="acts"></div>':''}
