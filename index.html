@@ -356,6 +356,13 @@ nav.bar .add:active{transform:scale(.95)}
 .bucket.donebox .bhead h2{color:var(--done)}
 .bucket.donebox .task{background:transparent; box-shadow:none; border-style:dashed}
 .undo{border:none; background:transparent; color:var(--olive-ink); font:inherit; font-size:12.5px; font-weight:700; cursor:pointer; padding:2px 6px}
+/* offline: say so loudly, and say what is safe to do about it */
+.offbar{
+  display:none; background:var(--pom-soft); border:1.5px solid var(--pom); color:var(--pom);
+  border-radius:12px; padding:10px 13px; margin-bottom:9px; font-size:13px; font-weight:700; line-height:1.5;
+}
+.offbar.on{display:block}
+.offbar a{color:var(--pom); font-weight:800}
 .empty{text-align:center; color:var(--muted); padding:40px 18px; font-weight:600}
 .toast{
   position:fixed; bottom:calc(88px + env(safe-area-inset-bottom)); inset-inline:0; margin:0 auto; width:max-content; max-width:92%;
@@ -379,6 +386,7 @@ nav.bar .add:active{transform:scale(.95)}
       <input id="q" type="search" placeholder="חיפוש…" enterkeyhint="search">
       <button class="catbtn" id="catbtn">סינון</button>
     </div>
+    <div class="offbar" id="offbar"></div>
     <div class="pinned" id="pinned"></div>
   </header>
   <main id="board"></main>
@@ -541,6 +549,25 @@ function setSync(txt,cls){
   const n=document.getElementById('sync');
   n.className='sync'+(cls?' '+cls:''); document.getElementById('syncT').textContent=txt;
 }
+const SITE='https://yaelavgil.github.io/avgil-board/';
+function setOffline(on,why){
+  live=!on;
+  const b=document.getElementById('offbar');
+  b.classList.toggle('on',on);
+  if(on){
+    const here=location.hostname.indexOf('github.io')<0;
+    b.innerHTML='⚠️ <b>לא מחובר — מה שמוצג כאן אינו מעודכן.</b><br>'+
+      (why?esc(why)+'<br>':'')+
+      (here?'הלוח החי נמצא ב-<a href="'+SITE+'" target="_blank" rel="noopener">yaelavgil.github.io/avgil-board</a> — כדאי לפתוח אותו שם.'
+           :'בודקים שוב כל 20 שניות. אפשר גם לרענן את העמוד.')+
+      '<br>שינויים לא יישמרו עד שהחיבור יחזור.';
+  }
+}
+function guard(){
+  if(live)return true;
+  toast('לא מחובר — השינוי לא יישמר');
+  return false;
+}
 /* ids whose write is still in the air — an incoming update must not roll these back */
 const pending=new Set();
 const DB='https://home-picks-47450-default-rtdb.europe-west1.firebasedatabase.app';
@@ -553,16 +580,30 @@ async function save(t,skipRender){
   try{
     const r=await fetch(NODE+'/'+encodeURIComponent(t.id)+'.json',
       {method:'PUT',body:JSON.stringify(t)});
-    if(!r.ok)throw 0;
-    setSync('מסונכרן','');
-  }catch(e){ setSync('לא נשמר','err'); toast('השמירה נכשלה — נסו שוב'); }
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    setSync('מסונכרן',''); setOffline(false);
+  }catch(e){
+    setSync('לא נשמר','err'); setOffline(true,'השמירה לא הגיעה לשרת.');
+    toast('השמירה נכשלה — נסו שוב');
+  }
   finally{ setTimeout(()=>pending.delete(t.id),1500); }
 }
 async function removeTask(id){
-  tasks=tasks.filter(x=>x.id!==id); pending.add(id); render();
-  try{ await fetch(NODE+'/'+encodeURIComponent(id)+'.json',{method:'DELETE'}); }
-  catch(e){ toast('המחיקה נכשלה') }
-  finally{ setTimeout(()=>pending.delete(id),1500); }
+  if(!guard())return false;
+  const keep=byId(id); if(!keep)return false;
+  pending.add(id);
+  try{
+    const r=await fetch(NODE+'/'+encodeURIComponent(id)+'.json',{method:'DELETE'});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    tasks=tasks.filter(x=>x.id!==id);      /* only now is it really gone */
+    toast('נמחקה ✓');
+  }catch(e){
+    setOffline(true,'המחיקה לא הגיעה לשרת.');
+    toast('המחיקה נכשלה — המשימה נשארה');  /* and it really did stay */
+  }finally{
+    setTimeout(()=>pending.delete(id),1500);
+    render();
+  }
 }
 /* an update arriving from the other phone.
    `put` replaces what is at the path; `patch` merges into it — treating a
@@ -1143,12 +1184,16 @@ async function pull(){
     const r=await fetch(NODE+'.json?t='+Date.now(),{cache:'no-store'});
     if(!r.ok)throw 0;
     applyRemote('/', await r.json());
-    live=true;
-  }catch(e){ live=false; setSync('לא מחובר','err'); }
+    setOffline(false); setSync('מסונכרן','');
+  }catch(e){
+    setSync('לא מחובר','err');
+    setOffline(true,'לא ניתן להגיע למסד הנתונים מהעמוד הזה.');
+  }
 }
 (async()=>{
   setSync('טוען…','off');
   await pull();
+  if(!live)setInterval(pull,20000);          /* keep trying */
   /* Firebase streams changes over server-sent events — the other phone's
      ticks arrive here within a second, with no SDK and no sign-in */
   let es=null;
@@ -1157,7 +1202,7 @@ async function pull(){
     const on=isPatch=>e=>{ try{ const m=JSON.parse(e.data); applyRemote(m.path,m.data,isPatch); }catch(x){} };
     es.addEventListener('put',on(false));
     es.addEventListener('patch',on(true));
-    es.onopen=()=>setSync('מסונכרן','');
+    es.onopen=()=>{ setSync('מסונכרן',''); setOffline(false); };
     es.onerror=()=>{ if(es.readyState===2){ es=null; setInterval(pull,20000); } };
   }catch(e){ setInterval(pull,20000); }
   /* a phone that was asleep reconnects the moment it comes back */
