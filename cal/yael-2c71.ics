@@ -1,0 +1,908 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//avgil-board//HE
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:משימות יעל
+X-PUBLISHED-TTL:PT30M
+REFRESH-INTERVAL;VALUE=DURATION:PT30M
+BEGIN:VEVENT
+UID:g02@avgil-board
+DTSTAMP:20261006T171326Z
+DTSTART:20261005T090000
+DTEND:20261005T091500
+SUMMARY:לסגור מתקין דשא סינתטי — ספק ייעודי
+ \, דחוף [שנינו]
+DESCRIPTION:🔴 כמה שיותר מהר. היציקה הסתיימה 25
+ .9. ⚠️ **עיזאת הוא הגנן שלנו — צריך ספק נ
+ פרד שמתמחה בדשא סינתטי.** לבקש המלצות מנ
+ ופר\, מברק\, או משכנים באשל. באותה נסיעה: 
+ אבני מדרך וצמחייה בחלק המערבי (g03)\, ומחי
+ צות במבוק לפרטיות שרועי רצה.\n\nhttps://yaelavgil
+ .github.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:לסגור מתקין דשא סינתטי — ספק ייעו
+ די\, דחוף [שנינו]
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:לסגור מתקין דשא סינתטי — ספק ייעו
+ די\, דחוף [שנינו]
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:g04@avgil-board
+DTSTAMP:20261006T171326Z
+DTSTART:20261004T090000
+DTEND:20261004T091500
+SUMMARY:להתקשר לרהיטי טבע — מושבים\, כסאות ו
+ שולחן לדני
+DESCRIPTION:שיחה אחת\, שלושה נושאים:\n1. מושבים 
+ בגוון קרם לכסאות פינת האוכל הקיימים\n2. א
+ ולי עוד שני כסאות\n3. לבדוק שולחן לדני\n\nht
+ tps://yaelavgil.github.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:להתקשר לרהיטי טבע — מושבים\, כסאו
+ ת ושולחן לדני
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:להתקשר לרהיטי טבע — מושבים\, כסאו
+ ת ושולחן לדני
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:g05@avgil-board
+DTSTAMP:20261006T171326Z
+DTSTART:20261004T090000
+DTEND:20261004T091500
+SUMMARY:ידיות לארונות הרחצה — זהב מוברש\, לה
+ חליט לפני הייצור
+DESCRIPTION:הוחלט 1.10: **זהב מוברש** לארונות קומ
+ ת הקרקע.\nהנימוק: זהב מוברש כבר בבית — בה
+ צעה 1248 של ליראן יש פרזול פליז בזהב מוברש
+  במקלחון ההרמוניקה 95/200 ובדלת המעבר 65/210.\
+ nקומת הקרקע: שחור (ברזים) + זהב מוברש (מקל
+ חונים). שתי מתכות\, קונספט ברור.\n📌 מקלחת
+  ההורים למעלה ברוז גולד — קומה נפרדת\, ש
+ פה נפרדת\, לא מתנגש.\n⏰ רפאל מוציא לייצור
+  אחרי התשלום. אם לא מספיקים — לבקש ארון 
+ בלי ידיות ולהוסיף בנפרד\, כדי לא לעכב את 
+ הייצור.\n💡 ידיות הן האלמנט המתחלף\; אם ב
+ עתיד הברזים יעברו לזהב\, ההחלפה כבר מיות
+ רת.\n\nhttps://yaelavgil.github.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:ידיות לארונות הרחצה — זהב מוברש\, 
+ להחליט לפני הייצור
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:ידיות לארונות הרחצה — זהב מוברש\, 
+ להחליט לפני הייצור
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:g06@avgil-board
+DTSTAMP:20261006T171326Z
+DTSTART:20261004T090000
+DTEND:20261004T091500
+SUMMARY:רפאל — לוודא שהארונות יצאו לייצור
+DESCRIPTION:התשלום יצא 1.10. 📌 לוודא מולו שהוא 
+ אכן הוציא\, ולקבל צפי אספקה.\n⚠️ שני דבר
+ ים חייבים להיות אצלו לפני שהוא מייצר:\n•
+  **הגוון** — עדיין לא נקבע. נופר: ״צריכים 
+ לקבוע יחד״ (g05\, 30.9)\n• **הידיות** — הוחלט ז
+ הב מוברש. אם לא סגור\, לבקש ארון בלי ידיו
+ ת ולהוסיף בנפרד.\nמידות: מקלחת הורים 187 ס"
+ מ · כללית מעל 180.\n\nhttps://yaelavgil.github.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:רפאל — לוודא שהארונות יצאו לייצו
+ ר
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:רפאל — לוודא שהארונות יצאו לייצו
+ ר
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:g07@avgil-board
+DTSTAMP:20261006T171326Z
+DTSTART:20261012T090000
+DTEND:20261012T091500
+SUMMARY:ידיות לארון הכניסה ולארון מתחת למדר
+ גות
+DESCRIPTION:⚠️ **הצעת המחיר של גולן לא כוללת י
+ דיות חיצוניות** — זה עלינו.\n📌 ארון הכני
+ סה הוא ירוק כהה עם פורניר אלון. הידית צר
+ יכה לעבוד מול שניהם.\n📌 לשקול אותה שפה כ
+ מו בחדרי הרחצה — זהב מוברש (g05) — כדי שהב
+ ית ידבר בקול אחד.\n⏰ לא חוסם ייצור אם מבק
+ שים ארון מוכן לקידוח\, אבל עדיף להחליט מ
+ ראש.\n\nhttps://yaelavgil.github.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:ידיות לארון הכניסה ולארון מתחת למ
+ דרגות
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:ידיות לארון הכניסה ולארון מתחת למ
+ דרגות
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:h02@avgil-board
+DTSTAMP:20261006T171326Z
+DTSTART:20261012T090000
+DTEND:20261012T091500
+SUMMARY:לרכוש וילונות לבית
+DESCRIPTION:וילונות לכל החדרים.\n📌 שתי משימות
+  נפרדות שכבר קיימות ונכנסות לכאן: וילון 
+ לממ"ד (n02) ווילון לחדר רחצה (n03).\n⚠️ בחדר 
+ האורחים — הווילון אמור לכסות את אי-ההתא
+ מה בין הקיר הירוק לחלון התכלת\, אז שם הגו
+ ון שלו עובד קשה יותר מהרגיל.\n📌 למדוד רו
+ חב וגובה לכל חלון לפני שיוצאים. ולהחליט:
+  מסילה או מוט\, ותלייה מהתקרה או מהקיר.\n\n
+ https://yaelavgil.github.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:לרכוש וילונות לבית
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:לרכוש וילונות לבית
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:k03@avgil-board
+DTSTAMP:20261006T171326Z
+DTSTART:20261008T090000
+DTEND:20261008T091500
+SUMMARY:משלוח מתואם — חמישי 8.10\, 09:00–13:00 [שני
+ נו]
+DESCRIPTION:✅ **תואם: יום חמישי 8.10\, חלון הגעה 09
+ :00–13:00.** הזמנה **60114949** · פורטל סלע (emobile).\n
+ \n❓ **לא הצלחתי לזהות מהמייל איזו הזמנה ז
+ ו** — התיאום הגיע ב-SMS ולא במייל. שלוש הזמ
+ נות בדרך כרגע\, קל להצליב לפי מספר:\n• **2 
+ טלוויזיות Samsung** — KSP\, הזמנה 954968472\, 4.10\, ח
+ שבונית 3997979\n• **מקרר Electra ELR210C קרם** — סופ
+ ר-פארם/מחסני חשמל\, הזמנה 031987080-A\, מעקב DHL 
+ **207005891**\n• **מראת גוף חצי אובלית** — סופר-
+ פארם/קלפאק\, הזמנה 032013342-A\, מעקב **102999873**\n\
+ n⚠️ **חלון של ארבע שעות בבוקר — צריך מיש
+ הו בבית.** אם זה המקרר או הטלוויזיות\, זו 
+ מסירה שדורשת שני אנשים ולא משאירים אותה
+  בחוץ.\n📌 אם זה הטלוויזיות — הן נדרשות מ
+ מילא לפני שקובעים מתקין *(n01)*.\n📌 אם זה ה
+ מקרר — לוודא מראש איפה הוא עומד ושיש\n\nht
+ tps://yaelavgil.github.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:משלוח מתואם — חמישי 8.10\, 09:00–13:00 [ש
+ נינו]
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:משלוח מתואם — חמישי 8.10\, 09:00–13:00 [ש
+ נינו]
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:n01@avgil-board
+DTSTAMP:20261006T171326Z
+DTSTART:20261005T090000
+DTEND:20261005T091500
+SUMMARY:להזמין התקנה — כל התאורה + 2 הטלוויז
+ יות [שנינו]
+DESCRIPTION:התאורה נאספה 2.10 — גם מעידה (22 גופי
+ ם) וגם ממחסני תאורה. הכל בבית וממתין.\n\n
+ 📌 **ייתכן שאלה שני בעלי מקצוע:**\n• **תאור
+ ה** — חשמלאי. שווה לשאול את ברק אם החשמלא
+ י שלו עושה את זה\, כי הוא מכיר את התשתית.\n
+ • **טלוויזיות** — תלייה על קיר\, לרוב הנד
+ ימן או מתקין ייעודי.\n\n⚠️ **הטלוויזיות ע
+ דיין לא הוזמנו** (o01) — אין טעם לקבוע מתקי
+ ן לפני שהן בבית.\n⚠️ פינת המשפחה בתקרה מ
+ שופעת — לוודא שהמתקין יודע לפני שהוא מג
+ יע.\n📌 מה שעוד לא הגיע: עלי אקספרס (16 גופ
+ ים) טרם הוזמן — יצטרך סבב התקנה שני.\n\nhttp
+ s://yaelavgil.github.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:להזמין התקנה — כל התאורה + 2 הטלוו
+ יזיות [שנינו]
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:להזמין התקנה — כל התאורה + 2 הטלוו
+ יזיות [שנינו]
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:n09@avgil-board
+DTSTAMP:20261006T171326Z
+DTSTART:20261005T090000
+DTEND:20261005T091500
+SUMMARY:מראות לשלושת חדרי הרחצה — לסגור צור
+ ה ומידה
+DESCRIPTION:📐 **נופר כבר ציירה צורה בכל חזית 
+ — שווה לכבד את זה:**\n• **הורים** (ארון 187) 
+ — מלבנית רחבה עם מסגרת דקה ותאורה אחורי
+ ת. עגולה מעל 187 ס״מ תיבלע. אורך ~120-140\, לא כ
+ ל הרוחב.\n• **כללית/ילדים** — נופר ציירה **
+ אליפסה**. על ארון רחב אליפסה שוכבת עובדת 
+ טוב יותר מעיגול.\n• **אורחים** — נופר ציי
+ רה **קשת** (ארקה). קיר צר עם כיור 40 — הקשת ה
+ יא המחווה המעצבת היחידה בחדר הקטן\, ושם 
+ זה בדיוק נכון.\n\n🎯 **מה שמחבר את השלוש:** 
+ אותה שפת מסגרת — מתכת דקה\, בלי שיפוע (beve
+ l)\, בלי מסגרת עבה. שלוש צורות שונות זה בס
+ דר כי אלה שלושה חדרים\; שלוש שפות מסגרת ש
+ ונות זה כבר בלגן.\n\n🎨 **גוון המסגרת לפי ה
+ חדר:** הורים — רוז גולד (הפרזול שם). כללית
+  — זהב מוברש (כמו הידיות\, g05). אורחים — ז
+ הב מוברש.\n\n💡 **תאורה אחורית:** יש הכנת שק
+ ע\n\nhttps://yaelavgil.github.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:מראות לשלושת חדרי הרחצה — לסגור צ
+ ורה ומידה
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:מראות לשלושת חדרי הרחצה — לסגור צ
+ ורה ומידה
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:n16@avgil-board
+DTSTAMP:20261006T171326Z
+DTSTART:20261004T090000
+DTEND:20261004T091500
+SUMMARY:גוון הארון בחדר הרחצה הכללי — לסגור
+  מספר מהמניפה
+DESCRIPTION:✅ **הכיוון סגור — כחול.** בחזית של 
+ נופר למקלחת הכללית (`16.36.14` ב-Downloads) כתוב ב
+ מפורש: **״גמר צבע בתנור כחול״**. זו לא שאל
+ ה פתוחה\, זו כבר ההנחיה שלה.\n\n🎯 **ההמלצה:
+  כחול עמוק יותר מהמטבח\, מאותה משפחה — ל
+ א אותו גוון.**\nהמטבח הוא **נירלט IS 0626 Blue Dep
+ ths**. (LR404/LR401 הוא קוד דגם וגימור של פורמג׳
+ ו\, לא שם גוון — אל תבקשי אותו מנופר כצבע
+ .) גוון כמעט-זהה אבל לא-בדיוק נקרא כטעות\;
+  גוון ברור יותר כהה נקרא ככוונה. בנוסף ל
+ חדר הרחצה יש פחות אור טבעי מהמטבח\, ואות
+ ה רוויה תיראה שם שטוחה.\n\n⛔ **מה שחסר זה ר
+ ק המספר.** רועי שאל את נופר 30.9 והיא ענתה ״
+ לא\, צריכים לקבוע יחד ❗️״ — כלומר זה לא 
+ מספר שהיא שולפת\, צריך לשבת מול המניפה.\n
+ 📌 להביא למפגש: דלת מהמטבח או צילום שלה\,
+  ואת הידית בזהב מוברש (g05) — הכחול\n\nhttps://y
+ aelavgil.github.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:גוון הארון בחדר הרחצה הכללי — לסג
+ ור מספר מהמניפה
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:גוון הארון בחדר הרחצה הכללי — לסג
+ ור מספר מהמניפה
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:n17@avgil-board
+DTSTAMP:20261006T171326Z
+DTSTART:20261007T090000
+DTEND:20261007T091500
+SUMMARY:מעקות — אין הצעת מחיר\, והכדור אצלכם
+DESCRIPTION:🟠 **6.10: שולמו 14\,000 ₪ לטרלידור — אב
+ ל על ״שערי כניסה וחניה״ בלבד** *(r29)*.\nכלומ
+ ר המעקות כנראה **לא** נכללו. זו השאלה הראש
+ ונה אליהם: האם ההצעה בעל פה של ~5\,000 ₪ למע
+ קה המרפסת עדיין עומדת\, ומה עם מעקה המדר
+ גות.\n🎯 עכשיו שהם כבר ספק פעיל ומשולם — 
+ לצרף את המעקות לאותה עבודה זה הרבה יותר 
+ פשוט מלפתוח ספק חדש.\n\n🔴 **נבדק שוב 5.10 בי
+ יצוא המלא (עד 30.9): אין שום הצעת מחיר למעק
+ ות בצ׳אט. מעולם לא נשלחה.**\n\n👤 **המסגר: ד
+ ניאל אומנות בברזל\, קיבוץ המעפיל.** נופר 
+ הציגה אותו 6.9 עם אלבום עבודות:\nhttps://photos.ap
+ p.goo.gl/w91yyW82ZngVqJdh8\n\n⛔ **למה זה תקוע — ולא אצ
+ לו.** נופר ב-6.9: ״ממש עד רמת הפרטים הקטנים\
+ , כדי שנוכל לקבל הצעת מחיר מדויקת לפני ש
+ הוא מגיע למדידה.״\nהיא מחכה שתסגרו את הע
+ יצוב לפני שהיא מעבירה לו. \n\nhttps://yaelavgil.gith
+ ub.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:מעקות — אין הצעת מחיר\, והכדור אצל
+ כם
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:מעקות — אין הצעת מחיר\, והכדור אצל
+ כם
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:n18@avgil-board
+DTSTAMP:20261006T171326Z
+DTSTART:20261004T090000
+DTEND:20261004T091500
+SUMMARY:נופר — שישה דברים לאישור (הודעה מוכ
+ נה)
+DESCRIPTION:📅 4.10. שלושה מהם חוסמים: הקרמיקה (מ
+ טבח ב-7.10)\, המעקות (טופס 4)\, וגוון ארון הכנ
+ יסה (הנגר תקוע).\n\n1. **גוון לטרלידור לשער**
+  — בודקים ייתכנות בגוון החלונות\, **תכלת 
+ צפחה**\n2. **חתיכת הגבס בחדר רחצה הורים** — 
+ מה אפשר עוד לבקש מאיש הריצוף\n3. **קרמיקה 
+ למטבח** — בריקים לבנים מט\, אופקי או אנכי
+ \, לא פישבון (r06)\n4. **מעקות** — מה עם דניאל? 
+ יש הצעה? מול ~5\,000 ₪ בע״פ מטרלידור (n17)\n5. **
+ גוון ארון הכניסה** — הנגר ממתין מ-12.9 (r09\, 
+ r31)\n6. **מיטה לחדר אורחים** — להתייעץ (t13)\n\n
+ 📌 ההודעה המלאה בכפתור הוואטסאפ.\n\nhttps://y
+ aelavgil.github.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:נופר — שישה דברים לאישור (הודעה מ
+ וכנה)
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:נופר — שישה דברים לאישור (הודעה מ
+ וכנה)
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:n19@avgil-board
+DTSTAMP:20261006T171326Z
+DTSTART:20261004T090000
+DTEND:20261004T091500
+SUMMARY:חתיכת גבס בחדר רחצה הורים — מה עושי
+ ם איתה
+DESCRIPTION:נוצרה חתיכת גבס שלא תוכננה. לשאול 
+ את נופר מה אפשר עוד לבקש מאיש הריצוף **לפ
+ ני שהוא מסיים ועוזב**.\n\n📸 **לצלם אותה ול
+ שלוח לנופר** — בלי תמונה היא לא תוכל להמ
+ ליץ.\n⏰ חלון ההזדמנות הוא כל עוד הרצף בש
+ טח. אחרי שהוא סיים\, כל תיקון הוא הזמנה נ
+ פרדת.\n\nhttps://yaelavgil.github.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:חתיכת גבס בחדר רחצה הורים — מה עו
+ שים איתה
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:חתיכת גבס בחדר רחצה הורים — מה עו
+ שים איתה
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:o01@avgil-board
+DTSTAMP:20261006T171326Z
+DTSTART:20261008T090000
+DTEND:20261008T091500
+SUMMARY:להזמין אונליין — מיקרוגל\, טוחן\, פח\
+ , 2 טלוויזיות [שנינו]
+DESCRIPTION:חמישה פריטים שאפשר לסגור בערב אחד
+ .\n⚠️ מיקרוגל: לוודא מידות נישה מול המטב
+ ח שמורכב ב-7.10. דובר על העברה מעל התנור לת
+ וך קלפה.\n⚠️ טוחן: מתחת לכיור כבר מתוכננ
+ ים טוחן + תמי 4 + פח — לוודא שיש מקום לכול
+ ם.\n⚠️ טלוויזיה לפינת משפחה: תקרה משופע
+ ת — למדוד גובה וזווית לפני.\n\nhttps://yaelavgil.g
+ ithub.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:להזמין אונליין — מיקרוגל\, טוחן\, 
+ פח\, 2 טלוויזיות [שנינו]
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:להזמין אונליין — מיקרוגל\, טוחן\, 
+ פח\, 2 טלוויזיות [שנינו]
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:o02@avgil-board
+DTSTAMP:20261006T171326Z
+DTSTART:20261015T090000
+DTEND:20261015T091500
+SUMMARY:שטיחים — למדוד ואז להזמין [שנינו]
+DESCRIPTION:להתחיל מהסלון ומפינת המשפחה בלבד 
+ — שני החדרים שכבר מרוהטים.\n📌 עם סשה בב
+ ית — לשאול על עמידות וניקוי.\n\nhttps://yaelavgil
+ .github.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:שטיחים — למדוד ואז להזמין [שנינו]
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:שטיחים — למדוד ואז להזמין [שנינו]
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:o03@avgil-board
+DTSTAMP:20261006T171326Z
+DTSTART:20261020T090000
+DTEND:20261020T091500
+SUMMARY:פינת ישיבה לפינת משפחה — לשבת לפני 
+ שקונים [שנינו]
+DESCRIPTION:⚠️ תקרה משופעת — ספה עם משענת גב
+ והה תרגיש חונקת.\n📌 בפריסת התאורה מתוכנ
+ נים 2 תלויים מעל הספה והכורסה — מיקום הי
+ שיבה קובע את מיקום התאורה.\n\nhttps://yaelavgil.git
+ hub.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:פינת ישיבה לפינת משפחה — לשבת לפנ
+ י שקונים [שנינו]
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:פינת ישיבה לפינת משפחה — לשבת לפנ
+ י שקונים [שנינו]
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:o04@avgil-board
+DTSTAMP:20261006T171326Z
+DTSTART:20261020T090000
+DTEND:20261020T091500
+SUMMARY:אבטחה חכמה — מנעולים\, מצלמות וזיהו
+ י פנים [שנינו]
+DESCRIPTION:🔴 פרויקט אחד\, לא שלושה. על הפרק מ-
+ 16.3.\n⚠️ נופר 12.7: בדלת היציאה מהמטבח לא פ
+ שוט להתקין מנעול חכם — לברר את האילוץ.\n
+ ⚠️ זיהוי פנים שפותח שער מרחוק הוא הדרי
+ שה שתצמצם הכי הרבה את רשימת הספקים.\n🔗 ת
+ לוי בשער הכניסה (r29) — אם עוד לא יוצר\, אפ
+ שר להכין תשתית.\n🔗 תלוי בהחלטה על גוגל מ
+ ול אמזון (o06).\n\nhttps://yaelavgil.github.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:אבטחה חכמה — מנעולים\, מצלמות וזי
+ הוי פנים [שנינו]
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:אבטחה חכמה — מנעולים\, מצלמות וזי
+ הוי פנים [שנינו]
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:o05@avgil-board
+DTSTAMP:20261006T171326Z
+DTSTART:20261025T090000
+DTEND:20261025T091500
+SUMMARY:עמדת טעינה לרכב חשמלי [שנינו]
+DESCRIPTION:✅ התשתית קיימת — ב-26.6 רועי ביקש מ
+ קרלוס חשמל לשני צדי החניה\, לשער ולעמדה.\
+ n📌 לברר: הספק (7kW חד-פאזי מול 11/22kW תלת-פאז
+ י) · הטבות מחברת החשמל · חיבור ללוח.\n\nhttps
+ ://yaelavgil.github.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:עמדת טעינה לרכב חשמלי [שנינו]
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:עמדת טעינה לרכב חשמלי [שנינו]
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:o06@avgil-board
+DTSTAMP:20261006T171326Z
+DTSTART:20261015T090000
+DTEND:20261015T091500
+SUMMARY:בקר בית חכם — Nest Hub Max ירד מהמדף [שנינ
+ ו]
+DESCRIPTION:🔴 גוגל הפסיקה למכור אותו במאי 2025.
+  מה שנשאר אצל מפיצים הוא מלאי שארית במחי
+ ר מנופח.\n📌 גוגל לא נוטשת את הקו — דור ח
+ דש מבוסס Gemini\, בלי תאריך.\n📌 שלוש אפשרוי
+ ות: לחכות · לקנות מלאי שארית ביודעין · ל
+ עבור ל-Echo Show.\n⚠️ זו החלטה שגוררת גם את ה
+ מנעולים\, המצלמות והתאורה — להכריע לפני
+  o04.\n\nhttps://yaelavgil.github.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:בקר בית חכם — Nest Hub Max ירד מהמדף [שנ
+ ינו]
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:בקר בית חכם — Nest Hub Max ירד מהמדף [שנ
+ ינו]
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:o07@avgil-board
+DTSTAMP:20261006T171326Z
+DTSTART:20261025T090000
+DTEND:20261025T091500
+SUMMARY:פילטר מים לבית [שנינו]
+DESCRIPTION:📌 השאלה הראשונה: מה מסננים — אבנ
+ ית\, כלור\, או טיהור מלא. שלושה פתרונות שו
+ נים לגמרי.\n⚠️ פילטר לכל הבית מותקן על ה
+ כניסה הראשית — לברר גישה לצנרת אחרי יצי
+ קת הבטון.\n\nhttps://yaelavgil.github.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:פילטר מים לבית [שנינו]
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:פילטר מים לבית [שנינו]
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:r07@avgil-board
+DTSTAMP:20261006T171326Z
+DTSTART:20261009T090000
+DTEND:20261009T091500
+SUMMARY:דלת פנימית לממ״ד — לשאול את מתקין ד
+ לתות תבור עכשיו
+DESCRIPTION:🔴 **4.10: מתקיני תבור בבית היום — זא
+ ת ההזדמנות.** הם מולך\, עם הכלים\, מול הפתח
+  עצמו.\n\nהמודד של תבור אמר שאין מקום/הכנה
+ . נופר: חובה דלת פנימית ואקוסטית לפרטיות
+  — הקיימת ישנה ולא מבודדת.\n\n❓ **מה לשאול
+  אותם עכשיו:**\n1. מה בדיוק חסר — משקוף? עו
+ מק? רוחב פתח?\n2. יש פתרון שהם מכירים לממ״
+ ד בלי הכנה — דלת נגררת חיצונית\, משקוף ד
+ ק\, פתרון על הקיר?\n3. ראו את זה בבתים אחרי
+ ם? מה עשו שם?\n📌 ברק ובתים זהים באשל הם מ
+ קור המידע השני\, אבל המתקין בשטח הוא הרא
+ שון.\n\nhttps://yaelavgil.github.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:דלת פנימית לממ״ד — לשאול את מתקין
+  דלתות תבור עכשיו
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:דלת פנימית לממ״ד — לשאול את מתקין
+  דלתות תבור עכשיו
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:r15@avgil-board
+DTSTAMP:20261006T171326Z
+DTSTART:20261012T090000
+DTEND:20261012T091500
+SUMMARY:מחסן נמוך למכונות במרפסת — עמית נתן
+  את המידה המותרת [שנינו]
+DESCRIPTION:✅ **4.10 — עמית המהנדס הכריע את זה.** 
+ לקראת הפקח לטופס 4:\n**מחסן בגודל המכונות 
+ עצמן\, נמוך מספיק שאדם לא יכול לעמוד בתו
+ כו — עובר אצל הפקח.**\nכל דבר אחר צריך פיר
+ וק לפני ביקור הפקח.\n\n🎯 **זה סוגר את הווי
+ כוח:** נופר רצתה ארון סגור\, רועי רצה גגון
+ . **הארון הסגור הוא התשובה** — הוא גם מגן 
+ וגם מסתיר\, והוא היחיד שעובר.\n\n⛔ **מה שיצ
+ א מהמשחק:** הגגון של רועי — ״אלומיניום ק
+ בוע\, לרוחב המרפסת\, בעומק ~2 מ׳״ — חורג מ
+ טביעת הרגל של המכונות ויצטרך פירוק. גם פ
+ רגולה וגם כל מבנה על רגליים.\n\n📏 **המפרט 
+ לקנייה או לייצור:**\n• רוחב ועומק — טביע
+ ת הרגל של מכונת הכביסה + המייבש\, לא יותר\
+ n• גובה — נמוך מספיק שאי אפשר לעמוד בפנ
+ ים\n• פתחים בגב למים\, ניקוז וחשמל\n• עמי
+ ד בשמש וגשם — זו מרפסת פתוחה\n\n💡 הפתרון
+  של ace.co.il/6001065 שי\n\nhttps://yaelavgil.github.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:מחסן נמוך למכונות במרפסת — עמית נ
+ תן את המידה המותרת [שנינו]
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:מחסן נמוך למכונות במרפסת — עמית נ
+ תן את המידה המותרת [שנינו]
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:r31@avgil-board
+DTSTAMP:20261006T171326Z
+DTSTART:20261004T090000
+DTEND:20261004T091500
+SUMMARY:גולן — לדרוש את שתי דוגמאות הצבע ות
+ אריך אספקה
+DESCRIPTION:⛔ **אין שום צפי לארון הכניסה\, כי ה
+ וא לא שוחרר לייצור.** גולן מעולם לא נקב ב
+ לו״ז בצ׳אט.\n\n🔗 **מה שנשאר בשרשרת:** גולן 
+ מייצר 2 דוגמאות → אתם רואים ובוחרים → ש
+ חרור לייצור → ייצור → הרכבה.\nזה **שני סב
+ בים**\, לא אחד — ולכן זה ארוך יותר ממה שזה
+  נראה.\n\n✅ הגוונים כבר נשלחו 12.9: טמבור 0885
+ T ונירלט IS_0703 (r09).\n⛔ הדוגמאות לא הגיעו\, ו
+ אין תאריך.\n\n💰 **הצעת המחיר (27.8\, נגריית ג
+ ולן סנאדו):**\n• ארון קיר בכניסה — 19\,500 + מ
+ ע״מ (סנדוויץ׳ לבן\, מגירות ודלתות טריקה 
+ שקטה\, חזיתות צבע אטום עד 50% ברק בשילוב פ
+ ורניר אלון)\n• ארון חשמל — 7\,200 + מע״מ\n• 
+ ארון מתחת למדרגות — 6\,000 + מע״מ\n**סה״כ 32\,7
+ 00 + מע״מ = 38\,259 ₪.** שולם 20\,886 ב-7.9 → **נותרו 
+ ~17\,373 ₪.**\n📌 כולל הובלה והרכבה\, **לא כולל
+  ידיות חיצוניות** — הידיות ב\n\nhttps://yaelavgil.
+ github.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:גולן — לדרוש את שתי דוגמאות הצבע 
+ ותאריך אספקה
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:גולן — לדרוש את שתי דוגמאות הצבע 
+ ותאריך אספקה
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:r35@avgil-board
+DTSTAMP:20261006T171326Z
+DTSTART:20261008T090000
+DTEND:20261008T091500
+SUMMARY:להזמין תאורה מעלי אקספרס — לפני הטי
+ סה
+DESCRIPTION:⛔ לא הוזמן משם כלום\, וזה הספק עם ז
+ מן האספקה הארוך ביותר (משלוח מסין). לפי ק
+ וד הצבעים בתוכנית המסומנת (9.9) הירוק מכס
+ ה הרבה יותר ממה שחשבנו: חדר עבודה ~6 גופי 
+ תקרה\, פינת משפחה\, מרפסת\, עמודי השביל המ
+ ערבי ותאורת חזית — לא רק חוץ. 🗺️ claude.ai/c
+ ode/artifact/a8020d06-4449-4493-86cd-01c2ab1a29d8 · 📄 מקור: אש
+ ל 57/שיפוץ/מקור-אמת.md\n\nhttps://yaelavgil.github.io/avgil
+ -board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:להזמין תאורה מעלי אקספרס — לפני ה
+ טיסה
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:להזמין תאורה מעלי אקספרס — לפני ה
+ טיסה
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:r39@avgil-board
+DTSTAMP:20261006T171326Z
+DTSTART:20261004T090000
+DTEND:20261004T091500
+SUMMARY:היום — לנצל את מתקיני תבור לכל שאלו
+ ת הדלתות
+DESCRIPTION:המתקינים בבית **עכשיו** (4.10). כל שאל
+ ה פתוחה בנושא דלתות נסגרת היום או מחכה ש
+ בועות.\n\n📋 **הרשימה:**\n• **ממ״ד** — הדלת ה
+ פנימית (r07). השאלה הכי יקרה אם נופלת.\n• **
+ חיפויים בפתחי המקלחות** — רועי שאל ב-9.8 א
+ ם החיפויים מגיעים עד הפתח. לבדוק בעין עכ
+ שיו שהמשקופים יושבים נכון מול הקרמיקה.\n
+ • **כיוון פתיחה** — לעבור חדר-חדר ולוודא 
+ מול התוכנית לפני שהציר מוברג. אחרי ההתק
+ נה זה תיקון.\n• **ספים** — איפה יש ואיפה א
+ ין\, ומה קורה במעבר מהמסדרון לחדרים (קשו
+ ר ל-r11\, ספי הפרקט).\n• **דלתות הזכוכית למק
+ לחות** — נופר ציינה שהן בלי נעילה ולא אט
+ ומות לרעש (r25). לוודא שזה מה שמותקן.\n\n📸 ל
+ צלם כל פתח אחרי ההתקנה — זה התיעוד אם מש
+ הו יתגלה אחר כך.\n\nhttps://yaelavgil.github.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:היום — לנצל את מתקיני תבור לכל שא
+ לות הדלתות
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:היום — לנצל את מתקיני תבור לכל שא
+ לות הדלתות
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:r40@avgil-board
+DTSTAMP:20261006T171326Z
+DTSTART:20261006T090000
+DTEND:20261006T091500
+SUMMARY:אבישב — שלטים למזגנים הגדולים (מטבח
+  וכניסה) [שנינו]
+DESCRIPTION:📞 לשאול אותו מחר\, בשיחה אחת.\n\n**1. 
+ שלטים למזגנים הגדולים — מטבח וכניסה.**\n
+ האם אפשר לקבל שלטים\, האם זו תוספת תשלום\
+ , וכמה.\n📌 במערכות VRF השליטה היא לרוב דרך
+  בקר קיר ולא שלט אינפרא-אדום\, ולפעמים של
+ ט הוא אביזר נפרד בתשלום — אז שווה לשאול 
+ במפורש ולא להניח.\n📌 אם אין שלט ייעודי 
+ — לשאול אם יש אפליקציה או מודול WiFi\, במי
+ וחד לנוכח הבית החכם שמתוכנן *(o04\, o06)*.\n\n**2
+ . בהזדמנות הזאת\, לפני שהוא יורד מהפרויק
+ ט:**\n• תעודת אחריות בכתב ופרטי שירות\n• 
+ מי הגורם לקריאת תקלה\, ומה נכלל באחריות\n
+ • הסבר קצר על ההפעלה והתחזוקה — ניקוי מ
+ סננים וכדומה\n\n⏰ זה היום שבו מרכיבים את 
+ המטבח *(k02)* — אם המזגן של המטבח נמצא באזו
+ ר העבודה\, שווה לתאם.\n💰 סה״כ שולם לו 32\,55
+ 0 ₪\, האחרון 6\,000 ב-5.10 *(r19)*.\n\nhttps://yaelavgil.github
+ .io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:אבישב — שלטים למזגנים הגדולים (מט
+ בח וכניסה) [שנינו]
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:אבישב — שלטים למזגנים הגדולים (מט
+ בח וכניסה) [שנינו]
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:t13@avgil-board
+DTSTAMP:20261006T171326Z
+DTSTART:20261008T090000
+DTEND:20261008T091500
+SUMMARY:מיטה 160 + מזרן לחדר אורחים — למדוד גו
+ בה לפני שמזמינים
+DESCRIPTION:📏 **קודם כל — מדידה אחת שפותרת את 
+ זה לתמיד:**\n**מהרצפה עד אדן החלון בחדר הא
+ ורחים\, בקיר שהמיטה נשענת עליו.**\nהראש חי
+ יב להישאר **מתחת** למספר הזה. את המספר הזה
+  שומרים — הוא יחסוך את אותה בדיקה גם במי
+ טה של לילי (t1788940000001) ובכל רהיט עתידי שנש
+ ען על קיר עם חלון.\n\n❌ **עמינח ״פיזה״ — נ
+ פסלה.** ראש מיטה **105 ס״מ**\, גבוה מדי.\nשאר ה
+ נתונים\, למקרה שתרצי להשוות: 160×200 או 180×20
+ 0\, **4\,990 ₪**\, מסגרת ופלטה אלון עם פורניר א
+ לון\, מרכז מרופד\, שתי אפשרויות בד. **בלי א
+ רגז אחסון. בלי מזרן.**\n🚚 משלוח 540 ₪ · עד 2
+ 5 ימי עסקים · הרכבה כלולה · תוספת 120 ₪ לק
+ ומה מעל 3 בלי מעלית.\n\n🎯 **מה לחפש במקום:**
+  ראש מיטה נמוך מהמידה שמדדת\, רצוי מרופד 
+ או אלון.\n🔗 **אגוז יתפור את החדר יחד** — ה
+ ארון בחדר הרחצה של האורחים הוא אג\n\nhttps://
+ yaelavgil.github.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:מיטה 160 + מזרן לחדר אורחים — למדוד 
+ גובה לפני שמזמינים
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:מיטה 160 + מזרן לחדר אורחים — למדוד 
+ גובה לפני שמזמינים
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:t1788940000001@avgil-board
+DTSTAMP:20261006T171326Z
+DTSTART:20261004T090000
+DTEND:20261004T091500
+SUMMARY:להזמין מיטת יחיד ללילי — דחוף
+DESCRIPTION:🔴 דחוף — נגרר מ-13.9. אין לה מיטה מא
+ ז המעבר. לוודא גם מזרן.\n\nhttps://yaelavgil.github.io/
+ avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:להזמין מיטת יחיד ללילי — דחוף
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:להזמין מיטת יחיד ללילי — דחוף
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:t179114456818583@avgil-board
+DTSTAMP:20261006T171326Z
+DTSTART:20261012T090000
+DTEND:20261012T091500
+SUMMARY:להמציא אישורים לתשלום והעברת בעלות 
+ של חשמל\, ארנונה\, מים\, דואר\, מזכירות היי
+ שוב ומה שצריך כדי לבקש את הצ׳קים חזרה
+DESCRIPTION:נוספה 4.10. מסמכים נדרשים לבקשת הצ׳
+ קים חזרה — חשמל\, ארנונה\, מים\, דואר ומזכ
+ ירות היישוב.\n🔗 קשור לארנונה שרועי מסדר
+  *(t3)*.\n\nhttps://yaelavgil.github.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:להמציא אישורים לתשלום והעברת בעל
+ ות של חשמל\, ארנונה\, מים\, דואר\, מזכירות 
+ היישוב ומה שצריך כדי לבקש את הצ׳קים חזר
+ ה
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:להמציא אישורים לתשלום והעברת בעל
+ ות של חשמל\, ארנונה\, מים\, דואר\, מזכירות 
+ היישוב ומה שצריך כדי לבקש את הצ׳קים חזר
+ ה
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:t179114481580838@avgil-board
+DTSTAMP:20261006T171326Z
+DTSTART:20261004T090000
+DTEND:20261004T091500
+SUMMARY:בדיקת הוספה
+DESCRIPTION:פרטים לבדיקה\n\nhttps://yaelavgil.github.io/avgil-
+ board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:בדיקת הוספה
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:בדיקת הוספה
+END:VALARM
+END:VEVENT
+END:VCALENDAR
