@@ -915,6 +915,9 @@ function paintTask(box,t){
     const w=el('<button class="wa">💬 וואטסאפ</button>');
     w.onclick=()=>open_wa(byId(id).wa||''); acts.appendChild(w);
   }
+  const cal=el('<button>📅 ליומן</button>');
+  cal.onclick=()=>addToCalendar(id);
+  acts.appendChild(cal);
   const ed=el('<button>✎ עריכה</button>');
   ed.onclick=()=>{ closeDetail(); ui.editing=id; ui.tab='all'; ui.days.clear(); render();
     setTimeout(()=>{const n=document.querySelector('.editor'); if(n)n.scrollIntoView({block:'center'})},80); };
@@ -1126,11 +1129,46 @@ function taskEl(t){
       w.onclick=ev=>{ev.stopPropagation(); open_wa(T().wa||'')};
       acts.appendChild(w);
     }
+    const cal=el('<button>📅 ליומן</button>');
+    cal.onclick=ev=>{ev.stopPropagation(); addToCalendar(t.id)};
+    acts.appendChild(cal);
     const ed=el('<button>✎ עריכה</button>');
     ed.onclick=ev=>{ev.stopPropagation(); ui.editing=t.id; render()};
     acts.appendChild(ed);
   }
   return node;
+}
+/* a task becomes a calendar event with alarms — the only reminder channel
+   that actually reaches someone else's phone, and he consents by adding it */
+function icsFor(t){
+  const pad=n=>String(n).padStart(2,'0');
+  const day=(t.due||todayStr()).split('-').map(Number);
+  const m=(t.notes||'').match(/\b([01]?\d|2[0-3]):([0-5]\d)\b/);   /* a time written in the notes wins */
+  const hh=m?+m[1]:9, mm=m?+m[2]:0;
+  const st=new Date(day[0],day[1]-1,day[2],hh,mm);
+  const en=new Date(st.getTime()+15*60000);
+  const fmt=d=>d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'T'+pad(d.getHours())+pad(d.getMinutes())+'00';
+  const esc=v=>String(v||'').replace(/\\/g,'\\\\').replace(/[,;]/g,c=>'\\'+c).replace(/\r?\n/g,'\\n');
+  const body=(t.notes||'').replace(/<[^>]*>/g,'').slice(0,700);
+  const who=t.owner?' ['+t.owner+']':'';
+  return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//avgil-board//HE','CALSCALE:GREGORIAN',
+    'BEGIN:VEVENT','UID:'+t.id+'-'+Date.now()+'@avgil-board',
+    'DTSTAMP:'+fmt(new Date()),'DTSTART:'+fmt(st),'DTEND:'+fmt(en),
+    'SUMMARY:'+esc(t.title.replace(/^[🔴🟠🟡🔵✅⛔📦🔧🗑️👤🔁]\s*/,'')+who),
+    'DESCRIPTION:'+esc(body+'\n\nמתוך לוח של האבגילים המשפצים\nhttps://yaelavgil.github.io/avgil-board/'),
+    'BEGIN:VALARM','TRIGGER:PT0S','ACTION:DISPLAY','DESCRIPTION:'+esc(t.title),'END:VALARM',
+    'BEGIN:VALARM','TRIGGER:-PT2H','ACTION:DISPLAY','DESCRIPTION:'+esc(t.title),'END:VALARM',
+    'END:VEVENT','END:VCALENDAR'].join('\r\n');
+}
+function addToCalendar(id){
+  const t=byId(id); if(!t)return;
+  const blob=new Blob([icsFor(t)],{type:'text/calendar;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=(t.title.replace(/[^\u0590-\u05ea\w ]/g,'').trim().slice(0,40)||'task')+'.ics';
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},400);
+  toast('נפתח ליומן — לאשר הוספה');
 }
 function open_wa(text){ window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank','noopener'); }
 
