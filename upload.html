@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>שליחת התכתבות לניתוח</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#6C7A44">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Karantina:wght@400;700&family=Assistant:wght@400;600;700;800&display=swap">
+<style>
+:root{
+  --bg:#F5F3EA; --card:#FFFDF6; --edge:#E4E0CC; --ink:#2F2E23; --muted:#8A8770;
+  --olive:#6C7A44; --olive-ink:#4E5A2E; --olive-soft:#EAEBD8;
+  --pom:#C0452F; --pom-soft:#F6E3DC; --line:#DDD9C6;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#1F2019; --card:#2A2B21; --edge:#3A3B2D; --ink:#EDEAD9; --muted:#9C9A81;
+  --olive:#A8BA6A; --olive-ink:#C3D38A; --olive-soft:#37402A;
+  --pom:#E07358; --pom-soft:#46281F; --line:#3B3C2E;
+}}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--ink);font-family:'Assistant',-apple-system,sans-serif;
+  font-size:16px;line-height:1.55;padding:22px 16px calc(28px + env(safe-area-inset-bottom));-webkit-text-size-adjust:100%}
+.wrap{max-width:460px;margin:0 auto}
+h1{font-family:'Karantina','Assistant',sans-serif;font-weight:700;font-size:36px;line-height:1.05;margin-bottom:6px}
+.sub{color:var(--muted);font-weight:600;font-size:14.5px;margin-bottom:20px}
+.card{background:var(--card);border:1px solid var(--edge);border-radius:15px;padding:16px 17px;margin-bottom:13px}
+.card h2{font-size:15px;font-weight:800;margin-bottom:9px;display:flex;align-items:center;gap:8px}
+.card h2 .n{flex:0 0 auto;width:24px;height:24px;border-radius:50%;background:var(--olive);color:#fff;
+  display:grid;place-items:center;font-size:13px;font-weight:800}
+ol{margin:0;padding-inline-start:19px;font-size:14.5px;line-height:1.75}
+ol b{font-weight:800}
+.note{font-size:13px;color:var(--muted);margin-top:9px;line-height:1.6}
+.drop{border:2px dashed var(--line);border-radius:14px;padding:26px 16px;text-align:center;cursor:pointer;
+  background:var(--bg);transition:border-color .18s,background .18s}
+.drop:hover,.drop.over{border-color:var(--olive);background:var(--olive-soft)}
+.drop .big{font-size:34px;line-height:1;margin-bottom:8px}
+.drop .t{font-weight:800;font-size:15.5px}
+.drop .s{font-size:13px;color:var(--muted);margin-top:4px}
+input[type=file]{display:none}
+.who{display:flex;gap:7px;margin-bottom:13px}
+.who button{flex:1;border:1.5px solid var(--line);background:var(--card);color:var(--muted);
+  border-radius:11px;padding:10px 4px;font:inherit;font-weight:700;font-size:14px;cursor:pointer}
+.who button.on{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.go{width:100%;border:none;background:var(--olive);color:#fff;border-radius:13px;padding:15px;
+  font:inherit;font-weight:800;font-size:16.5px;cursor:pointer;margin-top:4px}
+.go:disabled{opacity:.42;cursor:default}
+.status{margin-top:13px;font-size:14px;font-weight:700;line-height:1.6;display:none;border-radius:12px;padding:13px 15px}
+.status.on{display:block}
+.status.ok{background:var(--olive-soft);color:var(--olive-ink)}
+.status.err{background:var(--pom-soft);color:var(--pom)}
+.status.work{background:var(--card);border:1px solid var(--edge);color:var(--muted)}
+.files{margin-top:11px;font-size:13.5px;color:var(--muted);font-weight:700}
+.files div{padding:3px 0}
+.priv{font-size:12.5px;color:var(--muted);line-height:1.65;margin-top:18px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>שליחת התכתבות</h1>
+  <div class="sub">ייצוא שיחת וואטסאפ לניתוח — אשל 57</div>
+
+  <div class="card">
+    <h2><span class="n">1</span> לייצא את השיחה מהאייפון</h2>
+    <ol>
+      <li>לפתוח את השיחה בוואטסאפ</li>
+      <li>ללחוץ על <b>שם איש הקשר</b> למעלה</li>
+      <li>לגלול למטה ל־<b>ייצוא צ׳אט</b></li>
+      <li>לבחור <b>ללא מדיה</b> — זה הרבה יותר קטן ומהיר</li>
+      <li>בתפריט השיתוף לבחור <b>שמירה לקבצים</b></li>
+    </ol>
+    <div class="note">הקובץ יישמר כ־<b>.zip</b> או כ־<b>_chat.txt</b>. שניהם מתאימים.</div>
+  </div>
+
+  <div class="card">
+    <h2><span class="n">2</span> מי שלח?</h2>
+    <div class="who" id="who"></div>
+    <h2><span class="n">3</span> לצרף את הקובץ</h2>
+    <label class="drop" id="drop">
+      <div class="big">📎</div>
+      <div class="t">בחירת קובץ</div>
+      <div class="s">‎.zip או ‎.txt · אפשר כמה קבצים</div>
+      <input type="file" id="file" multiple accept=".txt,.zip,text/plain,application/zip">
+    </label>
+    <div class="files" id="files"></div>
+    <button class="go" id="go" disabled>שליחה</button>
+    <div class="status" id="status"></div>
+  </div>
+
+  <div class="priv">
+    הקובץ נשלח לאותו מסד נתונים שמשרת את לוח המשימות של הבית.<br>
+    לא מועלים ממנו תמונות או מדיה — רק הטקסט של השיחה.
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+const DB='https://home-picks-47450-default-rtdb.europe-west1.firebasedatabase.app';
+const NODE=DB+'/board/uploads';
+const WHO=['רועי','יעל','אחר'];
+let sender='רועי', picked=[];
+
+const $=i=>document.getElementById(i);
+(function(){
+  const bar=$('who');
+  WHO.forEach(w=>{
+    const b=document.createElement('button');
+    b.textContent=w; b.className=(w===sender?'on':'');
+    b.onclick=()=>{ sender=w; [...bar.children].forEach(c=>c.classList.toggle('on',c.textContent===w)); };
+    bar.appendChild(b);
+  });
+})();
+
+function setStatus(txt,cls){ const s=$('status'); s.className='status on '+cls; s.innerHTML=txt; }
+
+$('file').onchange=e=>{
+  picked=[...e.target.files];
+  $('files').innerHTML=picked.map(f=>`<div>📄 ${f.name} · ${(f.size/1024).toFixed(0)} KB</div>`).join('');
+  $('go').disabled=!picked.length;
+};
+['dragover','dragleave','drop'].forEach(ev=>{
+  $('drop').addEventListener(ev,e=>{
+    e.preventDefault();
+    $('drop').classList.toggle('over',ev==='dragover');
+    if(ev==='drop'&&e.dataTransfer.files.length){
+      picked=[...e.dataTransfer.files];
+      $('files').innerHTML=picked.map(f=>`<div>📄 ${f.name} · ${(f.size/1024).toFixed(0)} KB</div>`).join('');
+      $('go').disabled=false;
+    }
+  });
+});
+
+/* a WhatsApp export is either the chat text itself or a zip that holds it */
+async function readOne(f){
+  if(/\.zip$/i.test(f.name)){
+    const zip=await JSZip.loadAsync(f);
+    const out=[];
+    for(const name of Object.keys(zip.files)){
+      if(zip.files[name].dir)continue;
+      if(!/\.txt$/i.test(name))continue;          /* media stays out */
+      out.push({name, text:await zip.files[name].async('string')});
+    }
+    if(!out.length)throw new Error('לא נמצא קובץ טקסט בתוך ה-zip');
+    return out;
+  }
+  return [{name:f.name, text:await f.text()}];
+}
+
+$('go').onclick=async()=>{
+  $('go').disabled=true;
+  setStatus('קורא את הקובץ…','work');
+  try{
+    let parts=[];
+    for(const f of picked) parts=parts.concat(await readOne(f));
+    const total=parts.reduce((n,p)=>n+p.text.length,0);
+    if(total>9e6)throw new Error('הקובץ גדול מדי ('+(total/1e6).toFixed(1)+'MB). נסו לייצא שוב עם ״ללא מדיה״.');
+
+    setStatus('שולח… ('+(total/1024).toFixed(0)+' KB)','work');
+    const id='u'+Date.now();
+    const body={ id, sender, at:new Date().toISOString(),
+                 files:parts.map(p=>({name:p.name, chars:p.text.length, text:p.text})) };
+    const r=await fetch(NODE+'/'+id+'.json',{method:'PUT',body:JSON.stringify(body)});
+    if(!r.ok)throw new Error('השרת החזיר '+r.status);
+
+    const lines=parts.reduce((n,p)=>n+p.text.split('\n').length,0);
+    setStatus('✅ <b>נשלח בהצלחה.</b><br>'+parts.length+' קבצים · כ-'+lines.toLocaleString('he-IL')+
+              ' שורות.<br>אפשר לסגור את העמוד — יעל תראה את זה.','ok');
+    $('files').innerHTML=''; picked=[];
+  }catch(e){
+    setStatus('❌ '+(e.message||'השליחה נכשלה')+'<br>אפשר לנסות שוב, או פשוט לשלוח את הקובץ ליעל בוואטסאפ.','err');
+    $('go').disabled=false;
+  }
+};
+</script>
+</body>
+</html>
