@@ -195,6 +195,20 @@ h1{font-family:'Karantina','Assistant',sans-serif; font-weight:700; font-size:26
 .itembtns .done{background:var(--olive); color:#fff}
 .itembtns .reopen{background:transparent; border:1.5px solid var(--line); color:var(--ink)}
 .chkrow{user-select:none}
+/* ---- גרירה לשינוי סדר ---- */
+.grip{
+  flex:0 0 auto; width:30px; align-self:stretch; display:grid; place-items:center;
+  color:var(--line); font-size:15px; cursor:grab; touch-action:none; user-select:none;
+  letter-spacing:-2px; line-height:1;
+}
+.grip:active{cursor:grabbing; color:var(--olive)}
+.task:hover .grip,.chkrow:hover .grip,.subrow:hover .grip{color:var(--muted)}
+.dragging{opacity:.32}
+.dropline{height:3px; border-radius:2px; background:var(--olive); margin:3px 6px; box-shadow:0 0 0 1px var(--olive-soft)}
+.ghost{
+  position:fixed; z-index:120; pointer-events:none; opacity:.95;
+  box-shadow:0 14px 34px rgba(0,0,0,.26); transform:rotate(-1deg);
+}
 .dsclose{position:sticky; bottom:0; width:100%; margin-top:14px; border:none; background:var(--olive); color:#fff; border-radius:12px; padding:13px; font:inherit; font-weight:800; font-size:15px; cursor:pointer}
 
 /* who */
@@ -813,10 +827,25 @@ function checklistEl(id,onChange){
   const open=t.items.filter(i=>!i.done), closed=t.items.filter(i=>i.done);
   const row=it=>{
     const {body,ids,note}=splitRefs(it.t);
-    const r=el(`<div class="chkrow lv${it.lv||2} ${it.done?'off':''}">
+    const r=el(`<div class="chkrow lv${it.lv||2} ${it.done?'off':''}" data-k="${esc(it.k)}">
+      <span class="grip">⠿</span>
       <span class="chkbox" ${it.done?'data-on="1"':''}></span>
       <span class="chktxt">${md(body).replace(/<\/?div>/g,'')}</span></div>`);
-    r.onclick=ev=>{ if(ev.target.closest('.reflink,.tel,a'))return; openItem(id,it.k); };
+    r.onclick=ev=>{ if(ev.target.closest('.reflink,.tel,a,.grip'))return; openItem(id,it.k); };
+    setTimeout(()=>{
+      const box=r.parentElement; if(!box)return;
+      enableDrag(r.querySelector('.grip'),r,box,idx=>{
+        const cur=byId(id); if(!cur||!Array.isArray(cur.items))return;
+        const keys=[...box.children].filter(c=>c.classList.contains('chkrow')&&c!==r)
+          .map(c=>c.dataset.k);
+        const rest=keys.map(k=>cur.items.find(x=>x.k===k)).filter(Boolean);
+        const me=cur.items.find(x=>x.k===it.k);
+        rest.splice(idx,0,me);
+        const others=cur.items.filter(x=>!rest.includes(x));
+        cur.items=rest.concat(others);
+        save(cur,true); renderPinned(); paintSheet();
+      });
+    },0);
     const refs=ids.map(x=>[x,shortTitle(x)]).filter(([,n])=>n);
     if(it.ans){
       const a=el(`<div class="ansview" style="margin-top:7px;font-size:13px">${md(it.ans).replace(/<\/?div>/g,' ')}</div>`);
@@ -858,6 +887,12 @@ function sheetTop(box,backLabel,onBack){
   bar.appendChild(b); bar.appendChild(x); box.appendChild(bar);
 }
 function openPick(id){ ui.view={task:id,item:null,pick:true}; paintSheet(); }
+function openEdit(id){ ui.view={task:id,edit:true}; paintSheet(); }
+function paintEdit(box,t){
+  sheetTop(box,'חזרה למשימה',()=>openDetail(t.id));
+  box.appendChild(el('<h3>עריכת משימה</h3>'));
+  box.appendChild(editorEl(t,gone=>{ if(gone)closeDetail(); else openDetail(t.id); }));
+}
 function paintPick(box,t){
   sheetTop(box,'חזרה למשימה',()=>openDetail(t.id));
   box.appendChild(el('<h3>שיוך כתת־משימה</h3>'));
@@ -893,7 +928,8 @@ function paintSheet(){
   if(!t){ closeDetail(); return; }
   const box=document.getElementById('dsin');
   box.innerHTML='<div class="dsgrip"></div>';
-  if(v.pick){ paintPick(box,t); }
+  if(v.edit){ paintEdit(box,t); }
+  else if(v.pick){ paintPick(box,t); }
   else if(v.item){ paintItem(box,t,v.item); }
   else { paintTask(box,t); }
   document.getElementById('dsheet').classList.add('on');
@@ -989,8 +1025,7 @@ function paintTask(box,t){
   cal.onclick=()=>addToCalendar(id);
   acts.appendChild(cal);
   const ed=el('<button>✎ עריכה</button>');
-  ed.onclick=()=>{ closeDetail(); ui.editing=id; ui.tab='all'; ui.days.clear(); render();
-    setTimeout(()=>{const n=document.querySelector('.editor'); if(n)n.scrollIntoView({block:'center'})},80); };
+  ed.onclick=()=>openEdit(id);
   acts.appendChild(ed);
   box.appendChild(acts);
   const close=el('<button class="dsclose">סגירה</button>');
@@ -1000,11 +1035,11 @@ function closeDetail(){ ui.view=null; document.getElementById('dsheet').classLis
 /* tapping outside steps back one level, then closes */
 document.getElementById('dsheet').onclick=e=>{
   if(e.target.id!=='dsheet')return;
-  if(ui.view&&(ui.view.item||ui.view.pick))openDetail(ui.view.task); else closeDetail();
+  if(ui.view&&(ui.view.item||ui.view.pick||ui.view.edit))openDetail(ui.view.task); else closeDetail();
 };
 addEventListener('keydown',e=>{
   if(e.key!=='Escape')return;
-  if(ui.view&&(ui.view.item||ui.view.pick))openDetail(ui.view.task); else closeDetail();
+  if(ui.view&&(ui.view.item||ui.view.pick||ui.view.edit))openDetail(ui.view.task); else closeDetail();
 });
 
 function renderWho(){
@@ -1118,7 +1153,7 @@ function taskEl(t){
   const late=(!t.done&&!t.ongoing&&du!==null&&du<0);
   const open=ui.open.has(t.id);
   const hasN=!!(t.notes&&t.notes.trim());
-  const node=el(`<article class="task ${late?'overdue':''} ${t.done?'isdone':''} ${t.ongoing?'isong':''} ${open?'open':''}">
+  const node=el(`<article class="task ${late?'overdue':''} ${t.done?'isdone':''} ${t.ongoing?'isong':''} ${open?'open':''}" data-tid="${t.id}">
     ${t.ongoing?'<span class="cbwrap" style="cursor:default">🔁</span>'
                :`<label class="cbwrap"><input type="checkbox" class="cb" ${t.done?'checked':''}></label>`}
     <div class="tbody">
@@ -1133,6 +1168,7 @@ function taskEl(t){
       ${open?'<div class="acts"></div>':''}
       ${(t.done&&!open)?'<button class="undo">↩ החזרה למשימות</button>':''}
     </div>
+    <span class="grip" title="גרירה לשינוי סדר">⠿</span>
     ${(hasN||true)?'<button class="chev">▾</button>':''}
   </article>`);
 
@@ -1154,6 +1190,21 @@ function taskEl(t){
       save(cur);
     }
   };
+  /* reorder within the bucket this card is drawn in */
+  setTimeout(()=>{
+    const list=node.parentElement;
+    if(!list||!list.classList.contains('list'))return;
+    enableDrag(node.querySelector('.grip'),node,list,idx=>{
+      const sibs=[...list.children].filter(c=>c.classList.contains('task')&&c!==node)
+        .map(c=>byId(c.dataset.tid)).filter(Boolean);
+      const prev=sibs[idx-1], next=sibs[idx];
+      const cur=byId(t.id); if(!cur)return;
+      const a=prev?(prev.order||0):((next?(next.order||0):0)-20);
+      const b=next?(next.order||0):((prev?(prev.order||0):0)+20);
+      cur.order=(a+b)/2;
+      save(cur);
+    });
+  },0);
   const un=node.querySelector('.undo');
   if(un)un.onclick=ev=>{
     ev.stopPropagation();
@@ -1203,7 +1254,7 @@ function taskEl(t){
     cal.onclick=ev=>{ev.stopPropagation(); addToCalendar(t.id)};
     acts.appendChild(cal);
     const ed=el('<button>✎ עריכה</button>');
-    ed.onclick=ev=>{ev.stopPropagation(); ui.editing=t.id; render()};
+    ed.onclick=ev=>{ev.stopPropagation(); openEdit(t.id)};
     acts.appendChild(ed);
   }
   return node;
@@ -1240,9 +1291,48 @@ function addToCalendar(id){
   setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},400);
   toast('נפתח ליומן — לאשר הוספה');
 }
+/* Reordering by drag, from a handle only — anywhere else on the row the
+   finger still scrolls the page, which is what you want on a phone. */
+function enableDrag(handle,node,container,onDrop){
+  handle.addEventListener('pointerdown',ev=>{
+    if(ev.button)return;
+    ev.preventDefault(); ev.stopPropagation();
+    handle.setPointerCapture(ev.pointerId);
+    const r=node.getBoundingClientRect();
+    const ghost=node.cloneNode(true);
+    ghost.classList.add('ghost');
+    ghost.style.width=r.width+'px'; ghost.style.left=r.left+'px'; ghost.style.top=r.top+'px';
+    document.body.appendChild(ghost);
+    node.classList.add('dragging');
+    const line=document.createElement('div'); line.className='dropline';
+    const dy=ev.clientY-r.top;
+    let before=null;
+    const move=e=>{
+      ghost.style.top=(e.clientY-dy)+'px';
+      const sibs=[...container.children].filter(c=>c!==node&&c!==line&&!c.classList.contains('dropline'));
+      before=null;
+      for(const c of sibs){
+        const cr=c.getBoundingClientRect();
+        if(e.clientY<cr.top+cr.height/2){ before=c; break; }
+      }
+      container.insertBefore(line,before);
+      const pad=60, vh=innerHeight;
+      if(e.clientY<pad)scrollBy(0,-12); else if(e.clientY>vh-pad)scrollBy(0,12);
+    };
+    const up=()=>{
+      removeEventListener('pointermove',move); removeEventListener('pointerup',up);
+      ghost.remove(); node.classList.remove('dragging');
+      const idx=[...container.children].filter(c=>!c.classList.contains('dropline')||c===line)
+                 .indexOf(line);
+      line.remove();
+      if(idx>-1)onDrop(idx);
+    };
+    addEventListener('pointermove',move); addEventListener('pointerup',up);
+  });
+}
 function open_wa(text){ window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank','noopener'); }
 
-function editorEl(t){
+function editorEl(t,onDone){
   const node=el(`<div class="editor">
     <input type="text" class="e-t" value="${esc(t.title)}">
     <div class="erow"><span class="lbl">תאריך</span>
@@ -1275,10 +1365,14 @@ function editorEl(t){
   const ong=node.querySelector('.e-ong');
   ong.onclick=()=>{ t.ongoing=!t.ongoing; ong.classList.toggle('on',t.ongoing);
     if(t.ongoing){ t.done=false; node.querySelector('.e-d').value=''; } };
-  node.querySelector('.save').onclick=()=>{ grab(); if(t.ongoing){t.due=null;delete t.pin;} ui.editing=null; save(t); };
+  node.querySelector('.save').onclick=()=>{
+    grab(); if(t.ongoing){t.due=null;delete t.pin;}
+    ui.editing=null; save(t);
+    if(onDone)onDone();
+  };
   const d=node.querySelector('.del');
   d.onclick=()=>{
-    if(d.dataset.armed){ ui.editing=null; removeTask(t.id); }
+    if(d.dataset.armed){ ui.editing=null; removeTask(t.id); if(onDone)onDone(true); }
     else{ d.dataset.armed='1'; d.textContent='בטוח?';
       setTimeout(()=>{if(d.isConnected){delete d.dataset.armed; d.textContent='מחיקה'}},4000); }
   };
