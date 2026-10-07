@@ -866,7 +866,10 @@ function checklistEl(id,onChange){
   if(open.length){
     const urg=open.filter(i=>(i.lv||2)===1).length;
     wrap.appendChild(el(`<div class="chkhead">פתוח · ${open.length}${urg?` · מתוכם ${urg} דחופים`:''}</div>`));
-    open.sort((a,z)=>(a.lv||2)-(z.lv||2)).forEach(i=>wrap.appendChild(row(i)));
+    /* סדר הרשימה הוא מה שנשמר בנתונים. בעבר היה כאן מיון אוטומטי לפי
+       דחיפות, והוא החזיר כל גרירה למקומה — הצבע בפס הצדדי ממשיך לסמן
+       את הדחיפות, אבל הסדר הוא שלך. */
+    open.forEach(i=>wrap.appendChild(row(i)));
   }else{
     wrap.appendChild(el('<div class="chkhead">הכל סגור 🎉</div>'));
   }
