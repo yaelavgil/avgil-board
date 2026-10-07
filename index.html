@@ -204,6 +204,12 @@ h1{font-family:'Karantina','Assistant',sans-serif; font-weight:700; font-size:26
   border-radius:11px; padding:9px 4px; font:inherit; font-weight:700; font-size:14px; cursor:pointer;
 }
 .who button.on{background:var(--on); border-color:var(--on); color:var(--on-ink)}
+.sharebar{display:flex; gap:6px; margin-bottom:8px}
+.sharebar button{
+  flex:1; border:1.5px solid var(--olive); background:var(--olive-soft); color:var(--olive-ink);
+  border-radius:11px; padding:9px 6px; font:inherit; font-weight:800; font-size:13.5px; cursor:pointer;
+}
+.sharebar button:active{transform:scale(.985)}
 
 /* days */
 .days{display:flex; gap:6px; overflow-x:auto; overflow-y:visible; padding:9px 5px 8px; margin:-8px -5px 0;
@@ -405,6 +411,7 @@ nav.bar .add:active{transform:scale(.95)}
     </div>
     <div class="datel" id="datel"></div>
     <div class="who" id="who"></div>
+    <div class="sharebar" id="sharebar"></div>
     <div class="days" id="days"></div>
     <div class="toolrow">
       <input id="q" type="search" placeholder="חיפוש…" enterkeyhint="search">
@@ -473,6 +480,14 @@ const ui={tab:'week', cats:new Set(), q:'', days:new Set(), open:new Set(),
 const justDone=[];
 
 try{ ui.owner=localStorage.getItem('av_owner')||null; }catch(e){}
+/* a link can point straight at one person's day: ?who=רועי */
+(function(){
+  const q=new URLSearchParams(location.search).get('who');
+  if(!q)return;
+  const map={roi:'רועי', yael:'יעל', both:'שנינו', 'רועי':'רועי', 'יעל':'יעל', 'שנינו':'שנינו'};
+  const w=map[decodeURIComponent(q)];
+  if(w){ ui.owner=w; ui.tab='today'; }
+})();
 
 /* First paint comes from what THIS browser last synced, not from the copy baked
    into the page at publish time — that copy ages the moment anyone ticks anything,
@@ -696,9 +711,49 @@ function counts(){
 function render(){
   document.getElementById('datel').textContent=
     new Date().toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long'});
-  renderWho(); renderPinned(); renderDays(); renderBar(); renderBoard();
+  renderWho(); renderShare(); renderPinned(); renderDays(); renderBar(); renderBoard();
 }
 /* standing items live here instead of scrolling away with the list */
+/* a short WhatsApp nudge: what is late, what is today, and the link back */
+function shareText(who){
+  const mine=tasks.filter(t=>!t.done&&!t.ongoing&&t.due&&
+    (t.owner===who||(who!=='שנינו'&&t.owner==='שנינו')));
+  const late=mine.filter(t=>daysUntil(t.due)<0).sort((a,z)=>a.due<z.due?-1:1);
+  const now =mine.filter(t=>daysUntil(t.due)===0);
+  const soon=mine.filter(t=>daysUntil(t.due)===1);
+  const clean=t=>t.title.replace(/^[🔴🟠🟡🔵✅⛔📦🔧🗑️👤🔁]\s*/,'').replace(/\s*—\s*/g,' — ').trim();
+  const block=(head,arr,withDate)=>{
+    if(!arr.length)return '';
+    const take=arr.slice(0,6);
+    return head+'\n'+take.map(t=>'• '+clean(t)+(withDate?' ('+fmtDate(t.due)+')':'')).join('\n')+
+      (arr.length>take.length?`\n• ועוד ${arr.length-take.length}…`:'')+'\n\n';
+  };
+  const d=new Date().toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'numeric'});
+  let msg=`היי ${who} 👋\nמה שעליך — ${d}\n\n`;
+  msg+=block('🔴 באיחור:',late,true);
+  msg+=block('📅 היום:',now,false);
+  msg+=block('➡️ מחר:',soon,false);
+  if(!late.length&&!now.length&&!soon.length)msg+='אין כלום באיחור ולא להיום 🎉\n\n';
+  msg+='הלוח שלך:\nhttps://yaelavgil.github.io/avgil-board/?who='+encodeURIComponent(who);
+  return msg;
+}
+function renderShare(){
+  const bar=document.getElementById('sharebar'); bar.innerHTML='';
+  const who=ui.owner;
+  if(!who||who==='שנינו')return;
+  const n=tasks.filter(t=>!t.done&&!t.ongoing&&t.due&&daysUntil(t.due)<=0&&
+    (t.owner===who||t.owner==='שנינו')).length;
+  const wa=el(`<button>💬 שליחת סיכום ל${esc(who)}${n?' · '+n:''}</button>`);
+  wa.onclick=()=>window.open('https://wa.me/?text='+encodeURIComponent(shareText(who)),'_blank','noopener');
+  bar.appendChild(wa);
+  const cp=el('<button>🔗 העתקת לינק</button>');
+  cp.onclick=async()=>{
+    const url='https://yaelavgil.github.io/avgil-board/?who='+encodeURIComponent(who);
+    try{ await navigator.clipboard.writeText(url); toast('הלינק הועתק ✓'); }
+    catch(e){ toast('ההעתקה נכשלה'); }
+  };
+  bar.appendChild(cp);
+}
 function renderPinned(){
   const bar=document.getElementById('pinned'); bar.innerHTML='';
   tasks.filter(t=>t.ongoing&&!t.done)
