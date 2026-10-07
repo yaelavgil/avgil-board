@@ -7,35 +7,8 @@ X-WR-CALNAME:משימות יעל
 X-PUBLISHED-TTL:PT30M
 REFRESH-INTERVAL;VALUE=DURATION:PT30M
 BEGIN:VEVENT
-UID:g02@avgil-board
-DTSTAMP:20261006T182745Z
-DTSTART:20261005T090000
-DTEND:20261005T091500
-SUMMARY:לסגור מתקין דשא סינתטי — ספק ייעודי
- \, דחוף [שנינו]
-DESCRIPTION:🔴 כמה שיותר מהר. היציקה הסתיימה 25
- .9. ⚠️ **עיזאת הוא הגנן שלנו — צריך ספק נ
- פרד שמתמחה בדשא סינתטי.** לבקש המלצות מנ
- ופר\, מברק\, או משכנים באשל. באותה נסיעה: 
- אבני מדרך וצמחייה בחלק המערבי (g03)\, ומחי
- צות במבוק לפרטיות שרועי רצה.\n\nhttps://yaelavgil
- .github.io/avgil-board/
-BEGIN:VALARM
-TRIGGER:PT0S
-ACTION:DISPLAY
-DESCRIPTION:לסגור מתקין דשא סינתטי — ספק ייעו
- די\, דחוף [שנינו]
-END:VALARM
-BEGIN:VALARM
-TRIGGER:-PT2H
-ACTION:DISPLAY
-DESCRIPTION:לסגור מתקין דשא סינתטי — ספק ייעו
- די\, דחוף [שנינו]
-END:VALARM
-END:VEVENT
-BEGIN:VEVENT
 UID:g04@avgil-board
-DTSTAMP:20261006T182745Z
+DTSTAMP:20261007T101514Z
 DTSTART:20261004T090000
 DTEND:20261004T091500
 SUMMARY:להתקשר לרהיטי טבע — מושבים\, כסאות ו
@@ -59,7 +32,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:g05@avgil-board
-DTSTAMP:20261006T182745Z
+DTSTAMP:20261007T101514Z
 DTSTART:20261004T090000
 DTEND:20261004T091500
 SUMMARY:ידיות לארונות הרחצה — זהב מוברש\, לה
@@ -92,7 +65,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:g06@avgil-board
-DTSTAMP:20261006T182745Z
+DTSTAMP:20261007T101514Z
 DTSTART:20261004T090000
 DTEND:20261004T091500
 SUMMARY:רפאל — לוודא שהארונות יצאו לייצור
@@ -119,7 +92,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:g07@avgil-board
-DTSTAMP:20261006T182745Z
+DTSTAMP:20261007T101514Z
 DTSTART:20261012T090000
 DTEND:20261012T091500
 SUMMARY:ידיות לארון הכניסה ולארון מתחת למדר
@@ -147,7 +120,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:h02@avgil-board
-DTSTAMP:20261006T182745Z
+DTSTAMP:20261007T101514Z
 DTSTART:20261012T090000
 DTEND:20261012T091500
 SUMMARY:לרכוש וילונות לבית
@@ -173,7 +146,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:k03@avgil-board
-DTSTAMP:20261006T182745Z
+DTSTAMP:20261007T101514Z
 DTSTART:20261008T090000
 DTEND:20261008T091500
 SUMMARY:משלוח מתואם — חמישי 8.10\, 09:00–13:00 [שני
@@ -209,41 +182,8 @@ DESCRIPTION:משלוח מתואם — חמישי 8.10\, 09:00–13:00 [ש
 END:VALARM
 END:VEVENT
 BEGIN:VEVENT
-UID:n01@avgil-board
-DTSTAMP:20261006T182745Z
-DTSTART:20261005T090000
-DTEND:20261005T091500
-SUMMARY:להזמין התקנה — כל התאורה + 2 הטלוויז
- יות [שנינו]
-DESCRIPTION:התאורה נאספה 2.10 — גם מעידה (22 גופי
- ם) וגם ממחסני תאורה. הכל בבית וממתין.\n\n
- 📌 **ייתכן שאלה שני בעלי מקצוע:**\n• **תאור
- ה** — חשמלאי. שווה לשאול את ברק אם החשמלא
- י שלו עושה את זה\, כי הוא מכיר את התשתית.\n
- • **טלוויזיות** — תלייה על קיר\, לרוב הנד
- ימן או מתקין ייעודי.\n\n⚠️ **הטלוויזיות ע
- דיין לא הוזמנו** (o01) — אין טעם לקבוע מתקי
- ן לפני שהן בבית.\n⚠️ פינת המשפחה בתקרה מ
- שופעת — לוודא שהמתקין יודע לפני שהוא מג
- יע.\n📌 מה שעוד לא הגיע: עלי אקספרס (16 גופ
- ים) טרם הוזמן — יצטרך סבב התקנה שני.\n\nhttp
- s://yaelavgil.github.io/avgil-board/
-BEGIN:VALARM
-TRIGGER:PT0S
-ACTION:DISPLAY
-DESCRIPTION:להזמין התקנה — כל התאורה + 2 הטלוו
- יזיות [שנינו]
-END:VALARM
-BEGIN:VALARM
-TRIGGER:-PT2H
-ACTION:DISPLAY
-DESCRIPTION:להזמין התקנה — כל התאורה + 2 הטלוו
- יזיות [שנינו]
-END:VALARM
-END:VEVENT
-BEGIN:VEVENT
 UID:n09@avgil-board
-DTSTAMP:20261006T182745Z
+DTSTAMP:20261007T101514Z
 DTSTART:20261005T090000
 DTEND:20261005T091500
 SUMMARY:מראות לשלושת חדרי הרחצה — לסגור צור
@@ -281,7 +221,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:n16@avgil-board
-DTSTAMP:20261006T182745Z
+DTSTAMP:20261007T101514Z
 DTSTART:20261004T090000
 DTEND:20261004T091500
 SUMMARY:גוון הארון בחדר הרחצה הכללי — לסגור
@@ -319,7 +259,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:n17@avgil-board
-DTSTAMP:20261006T182745Z
+DTSTAMP:20261007T101514Z
 DTSTART:20261007T090000
 DTEND:20261007T091500
 SUMMARY:מעקות — אין הצעת מחיר\, והכדור אצלכם
@@ -356,7 +296,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:n18@avgil-board
-DTSTAMP:20261006T182745Z
+DTSTAMP:20261007T101514Z
 DTSTART:20261004T090000
 DTEND:20261004T091500
 SUMMARY:נופר — שישה דברים לאישור (הודעה מוכ
@@ -389,7 +329,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:n19@avgil-board
-DTSTAMP:20261006T182745Z
+DTSTAMP:20261007T101514Z
 DTSTART:20261004T090000
 DTEND:20261004T091500
 SUMMARY:חתיכת גבס בחדר רחצה הורים — מה עושי
@@ -416,7 +356,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:o01@avgil-board
-DTSTAMP:20261006T182745Z
+DTSTAMP:20261007T101514Z
 DTSTART:20261008T090000
 DTEND:20261008T091500
 SUMMARY:להזמין אונליין — מיקרוגל\, טוחן\, פח\
@@ -444,7 +384,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:o02@avgil-board
-DTSTAMP:20261006T182745Z
+DTSTAMP:20261007T101514Z
 DTSTART:20261015T090000
 DTEND:20261015T091500
 SUMMARY:שטיחים — למדוד ואז להזמין [שנינו]
@@ -465,7 +405,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:o03@avgil-board
-DTSTAMP:20261006T182745Z
+DTSTAMP:20261007T101514Z
 DTSTART:20261020T090000
 DTEND:20261020T091500
 SUMMARY:פינת ישיבה לפינת משפחה — לשבת לפני 
@@ -490,7 +430,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:o04@avgil-board
-DTSTAMP:20261006T182745Z
+DTSTAMP:20261007T101514Z
 DTSTART:20261020T090000
 DTEND:20261020T091500
 SUMMARY:אבטחה חכמה — מנעולים\, מצלמות וזיהו
@@ -518,7 +458,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:o05@avgil-board
-DTSTAMP:20261006T182745Z
+DTSTAMP:20261007T101514Z
 DTSTART:20261025T090000
 DTEND:20261025T091500
 SUMMARY:עמדת טעינה לרכב חשמלי [שנינו]
@@ -540,7 +480,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:o06@avgil-board
-DTSTAMP:20261006T182745Z
+DTSTAMP:20261007T101514Z
 DTSTART:20261015T090000
 DTEND:20261015T091500
 SUMMARY:בקר בית חכם — Nest Hub Max ירד מהמדף [שנינ
@@ -568,7 +508,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:o07@avgil-board
-DTSTAMP:20261006T182745Z
+DTSTAMP:20261007T101514Z
 DTSTART:20261025T090000
 DTEND:20261025T091500
 SUMMARY:פילטר מים לבית [שנינו]
@@ -589,8 +529,97 @@ DESCRIPTION:פילטר מים לבית [שנינו]
 END:VALARM
 END:VEVENT
 BEGIN:VEVENT
+UID:p01@avgil-board
+DTSTAMP:20261007T101514Z
+DTSTART:20261007T090000
+DTEND:20261007T091500
+SUMMARY:פורמג׳ו — הצעת מחיר לצביעה חוזרת בג
+ וון אחר
+DESCRIPTION:הגוון שיוצר הוא **LR 401 ״תואם לכחול 
+ אינדגו״** — התאמה לאקריל המקורי\, לא Blue De
+ pths שנבחר.\n\n❓ **מה לבקש מרעות:**\n• כמה עול
+ ה צביעה חוזרת בתנור בגוון אחר\n• כמה זמן
+  זה לוקח\n• האם אפשר רק חלק מהחזיתות או ש
+ חייבים הכל\n\n📌 להביא את הגוון המבוקש **ב
+ כתב**: נירלט **Blue Depths**. בלי מספר ומותג במי
+ יל זה חוזר על אותה טעות.\n⚠️ זו ההחלטה ש
+ חוסמת את הזמנת מתקין פורמג׳ו לסיום *(p02)* 
+ — אין טעם לקבוע מתקין לפני שמחליטים.\n\nht
+ tps://yaelavgil.github.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:פורמג׳ו — הצעת מחיר לצביעה חוזרת 
+ בגוון אחר
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:פורמג׳ו — הצעת מחיר לצביעה חוזרת 
+ בגוון אחר
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:p04@avgil-board
+DTSTAMP:20261007T101514Z
+DTSTART:20261008T090000
+DTEND:20261008T091500
+SUMMARY:לוודא מול אבישב את המזגן במטבח — לפ
+ י הודעת נופר [שנינו]
+DESCRIPTION:❓ **נופר העלתה את זה ב-6.10 ואין לי א
+ ת ההודעה** — הייצוא שלי מסתיים ב-30.9.\nתגי
+ די לי מה היא כתבה ואמלא כאן את הפרטים.\n\n
+ 📌 מה שידוע מהעבר על המזגן במטבח: פתח שי
+ רות מהקלאפה\, גובה 35 ס״מ ליחידה\, וחירוץ 
+ אופקי מחולק לשלושה מקטעים. ברק ורעות שנ
+ יהם היו מעורבים.\n☎️ אבישב — סיים והותק
+ ן ב-5.10\, שולמו 32\,550 ₪ *(r19)*.\n\nhttps://yaelavgil.github
+ .io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:לוודא מול אבישב את המזגן במטבח — 
+ לפי הודעת נופר [שנינו]
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:לוודא מול אבישב את המזגן במטבח — 
+ לפי הודעת נופר [שנינו]
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:p05@avgil-board
+DTSTAMP:20261007T101514Z
+DTSTART:20261008T090000
+DTEND:20261008T091500
+SUMMARY:לקבוע עם עומרי התקנת תאורה וטלוויזי
+ ות [שנינו]
+DESCRIPTION:📌 התאורה כבר בבית — 22 גופים מעיד
+ ה וכל ההזמנה ממחסני תאורה.\n⚠️ **הטלוויז
+ יות עדיין לא הגיעו** — יש משלוח מתואם לח
+ מישי 8.10 ב-09:00–13:00 *(k03)*\, ייתכן שזה הן. לא ל
+ קבוע התקנה לפני שהן בבית.\n⚠️ פינת המשפ
+ חה בתקרה משופעת — לוודא שהוא יודע לפני 
+ שהוא מגיע.\n📌 עלי אקספרס עוד לא הוזמן *(r3
+ 5)* — יהיה סבב התקנה שני.\n\nhttps://yaelavgil.github.i
+ o/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:לקבוע עם עומרי התקנת תאורה וטלווי
+ זיות [שנינו]
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:לקבוע עם עומרי התקנת תאורה וטלווי
+ זיות [שנינו]
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
 UID:r07@avgil-board
-DTSTAMP:20261006T182745Z
+DTSTAMP:20261007T101514Z
 DTSTART:20261009T090000
 DTEND:20261009T091500
 SUMMARY:דלת פנימית לממ״ד — לשאול את מתקין ד
@@ -622,7 +651,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:r15@avgil-board
-DTSTAMP:20261006T182745Z
+DTSTAMP:20261007T101514Z
 DTSTART:20261012T090000
 DTEND:20261012T091500
 SUMMARY:מחסן נמוך למכונות במרפסת — עמית נתן
@@ -660,7 +689,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:r31@avgil-board
-DTSTAMP:20261006T182745Z
+DTSTAMP:20261007T101514Z
 DTSTART:20261004T090000
 DTEND:20261004T091500
 SUMMARY:גולן — לדרוש את שתי דוגמאות הצבע ות
@@ -698,7 +727,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:r35@avgil-board
-DTSTAMP:20261006T182745Z
+DTSTAMP:20261007T101514Z
 DTSTART:20261008T090000
 DTEND:20261008T091500
 SUMMARY:להזמין תאורה מעלי אקספרס — לפני הטי
@@ -727,7 +756,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:r39@avgil-board
-DTSTAMP:20261006T182745Z
+DTSTAMP:20261007T101514Z
 DTSTART:20261004T090000
 DTEND:20261004T091500
 SUMMARY:היום — לנצל את מתקיני תבור לכל שאלו
@@ -763,7 +792,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:r40@avgil-board
-DTSTAMP:20261006T182745Z
+DTSTAMP:20261007T101514Z
 DTSTART:20261006T090000
 DTEND:20261006T091500
 SUMMARY:אבישב — שלטים למזגנים הגדולים (מטבח
@@ -801,7 +830,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:t13@avgil-board
-DTSTAMP:20261006T182745Z
+DTSTAMP:20261007T101514Z
 DTSTART:20261008T090000
 DTEND:20261008T091500
 SUMMARY:מיטה 160 + מזרן לחדר אורחים — למדוד גו
@@ -838,28 +867,8 @@ DESCRIPTION:מיטה 160 + מזרן לחדר אורחים — למדוד
 END:VALARM
 END:VEVENT
 BEGIN:VEVENT
-UID:t1788940000001@avgil-board
-DTSTAMP:20261006T182745Z
-DTSTART:20261004T090000
-DTEND:20261004T091500
-SUMMARY:להזמין מיטת יחיד ללילי — דחוף
-DESCRIPTION:🔴 דחוף — נגרר מ-13.9. אין לה מיטה מא
- ז המעבר. לוודא גם מזרן.\n\nhttps://yaelavgil.github.io/
- avgil-board/
-BEGIN:VALARM
-TRIGGER:PT0S
-ACTION:DISPLAY
-DESCRIPTION:להזמין מיטת יחיד ללילי — דחוף
-END:VALARM
-BEGIN:VALARM
-TRIGGER:-PT2H
-ACTION:DISPLAY
-DESCRIPTION:להזמין מיטת יחיד ללילי — דחוף
-END:VALARM
-END:VEVENT
-BEGIN:VEVENT
 UID:t179114456818583@avgil-board
-DTSTAMP:20261006T182745Z
+DTSTAMP:20261007T101514Z
 DTSTART:20261012T090000
 DTEND:20261012T091500
 SUMMARY:להמציא אישורים לתשלום והעברת בעלות 
@@ -888,7 +897,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:t179114481580838@avgil-board
-DTSTAMP:20261006T182745Z
+DTSTAMP:20261007T101514Z
 DTSTART:20261004T090000
 DTEND:20261004T091500
 SUMMARY:בדיקת הוספה
