@@ -834,7 +834,7 @@ function checklistEl(id,onChange){
     r.onclick=ev=>{ if(ev.target.closest('.reflink,.tel,a,.grip'))return; openItem(id,it.k); };
     setTimeout(()=>{
       const box=r.parentElement; if(!box)return;
-      enableDrag(r.querySelector('.grip'),r,box,idx=>{
+      enableDrag(r.querySelector('.grip'),r,box,'.chkrow',idx=>{
         const cur=byId(id); if(!cur||!Array.isArray(cur.items))return;
         const keys=[...box.children].filter(c=>c.classList.contains('chkrow')&&c!==r)
           .map(c=>c.dataset.k);
@@ -1194,7 +1194,7 @@ function taskEl(t){
   setTimeout(()=>{
     const list=node.parentElement;
     if(!list||!list.classList.contains('list'))return;
-    enableDrag(node.querySelector('.grip'),node,list,idx=>{
+    enableDrag(node.querySelector('.grip'),node,list,'.task',idx=>{
       const sibs=[...list.children].filter(c=>c.classList.contains('task')&&c!==node)
         .map(c=>byId(c.dataset.tid)).filter(Boolean);
       const prev=sibs[idx-1], next=sibs[idx];
@@ -1293,7 +1293,7 @@ function addToCalendar(id){
 }
 /* Reordering by drag, from a handle only — anywhere else on the row the
    finger still scrolls the page, which is what you want on a phone. */
-function enableDrag(handle,node,container,onDrop){
+function enableDrag(handle,node,container,sel,onDrop){
   handle.addEventListener('pointerdown',ev=>{
     if(ev.button)return;
     ev.preventDefault(); ev.stopPropagation();
@@ -1322,10 +1322,16 @@ function enableDrag(handle,node,container,onDrop){
     const up=()=>{
       removeEventListener('pointermove',move); removeEventListener('pointerup',up);
       ghost.remove(); node.classList.remove('dragging');
-      const idx=[...container.children].filter(c=>!c.classList.contains('dropline')||c===line)
-                 .indexOf(line);
+      /* position among the OTHER rows — the dragged row must not count itself,
+         or one of the two directions lands one place off */
+      let idx=0, placed=false;
+      for(const c of container.children){
+        if(c===line){ placed=true; break; }
+        if(c===node)continue;
+        if(c.matches(sel))idx++;
+      }
       line.remove();
-      if(idx>-1)onDrop(idx);
+      if(placed)onDrop(idx);
     };
     addEventListener('pointermove',move); addEventListener('pointerup',up);
   });
