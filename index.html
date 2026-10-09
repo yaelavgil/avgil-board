@@ -153,6 +153,26 @@ h1{font-family:'Karantina','Assistant',sans-serif; font-weight:700; font-size:26
 .tel a{display:inline-block; padding:2px 10px; font-size:12.5px; font-weight:700; color:var(--ink); text-decoration:none; white-space:nowrap}
 .tel a+a{border-inline-start:1px solid var(--line); color:#1f8a4c; padding:2px 9px}
 .tel a:hover{background:var(--olive-soft)}
+/* ---- קבצים מצורפים ---- */
+.atts{display:flex; flex-direction:column; gap:6px; margin:10px 0 2px}
+.att{display:flex; align-items:center; gap:9px; border:1px solid var(--edge); background:var(--bg);
+     border-radius:11px; padding:8px 11px; cursor:pointer}
+.att:hover{border-color:var(--olive)}
+.att .ic{flex:0 0 auto; font-size:17px}
+.att .nm{flex:1; min-width:0; font-size:13.5px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.att .sz{flex:0 0 auto; font-size:11.5px; color:var(--muted); font-weight:700}
+.att .rm{flex:0 0 auto; border:none; background:transparent; color:var(--muted); font-size:15px; cursor:pointer; padding:0 2px}
+.att .rm:hover{color:var(--pom)}
+.attadd{width:100%; border:1.5px dashed var(--line); background:transparent; color:var(--olive-ink);
+  border-radius:11px; padding:10px; font:inherit; font-weight:800; font-size:13.5px; cursor:pointer; margin-top:6px}
+.attadd:hover{border-color:var(--olive); background:var(--olive-soft)}
+.attadd[disabled]{opacity:.5; cursor:default}
+.lightbox{position:fixed; inset:0; z-index:200; background:rgba(15,15,12,.92); display:none;
+  align-items:center; justify-content:center; padding:16px}
+.lightbox.on{display:flex}
+.lightbox img{max-width:100%; max-height:100%; border-radius:10px}
+.lightbox pre{max-width:100%; max-height:100%; overflow:auto; background:var(--card); color:var(--ink);
+  border-radius:12px; padding:16px; font-size:12.5px; line-height:1.6; white-space:pre-wrap; direction:rtl}
 .links{display:flex; flex-wrap:wrap; gap:6px; margin:10px 0 2px}
 .lnk{display:inline-flex; align-items:center; gap:5px; border:1px solid var(--line); background:var(--card);
      color:var(--olive-ink); border-radius:10px; padding:6px 11px; font-size:12.5px; font-weight:700; text-decoration:none}
@@ -462,8 +482,11 @@ nav.bar .add:active{transform:scale(.95)}
   </div>
 </div>
 <div class="dsheet" id="dsheet"><div class="dsin" id="dsin"></div></div>
+<div class="lightbox" id="lightbox"></div>
+<input type="file" id="attinput" style="display:none" multiple>
 <div class="toast" id="toast"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
 document.documentElement.lang='he'; document.documentElement.dir='rtl';
 
@@ -811,6 +834,126 @@ function shortTitle(id){
   return s.length>26?s.slice(0,25)+'…':s;
 }
 /* a task's items are live data, not text — tick one and it moves to the bottom */
+/* ========== קבצים מצורפים למשימה ==========
+   Firebase Storage אינו מופעל בפרויקט, ולכן הקבצים נשמרים במסד הנתונים:
+   המטא-דאטה תחת filemeta/<task> (קל, נטען עם המשימה) והתוכן עצמו תחת
+   files/<id> (כבד, נטען רק כשפותחים). תמונות נדחסות בדפדפן לפני השליחה. */
+const FMETA=DB+'/board/filemeta', FDATA=DB+'/board/files';
+const MAXB=700*1024;
+const metaCache={};
+async function loadMeta(taskId){
+  try{
+    const r=await fetch(`${FMETA}/${encodeURIComponent(taskId)}.json?t=`+Date.now(),{cache:'no-store'});
+    const j=r.ok?(await r.json()):null;
+    metaCache[taskId]=j?Object.keys(j).map(k=>Object.assign({fid:k},j[k])):[];
+  }catch(e){ metaCache[taskId]=metaCache[taskId]||[]; }
+  return metaCache[taskId];
+}
+function icFor(type,name){
+  if(/^image\//.test(type))return '🖼';
+  if(/pdf/.test(type))return '📄';
+  if(/zip/.test(type))return '🗜';
+  if(/^text|\.txt$/i.test(type+name))return '💬';
+  return '📎';
+}
+function kb(n){ return n>=1048576?(n/1048576).toFixed(1)+' MB':Math.max(1,Math.round(n/1024))+' KB'; }
+/* a phone screenshot is 3–5x larger than it needs to be for reading a receipt */
+function shrink(file){
+  return new Promise(res=>{
+    if(!/^image\//.test(file.type)||/svg/.test(file.type))return res(null);
+    const img=new Image(), url=URL.createObjectURL(file);
+    img.onload=()=>{
+      const max=1600, sc=Math.min(1,max/Math.max(img.width,img.height));
+      const c=document.createElement('canvas');
+      c.width=Math.round(img.width*sc); c.height=Math.round(img.height*sc);
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      URL.revokeObjectURL(url);
+      res(c.toDataURL('image/jpeg',0.72));
+    };
+    img.onerror=()=>{ URL.revokeObjectURL(url); res(null); };
+    img.src=url;
+  });
+}
+function readAs(file,how){
+  return new Promise((res,rej)=>{
+    const fr=new FileReader();
+    fr.onload=()=>res(fr.result); fr.onerror=rej;
+    how==='text'?fr.readAsText(file):fr.readAsDataURL(file);
+  });
+}
+async function attachFiles(taskId,files,after){
+  for(const f of files){
+    try{
+      let data=await shrink(f), kind=data?'image/jpeg':f.type||'application/octet-stream';
+      if(!data){
+        if(/\.zip$/i.test(f.name)&&window.JSZip){
+          const zip=await JSZip.loadAsync(f); const parts=[];
+          for(const n of Object.keys(zip.files))
+            if(!zip.files[n].dir&&/\.txt$/i.test(n))parts.push(await zip.files[n].async('string'));
+          if(parts.length){ data=parts.join('\n\n'); kind='text/plain'; }
+        }
+        if(!data) data = /^text\//.test(f.type)||/\.txt$/i.test(f.name)
+          ? await readAs(f,'text') : await readAs(f,'url');
+      }
+      if(data.length>MAXB){ toast(`${f.name} גדול מדי (${kb(data.length)})`); continue; }
+      const fid='f'+Date.now()+Math.floor(Math.random()*999);
+      const meta={fid,task:taskId,name:f.name,type:kind,size:data.length,
+                  at:new Date().toISOString(),by:ui.owner||'יעל'};
+      const a=await fetch(`${FDATA}/${fid}.json`,{method:'PUT',body:JSON.stringify({data})});
+      const b=await fetch(`${FMETA}/${encodeURIComponent(taskId)}/${fid}.json`,
+                          {method:'PUT',body:JSON.stringify(meta)});
+      if(!a.ok||!b.ok)throw new Error('upload');
+      (metaCache[taskId]=metaCache[taskId]||[]).push(meta);
+      toast('צורף ✓');
+    }catch(e){ toast('הצירוף נכשל — '+f.name); }
+  }
+  if(after)after();
+}
+async function openAttachment(m){
+  const lb=document.getElementById('lightbox');
+  lb.innerHTML='<div style="color:#fff;font-weight:700">טוען…</div>'; lb.classList.add('on');
+  lb.onclick=()=>lb.classList.remove('on');
+  try{
+    const r=await fetch(`${FDATA}/${m.fid}.json?t=`+Date.now(),{cache:'no-store'});
+    const j=await r.json(); const data=j&&j.data;
+    if(!data)throw 0;
+    if(/^image\//.test(m.type)){ lb.innerHTML=''; const i=new Image(); i.src=data; lb.appendChild(i); }
+    else if(/^text/.test(m.type)){ lb.innerHTML=''; const p=document.createElement('pre'); p.textContent=data; lb.appendChild(p); }
+    else { lb.classList.remove('on');
+      const a=document.createElement('a'); a.href=data; a.download=m.name; a.click(); }
+  }catch(e){ lb.innerHTML='<div style="color:#fff;font-weight:700">לא ניתן לפתוח</div>'; }
+}
+function attachEl(taskId,refresh){
+  const wrap=el('<div class="atts"></div>');
+  const list=metaCache[taskId]||[];
+  list.sort((a,z)=>(a.at||'')<(z.at||'')?-1:1).forEach(m=>{
+    const row=el(`<div class="att"><span class="ic">${icFor(m.type,m.name)}</span>
+      <span class="nm">${esc(m.name)}</span><span class="sz">${kb(m.size||0)}</span>
+      <button class="rm" title="הסרה">✕</button></div>`);
+    row.onclick=ev=>{ if(ev.target.closest('.rm'))return; openAttachment(m); };
+    row.querySelector('.rm').onclick=async ev=>{
+      ev.stopPropagation();
+      await fetch(`${FMETA}/${encodeURIComponent(taskId)}/${m.fid}.json`,{method:'DELETE'});
+      await fetch(`${FDATA}/${m.fid}.json`,{method:'DELETE'});
+      metaCache[taskId]=(metaCache[taskId]||[]).filter(x=>x.fid!==m.fid);
+      toast('הוסר'); if(refresh)refresh();
+    };
+    wrap.appendChild(row);
+  });
+  const add=el(`<button class="attadd">📎 צירוף קובץ${list.length?' נוסף':''}</button>`);
+  add.onclick=()=>{
+    const inp=document.getElementById('attinput');
+    inp.value=''; inp.onchange=async e=>{
+      const files=[...e.target.files]; if(!files.length)return;
+      add.disabled=true; add.textContent='מעלה…';
+      await attachFiles(taskId,files,refresh);
+      add.disabled=false;
+    };
+    inp.click();
+  };
+  wrap.appendChild(add);
+  return wrap;
+}
 /* attachments a task carries: {label, url} — plans, quotes, sites */
 function linksEl(t){
   if(!Array.isArray(t.links)||!t.links.length)return null;
@@ -1012,6 +1155,12 @@ function paintTask(box,t){
   const chk=checklistEl(id,()=>openDetail(id));
   if(chk)box.appendChild(chk);
   const lk=linksEl(t); if(lk)box.appendChild(lk);
+
+  box.appendChild(el('<div class="subhead">קבצים מצורפים</div>'));
+  const slot=el('<div></div>'); box.appendChild(slot);
+  const paintAtts=()=>{ slot.innerHTML=''; slot.appendChild(attachEl(id,paintAtts)); };
+  paintAtts();
+  if(!metaCache[id])loadMeta(id).then(paintAtts);
 
   const kids=childrenOf(id);
   if(kids.length){
