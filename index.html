@@ -1245,6 +1245,19 @@ function paintTask(box,t){
   const cal=el('<button>📅 ליומן</button>');
   cal.onclick=()=>addToCalendar(id);
   acts.appendChild(cal);
+  if(Array.isArray(t.items)&&t.items.length){
+    const dc=el('<button>📄 מסמך לקבלן</button>');
+    dc.onclick=()=>exportDoc(id);
+    acts.appendChild(dc);
+    const wb=el('<button class="wa">💬 רשימה לוואטסאפ</button>');
+    wb.onclick=async()=>{
+      const txt=waText(id);
+      try{ await navigator.clipboard.writeText(txt); }catch(e){}
+      if(txt.length<1600)open_wa(txt);
+      else toast('הרשימה ארוכה — הועתקה, אפשר להדביק בוואטסאפ');
+    };
+    acts.appendChild(wb);
+  }
   const lnk=el('<button>🔗 לינק למשימה</button>');
   lnk.onclick=async()=>{
     const u='https://yaelavgil.github.io/avgil-board/?task='+encodeURIComponent(id);
@@ -1563,6 +1576,79 @@ function enableDrag(handle,node,container,sel,onDrop){
     };
     addEventListener('pointermove',move); addEventListener('pointerup',up);
   });
+}
+/* ===== ייצוא רשימת נושאים לשליחה לבעל מקצוע ===== */
+function plain(t){                      /* markdown → טקסט נקי */
+  return String(t||'').replace(/\*\*(.+?)\*\*/g,'$1').replace(/`/g,'')
+    .replace(/\s*\*\([^)]*\)\*\s*/g,' ').replace(/\s+/g,' ').trim();
+}
+/* הנושאים מקובצים לפי התחילית שלפני ה־· , כך שהמסמך נקרא כמו סיור */
+function groupItems(t,openOnly){
+  const out=[];
+  (t.items||[]).filter(i=>openOnly?!i.done:true).forEach(i=>{
+    const raw=i.t||'', ix=raw.indexOf(' · ');
+    const head=ix>0&&ix<34?raw.slice(0,ix).trim():'';
+    const body=ix>0&&ix<34?raw.slice(ix+3):raw;
+    let g=out.find(x=>x.head===head);
+    if(!g){ g={head,rows:[]}; out.push(g); }
+    g.rows.push({lv:i.lv||2, text:plain(body), ans:(i.ans||'').trim(), done:!!i.done});
+  });
+  return out;
+}
+function exportDoc(id){
+  const t=byId(id); if(!t)return;
+  const groups=groupItems(t,false);
+  const today=new Date().toLocaleDateString('he-IL',{day:'numeric',month:'long',year:'numeric'});
+  const MARK={1:'דחוף',2:'',3:''};
+  let body='';
+  groups.forEach(g=>{
+    if(g.head)body+=`<h2>${esc(g.head)}</h2>`;
+    body+='<table><tr><th style="width:26px"></th><th>נושא</th><th style="width:150px">הערות / מה סוכם</th></tr>';
+    g.rows.forEach(r=>{
+      body+=`<tr><td style="text-align:center">${r.done?'✔':'☐'}</td>`+
+        `<td>${esc(r.text)}${r.lv===1?' <b style="color:#C0452F">· דחוף</b>':''}</td>`+
+        `<td>${esc(r.ans)}</td></tr>`;
+    });
+    body+='</table>';
+  });
+  const n=(t.items||[]).length, open=(t.items||[]).filter(i=>!i.done).length;
+  const html=`<html xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8">
+<title>${esc(t.title)}</title><style>
+body{font-family:Arial,sans-serif;direction:rtl;font-size:11pt;color:#222}
+h1{font-size:18pt;margin:0 0 2pt}
+.sub{color:#777;font-size:9.5pt;margin-bottom:14pt}
+h2{font-size:12.5pt;margin:16pt 0 5pt;padding-bottom:3pt;border-bottom:1.5pt solid #6C7A44;color:#4E5A2E}
+table{border-collapse:collapse;width:100%;margin-bottom:6pt}
+th{background:#EAEBD8;font-size:9.5pt;text-align:right;padding:4pt 6pt;border:0.5pt solid #C9C8B4}
+td{padding:5pt 6pt;border:0.5pt solid #C9C8B4;vertical-align:top;font-size:10.5pt}
+.foot{margin-top:22pt;font-size:9.5pt;color:#777;border-top:0.5pt solid #ccc;padding-top:8pt}
+</style></head><body>
+<h1>${esc(plain(t.title))}</h1>
+<div class="sub">אשל 57, בת חפר · ${today} · ${open} פתוחים מתוך ${n}</div>
+${body}
+<div class="foot">נחתם בתאריך ___________ &nbsp;&nbsp; שם ___________________ &nbsp;&nbsp; חתימה ___________________<br>
+מועד משוער לסיום ההשלמות: ___________________</div>
+</body></html>`;
+  const blob=new Blob(['\ufeff'+html],{type:'application/msword'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=plain(t.title).replace(/[^\u0590-\u05ea\w ]/g,'').trim().slice(0,40)+'.doc';
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},400);
+  toast('המסמך ירד — אפשר להעלות לגוגל דוקס');
+}
+function waText(id){
+  const t=byId(id); if(!t)return '';
+  const groups=groupItems(t,true);
+  const today=new Date().toLocaleDateString('he-IL',{day:'numeric',month:'numeric'});
+  let s=`*${plain(t.title)}*\n_אשל 57 · ${today}_\n`;
+  groups.forEach(g=>{
+    s+='\n';
+    if(g.head)s+=`*${g.head}*\n`;
+    g.rows.forEach(r=>{ s+=(r.lv===1?'🔴 ':'• ')+r.text+'\n'; });
+  });
+  s+='\nנשמח לדעת מה מתוך זה אתם מתקנים ועד מתי 🙏';
+  return s;
 }
 function open_wa(text){ window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank','noopener'); }
 
