@@ -533,6 +533,7 @@ try{ ui.owner=localStorage.getItem('av_owner')||null; }catch(e){}
   const w=map[decodeURIComponent(q)];
   if(w){ ui.owner=w; ui.tab='today'; }
 })();
+const deepTask=new URLSearchParams(location.search).get('task');
 
 /* First paint comes from what THIS browser last synced, not from the copy baked
    into the page at publish time — that copy ages the moment anyone ticks anything,
@@ -1059,6 +1060,24 @@ function checklistEl(id,onChange){
   }else{
     wrap.appendChild(el('<div class="chkhead">הכל סגור 🎉</div>'));
   }
+  const addBox=el('<div style="display:flex;gap:6px;margin-top:9px">'+
+    '<input class="picksearch" style="margin:0;flex:1" placeholder="הוספת נושא…" enterkeyhint="done">'+
+    '<button class="catbtn" type="button">הוספה</button></div>');
+  const inp=addBox.querySelector('input');
+  const doAdd=()=>{
+    const v=inp.value.trim(); if(!v)return;
+    const cur=byId(id); if(!cur)return;
+    if(!Array.isArray(cur.items))cur.items=[];
+    cur.items.push({k:'x'+Date.now()+Math.floor(Math.random()*99),lv:2,done:false,ans:'',t:v});
+    inp.value='';
+    save(cur,true); renderPinned();
+    if(onChange)onChange();
+    toast('נושא נוסף ✓');
+  };
+  addBox.querySelector('button').onclick=doAdd;
+  inp.addEventListener('keydown',e=>{ if(e.key==='Enter')doAdd(); });
+  wrap.appendChild(addBox);
+
   if(closed.length){
     wrap.appendChild(el(`<div class="chkdone">נסגר · ${closed.length}</div>`));
     closed.forEach(i=>wrap.appendChild(row(i)));
@@ -1226,6 +1245,13 @@ function paintTask(box,t){
   const cal=el('<button>📅 ליומן</button>');
   cal.onclick=()=>addToCalendar(id);
   acts.appendChild(cal);
+  const lnk=el('<button>🔗 לינק למשימה</button>');
+  lnk.onclick=async()=>{
+    const u='https://yaelavgil.github.io/avgil-board/?task='+encodeURIComponent(id);
+    try{ await navigator.clipboard.writeText(u); toast('הלינק הועתק ✓'); }
+    catch(e){ toast('ההעתקה נכשלה'); }
+  };
+  acts.appendChild(lnk);
   const ed=el('<button>✎ עריכה</button>');
   ed.onclick=()=>openEdit(id);
   acts.appendChild(ed);
@@ -1687,6 +1713,8 @@ async function pull(){
   setSync(fromCache?'מתעדכן…':'טוען…','off');
   await pull();
   loadAllMeta().then(()=>{ if(!ui.editing)render(); });
+  /* לינק שמצביע על משימה אחת נפתח ישר עליה */
+  if(deepTask&&byId(deepTask))openDetail(deepTask);
   if(!live)setInterval(pull,20000);          /* keep trying */
   /* Firebase streams changes over server-sent events — the other phone's
      ticks arrive here within a second, with no SDK and no sign-in */
