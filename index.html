@@ -1250,6 +1250,16 @@ function paintTask(box,t){
     dc.onclick=async()=>{ dc.disabled=true; dc.textContent='מכין…'; await exportDoc(id);
       dc.disabled=false; dc.textContent='📄 מסמך לקבלן'; };
     acts.appendChild(dc);
+    const pv=el('<button>👁 תצוגה לקבלן</button>');
+    pv.onclick=()=>window.open('view.html?task='+encodeURIComponent(id),'_blank','noopener');
+    acts.appendChild(pv);
+    const sl=el('<button>🔗 לינק לקבלן</button>');
+    sl.onclick=async()=>{
+      const u='https://yaelavgil.github.io/avgil-board/view.html?task='+encodeURIComponent(id);
+      try{ await navigator.clipboard.writeText(u); toast('הלינק לקבלן הועתק ✓'); }
+      catch(e){ toast('ההעתקה נכשלה'); }
+    };
+    acts.appendChild(sl);
     const wb=el('<button class="wa">💬 רשימה לוואטסאפ</button>');
     wb.onclick=async()=>{
       const txt=waText(id);
