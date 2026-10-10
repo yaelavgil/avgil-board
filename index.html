@@ -163,6 +163,8 @@ h1{font-family:'Karantina','Assistant',sans-serif; font-weight:700; font-size:26
 .att .sz{flex:0 0 auto; font-size:11.5px; color:var(--muted); font-weight:700}
 .att .rm{flex:0 0 auto; border:none; background:transparent; color:var(--muted); font-size:15px; cursor:pointer; padding:0 2px}
 .att .rm:hover{color:var(--pom)}
+.chkrow .pin{flex:0 0 auto; font-size:12px; color:var(--muted); font-weight:800}
+.att .th{flex:0 0 auto; width:34px; height:34px; border-radius:7px; object-fit:cover; background:var(--chip)}
 .attadd{width:100%; border:1.5px dashed var(--line); background:transparent; color:var(--olive-ink);
   border-radius:11px; padding:10px; font:inherit; font-weight:800; font-size:13.5px; cursor:pointer; margin-top:6px}
 .attadd:hover{border-color:var(--olive); background:var(--olive-soft)}
@@ -841,6 +843,17 @@ function shortTitle(id){
 const FMETA=DB+'/board/filemeta', FDATA=DB+'/board/files';
 const MAXB=700*1024;
 const metaCache={}, oversize=[];
+let metaAllLoaded=false;
+async function loadAllMeta(){
+  try{
+    const r=await fetch(`${FMETA}.json?t=`+Date.now(),{cache:'no-store'});
+    const j=r.ok?(await r.json()):null;
+    if(j)for(const key of Object.keys(j))
+      metaCache[key]=Object.keys(j[key]).map(f=>Object.assign({fid:f},j[key][f]));
+    metaAllLoaded=true;
+  }catch(e){}
+}
+function attCount(key){ return (metaCache[key]||[]).length; }
 async function loadMeta(taskId){
   try{
     const r=await fetch(`${FMETA}/${encodeURIComponent(taskId)}.json?t=`+Date.now(),{cache:'no-store'});
@@ -987,6 +1000,7 @@ function checklistEl(id,onChange){
     const r=el(`<div class="chkrow lv${it.lv||2} ${it.done?'off':''}" data-k="${esc(it.k)}">
       <span class="grip">⠿</span>
       <span class="chkbox" ${it.done?'data-on="1"':''}></span>
+      ${attCount(id+'__'+it.k)?`<span class="pin">📎${attCount(id+'__'+it.k)}</span>`:''}
       <span class="chktxt">${md(body).replace(/<\/?div>/g,'')}</span></div>`);
     r.onclick=ev=>{ if(ev.target.closest('.reflink,.tel,a,.grip'))return; openItem(id,it.k); };
     setTimeout(()=>{
@@ -1128,7 +1142,14 @@ function paintItem(box,t,key){
     });
     box.appendChild(bar);
   }
-  box.appendChild(el('<div class="anslbl">מה נופר ענתה?</div>'));
+  const akey=t.id+'__'+key;
+  box.appendChild(el('<div class="subhead">תמונות וקבצים לנושא הזה</div>'));
+  const aslot=el('<div></div>'); box.appendChild(aslot);
+  const paintA=()=>{ aslot.innerHTML=''; aslot.appendChild(attachEl(akey,paintA)); };
+  paintA();
+  if(!metaCache[akey])loadMeta(akey).then(paintA);
+
+  box.appendChild(el(`<div class="anslbl">${t.id==='ong-barak'?'מה ברק אמר?':'מה נופר ענתה?'}</div>`));
   const ta=el('<textarea class="ansbox" placeholder="התשובה נשמרת ונשארת לתיעוד — גם אחרי שהנושא נסגר…"></textarea>');
   ta.value=it.ans||'';
   box.appendChild(ta);
@@ -1665,6 +1686,7 @@ async function pull(){
 (async()=>{
   setSync(fromCache?'מתעדכן…':'טוען…','off');
   await pull();
+  loadAllMeta().then(()=>{ if(!ui.editing)render(); });
   if(!live)setInterval(pull,20000);          /* keep trying */
   /* Firebase streams changes over server-sent events — the other phone's
      ticks arrive here within a second, with no SDK and no sign-in */
