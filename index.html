@@ -1247,7 +1247,8 @@ function paintTask(box,t){
   acts.appendChild(cal);
   if(Array.isArray(t.items)&&t.items.length){
     const dc=el('<button>📄 מסמך לקבלן</button>');
-    dc.onclick=()=>exportDoc(id);
+    dc.onclick=async()=>{ dc.disabled=true; dc.textContent='מכין…'; await exportDoc(id);
+      dc.disabled=false; dc.textContent='📄 מסמך לקבלן'; };
     acts.appendChild(dc);
     const wb=el('<button class="wa">💬 רשימה לוואטסאפ</button>');
     wb.onclick=async()=>{
@@ -1591,13 +1592,32 @@ function groupItems(t,openOnly){
     const body=ix>0&&ix<34?raw.slice(ix+3):raw;
     let g=out.find(x=>x.head===head);
     if(!g){ g={head,rows:[]}; out.push(g); }
-    g.rows.push({lv:i.lv||2, text:plain(body), ans:(i.ans||'').trim(), done:!!i.done});
+    g.rows.push({k:i.k, lv:i.lv||2, text:plain(body), ans:(i.ans||'').trim(), done:!!i.done});
   });
   return out;
 }
-function exportDoc(id){
+async function fileData(fid){
+  try{
+    const r=await fetch(`${FDATA}/${fid}.json?t=`+Date.now(),{cache:'no-store'});
+    const j=await r.json(); return (j&&j.data)||null;
+  }catch(e){ return null; }
+}
+async function exportDoc(id){
   const t=byId(id); if(!t)return;
   const groups=groupItems(t,false);
+  /* התמונות שצורפו לנושאים נשלפות ומוטמעות במסמך עצמו */
+  if(!metaAllLoaded)await loadAllMeta();
+  let pics=0;
+  for(const g of groups)for(const r of g.rows){
+    const metas=(metaCache[id+'__'+r.k]||[]).filter(m=>/^image\//.test(m.type));
+    if(!metas.length)continue;
+    if(!pics)toast('אוסף תמונות…');
+    r.imgs=[];
+    for(const m of metas.slice(0,4)){
+      const data=await fileData(m.fid);
+      if(data){ r.imgs.push(data); pics++; }
+    }
+  }
   const today=new Date().toLocaleDateString('he-IL',{day:'numeric',month:'long',year:'numeric'});
   const MARK={1:'דחוף',2:'',3:''};
   let body='';
@@ -1605,8 +1625,10 @@ function exportDoc(id){
     if(g.head)body+=`<h2>${esc(g.head)}</h2>`;
     body+='<table><tr><th style="width:26px"></th><th>נושא</th><th style="width:150px">הערות / מה סוכם</th></tr>';
     g.rows.forEach(r=>{
+      const shots=(r.imgs||[]).map(src=>`<img src="${src}" width="210">`).join(' ');
       body+=`<tr><td style="text-align:center">${r.done?'✔':'☐'}</td>`+
-        `<td>${esc(r.text)}${r.lv===1?' <b style="color:#C0452F">· דחוף</b>':''}</td>`+
+        `<td>${esc(r.text)}${r.lv===1?' <b style="color:#C0452F">· דחוף</b>':''}`+
+        `${shots?`<div class="shots">${shots}</div>`:''}</td>`+
         `<td>${esc(r.ans)}</td></tr>`;
     });
     body+='</table>';
@@ -1622,9 +1644,11 @@ table{border-collapse:collapse;width:100%;margin-bottom:6pt}
 th{background:#EAEBD8;font-size:9.5pt;text-align:right;padding:4pt 6pt;border:0.5pt solid #C9C8B4}
 td{padding:5pt 6pt;border:0.5pt solid #C9C8B4;vertical-align:top;font-size:10.5pt}
 .foot{margin-top:22pt;font-size:9.5pt;color:#777;border-top:0.5pt solid #ccc;padding-top:8pt}
+.shots{margin-top:5pt}
+.shots img{border:0.5pt solid #C9C8B4;margin:0 0 4pt 4pt}
 </style></head><body>
 <h1>${esc(plain(t.title))}</h1>
-<div class="sub">אשל 57, בת חפר · ${today} · ${open} פתוחים מתוך ${n}</div>
+<div class="sub">אשל 57, בת חפר · ${today} · ${open} פתוחים מתוך ${n}${pics?` · ${pics} תמונות`:''}</div>
 ${body}
 <div class="foot">נחתם בתאריך ___________ &nbsp;&nbsp; שם ___________________ &nbsp;&nbsp; חתימה ___________________<br>
 מועד משוער לסיום ההשלמות: ___________________</div>
@@ -1635,7 +1659,7 @@ ${body}
   a.download=plain(t.title).replace(/[^\u0590-\u05ea\w ]/g,'').trim().slice(0,40)+'.doc';
   document.body.appendChild(a); a.click();
   setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},400);
-  toast('המסמך ירד — אפשר להעלות לגוגל דוקס');
+  toast(pics?`המסמך ירד עם ${pics} תמונות`:'המסמך ירד — אפשר להעלות לגוגל דוקס');
 }
 function waText(id){
   const t=byId(id); if(!t)return '';
