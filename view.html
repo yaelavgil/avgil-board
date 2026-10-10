@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>רשימת נושאים — אשל 57</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#6C7A44">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="רשימת נושאים — אשל 57, בת חפר">
+<meta property="og:description" content="רשימה מסודרת לפי חדרים, עם תמונות. אשל 57, בת חפר.">
+<meta property="og:image" content="https://yaelavgil.github.io/avgil-board/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="he_IL">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Karantina:wght@400;700&family=Assistant:wght@400;600;700;800&display=swap">
+<style>
+:root{
+  --bg:#F5F3EA; --card:#FFFDF6; --edge:#E4E0CC; --ink:#2F2E23; --muted:#8A8770;
+  --olive:#6C7A44; --olive-ink:#4E5A2E; --olive-soft:#EAEBD8;
+  --pom:#C0452F; --pom-soft:#F6E3DC; --amber:#B97F1E; --done:#A7A489; --line:#DDD9C6;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#1F2019; --card:#2A2B21; --edge:#3A3B2D; --ink:#EDEAD9; --muted:#9C9A81;
+  --olive:#A8BA6A; --olive-ink:#C3D38A; --olive-soft:#37402A;
+  --pom:#E07358; --pom-soft:#46281F; --amber:#E0A94F; --done:#6E6C55; --line:#3B3C2E;
+}}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--ink);font-family:'Assistant',-apple-system,sans-serif;
+  font-size:16px;line-height:1.5;padding:0 0 40px;-webkit-text-size-adjust:100%}
+.wrap{max-width:720px;margin:0 auto;padding:0 16px}
+header{padding:26px 0 16px;border-bottom:2px solid var(--olive);margin-bottom:4px}
+h1{font-family:'Karantina','Assistant',sans-serif;font-weight:700;font-size:40px;line-height:1.05}
+.meta{color:var(--muted);font-weight:600;font-size:14px;margin-top:5px}
+.counts{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+.pill{border-radius:99px;padding:3px 12px;font-size:12.5px;font-weight:800}
+.pill.red{background:var(--pom-soft);color:var(--pom)}
+.pill.n{background:var(--olive-soft);color:var(--olive-ink)}
+.pill.g{background:var(--card);color:var(--muted);border:1px solid var(--edge)}
+.intro{background:var(--card);border:1px solid var(--edge);border-radius:14px;
+  padding:13px 15px;margin:16px 0 4px;font-size:14px;color:var(--muted);line-height:1.65}
+h2{font-family:'Karantina','Assistant',sans-serif;font-size:27px;font-weight:700;
+  margin:28px 0 10px;color:var(--olive-ink);display:flex;align-items:baseline;gap:9px}
+h2 .c{font-family:'Assistant';font-size:13px;font-weight:700;color:var(--muted)}
+.row{background:var(--card);border:1px solid var(--edge);border-radius:14px;
+  padding:13px 15px;margin-bottom:9px;position:relative;overflow:hidden}
+.row::before{content:'';position:absolute;inset-inline-start:0;top:0;bottom:0;width:4px;background:var(--done)}
+.row.lv1::before{background:var(--pom)}
+.row.lv2::before{background:var(--amber)}
+.row.off{opacity:.52}
+.row.off .t{text-decoration:line-through;text-decoration-color:var(--done)}
+.t{font-size:15.5px;font-weight:700;line-height:1.45}
+.t b{font-weight:800}
+.tag{display:inline-block;background:var(--pom);color:#fff;border-radius:99px;
+  padding:1px 9px;font-size:11px;font-weight:800;margin-inline-start:7px;vertical-align:1px}
+.tag.ok{background:var(--done)}
+.ans{background:var(--olive-soft);border-radius:10px;padding:9px 12px;margin-top:9px;
+  font-size:13.5px;line-height:1.55;color:var(--olive-ink)}
+.ans b{font-weight:800}
+.shots{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.shots img{width:132px;height:132px;object-fit:cover;border-radius:9px;
+  border:1px solid var(--edge);cursor:zoom-in;background:var(--bg)}
+.foot{margin-top:34px;padding-top:16px;border-top:1px solid var(--line);
+  color:var(--muted);font-size:13px;line-height:1.7}
+.bar{position:sticky;bottom:0;background:var(--bg);padding:12px 0 calc(12px + env(safe-area-inset-bottom));
+  display:flex;gap:8px;border-top:1px solid var(--line);margin-top:26px}
+.bar button{flex:1;border:1.5px solid var(--line);background:var(--card);color:var(--ink);
+  border-radius:12px;padding:12px;font:inherit;font-weight:800;font-size:14.5px;cursor:pointer}
+.bar button.p{background:var(--olive);border-color:var(--olive);color:#fff}
+.state{text-align:center;padding:70px 20px;color:var(--muted);font-weight:700}
+.lb{position:fixed;inset:0;background:rgba(15,15,12,.93);display:none;align-items:center;
+  justify-content:center;padding:16px;z-index:50}
+.lb.on{display:flex}
+.lb img{max-width:100%;max-height:100%;border-radius:10px}
+@media print{
+  body{background:#fff;color:#000;font-size:11pt}
+  .bar,.foot{display:none}
+  .row{break-inside:avoid;border:1px solid #bbb}
+  .shots img{width:150px;height:auto}
+  h2{break-after:avoid}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="app"><div class="state">טוען…</div></div>
+</div>
+<div class="lb" id="lb"></div>
+
+<script>
+const DB='https://home-picks-47450-default-rtdb.europe-west1.firebasedatabase.app';
+const $=i=>document.getElementById(i);
+const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const md=s=>esc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
+const strip=s=>String(s||'').replace(/\s*\*\([^)]*\)\*\s*/g,' ').replace(/\s+/g,' ').trim();
+const clean=s=>String(s||'').replace(/^[\u{1F300}-\u{1FAFF}☀-➿️\s]+/u,'').trim();
+
+function show(src){ const lb=$('lb'); lb.innerHTML=''; const i=new Image(); i.src=src;
+  lb.appendChild(i); lb.classList.add('on'); lb.onclick=()=>lb.classList.remove('on'); }
+
+/* הנושאים מקובצים לפי התחילית שלפני ה־· — כך הרשימה נקראת כמו סיור */
+function group(items){
+  const out=[];
+  items.forEach(i=>{
+    const raw=i.t||'', ix=raw.indexOf(' · ');
+    const head=(ix>0&&ix<34)?raw.slice(0,ix).trim():'כללי';
+    const body=(ix>0&&ix<34)?raw.slice(ix+3):raw;
+    let g=out.find(x=>x.head===head);
+    if(!g){ g={head,rows:[]}; out.push(g); }
+    g.rows.push(Object.assign({},i,{body:strip(body)}));
+  });
+  return out;
+}
+
+(async()=>{
+  const id=new URLSearchParams(location.search).get('task');
+  const app=$('app');
+  if(!id){ app.innerHTML='<div class="state">חסר מזהה משימה בכתובת</div>'; return; }
+  let t=null, meta={};
+  try{
+    const [a,b]=await Promise.all([
+      fetch(`${DB}/board/tasks/${encodeURIComponent(id)}.json?t=`+Date.now(),{cache:'no-store'}),
+      fetch(`${DB}/board/filemeta.json?t=`+Date.now(),{cache:'no-store'})
+    ]);
+    t=await a.json(); meta=(await b.json())||{};
+  }catch(e){}
+  if(!t){ app.innerHTML='<div class="state">לא נמצאה רשימה בכתובת הזאת</div>'; return; }
+
+  const items=Array.isArray(t.items)?t.items:[];
+  const open=items.filter(i=>!i.done), red=open.filter(i=>(i.lv||2)===1);
+  const today=new Date().toLocaleDateString('he-IL',{day:'numeric',month:'long',year:'numeric'});
+
+  let h=`<header><h1>${esc(clean(strip(t.title)))}</h1>
+    <div class="meta">אשל 57, בת חפר · עודכן ${today}</div>
+    <div class="counts">
+      ${red.length?`<span class="pill red">${red.length} דחופים</span>`:''}
+      <span class="pill n">${open.length} פתוחים</span>
+      <span class="pill g">${items.length} סה״כ</span>
+    </div></header>
+    <div class="intro">הרשימה מסודרת לפי מיקום בבית. פס אדום = דחוף, כתום = רגיל.
+    נושא עם קו חוצה כבר טופל. לחיצה על תמונה מגדילה אותה.</div>`;
+
+  let pics=0;
+  group(items).forEach(g=>{
+    const o=g.rows.filter(r=>!r.done).length;
+    h+=`<h2>${esc(g.head)} <span class="c">${o} מתוך ${g.rows.length}</span></h2>`;
+    g.rows.forEach(r=>{
+      const imgs=(meta[id+'__'+r.k]?Object.values(meta[id+'__'+r.k]):[])
+        .filter(m=>/^image\//.test(m.type||''));
+      pics+=imgs.length;
+      h+=`<div class="row lv${r.lv||2} ${r.done?'off':''}">
+        <div class="t">${md(r.body)}${r.lv===1&&!r.done?'<span class="tag">דחוף</span>':''}${r.done?'<span class="tag ok">טופל</span>':''}</div>
+        ${r.ans?`<div class="ans"><b>סוכם:</b> ${md(r.ans)}</div>`:''}
+        ${imgs.length?`<div class="shots">${imgs.map(m=>`<img data-f="${m.fid}" alt="">`).join('')}</div>`:''}
+      </div>`;
+    });
+  });
+
+  h+=`<div class="foot">אשל 57, בת חפר · יעל ורועי אבגיל<br>
+    הרשימה מתעדכנת — רענון הדף מציג את המצב הנוכחי.</div>
+    <div class="bar">
+      <button class="p" onclick="print()">🖨 הדפסה / PDF</button>
+      <button onclick="location.reload()">↻ רענון</button>
+    </div>`;
+  app.innerHTML=h;
+
+  /* התמונות נטענות אחרי הטקסט, כדי שהדף ייפתח מיד */
+  for(const el of app.querySelectorAll('img[data-f]')){
+    try{
+      const r=await fetch(`${DB}/board/files/${el.dataset.f}.json`,{cache:'force-cache'});
+      const j=await r.json();
+      if(j&&j.data){ el.src=j.data; el.onclick=()=>show(j.data); }
+      else el.remove();
+    }catch(e){ el.remove(); }
+  }
+})();
+</script>
+</body>
+</html>
