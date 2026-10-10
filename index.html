@@ -840,7 +840,7 @@ function shortTitle(id){
    files/<id> (כבד, נטען רק כשפותחים). תמונות נדחסות בדפדפן לפני השליחה. */
 const FMETA=DB+'/board/filemeta', FDATA=DB+'/board/files';
 const MAXB=700*1024;
-const metaCache={};
+const metaCache={}, oversize=[];
 async function loadMeta(taskId){
   try{
     const r=await fetch(`${FMETA}/${encodeURIComponent(taskId)}.json?t=`+Date.now(),{cache:'no-store'});
@@ -895,7 +895,15 @@ async function attachFiles(taskId,files,after){
         if(!data) data = /^text\//.test(f.type)||/\.txt$/i.test(f.name)
           ? await readAs(f,'text') : await readAs(f,'url');
       }
-      if(data.length>MAXB){ toast(`${f.name} גדול מדי (${kb(data.length)})`); continue; }
+      if(data.length>MAXB){
+        /* התקרה קיימת כי Storage לא מופעל בפרויקט. במקום הודעת שגיאה יבשה,
+           להגיד מה אפשר לעשות — ולסמן את זה כדי שנדע אם זה חוזר. */
+        oversize.push({name:f.name,size:data.length,task:taskId});
+        try{ await fetch(`${DB}/board/oversize/${Date.now()}.json`,{method:'PUT',
+          body:JSON.stringify({name:f.name,size:data.length,task:taskId,at:new Date().toISOString()})}); }catch(e){}
+        toast(`${f.name} גדול מדי (${kb(data.length)}) — אפשר לצרף כקישור במקום`);
+        continue;
+      }
       const fid='f'+Date.now()+Math.floor(Math.random()*999);
       const meta={fid,task:taskId,name:f.name,type:kind,size:data.length,
                   at:new Date().toISOString(),by:ui.owner||'יעל'};
