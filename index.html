@@ -1,3 +1,5 @@
+<!doctype html>
+<meta charset="utf-8">
 <title>לוח של האבגילים המשפצים</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -443,6 +445,110 @@ nav.bar .add:active{transform:scale(.95)}
   pointer-events:none; box-shadow:0 6px 22px rgba(60,58,38,.28); text-align:center;
 }
 .toast.on{opacity:1; transform:none}
+
+/* ================= יומן =================
+   מכווץ זה רצועה של שבעה ימים. פתוח זה יום / שבוע / חודש.
+   כשהוא פתוח הוא פורץ מרוחב ה-620 של הלוח, כי חודש ב-620 פיקסל
+   הוא רשת של תאים צרים מדי מכדי לקרוא בהם משהו. */
+.cal{margin:0 0 14px}
+.cal.open{width:min(96vw,1060px); margin-inline:calc(50% - min(48vw,530px))}
+.caltog{
+  display:flex; align-items:center; gap:9px; width:100%; border:1px solid var(--edge);
+  background:var(--card); color:var(--ink); border-radius:13px; padding:10px 13px;
+  font:inherit; font-weight:800; font-size:14.5px; cursor:pointer; box-shadow:var(--shadow);
+}
+.caltog .sub{font-weight:600; font-size:12.5px; color:var(--muted); margin-inline-start:auto;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.caltog .chev{transition:transform .22s; font-size:11px; color:var(--muted); flex:0 0 auto}
+.cal.open .caltog .chev{transform:rotate(180deg)}
+
+.calstrip{display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:5px; margin-top:8px}
+.cday{
+  border:1px solid var(--edge); background:var(--card); border-radius:11px; padding:7px 2px 6px;
+  cursor:pointer; font:inherit; color:var(--ink); min-height:62px;
+  display:flex; flex-direction:column; align-items:center; gap:3px;
+}
+.cday b{font-size:10px; font-weight:700; color:var(--muted)}
+.cday i{font-style:normal; font-size:16px; font-weight:800; line-height:1; font-variant-numeric:tabular-nums}
+.cday .dots{display:flex; gap:2px; flex-wrap:wrap; justify-content:center; min-height:6px}
+.dot{width:5px; height:5px; border-radius:50%; background:var(--olive); flex:0 0 auto}
+.dot.ev{background:var(--school-ink)} .dot.late{background:var(--pom)} .dot.ok{background:var(--done)}
+.cday.today{border-color:var(--olive); background:var(--olive-soft)}
+.cday.today b, .cday.today i{color:var(--olive-ink)}
+.cday.sel{outline:2px solid var(--olive); outline-offset:-2px}
+
+.calhead{display:flex; align-items:center; gap:7px; margin-top:10px; flex-wrap:wrap}
+.calnav{
+  width:32px; height:32px; flex:0 0 auto; border-radius:9px; border:1px solid var(--edge);
+  background:var(--card); color:var(--ink); font:inherit; font-size:17px; font-weight:800;
+  cursor:pointer; line-height:1;
+}
+.calttl{font-family:'Karantina','Assistant',sans-serif; font-size:24px; font-weight:700;
+  color:var(--olive-ink); white-space:nowrap}
+.caltoday{border:1px solid var(--edge); background:var(--card); color:var(--ink); border-radius:9px;
+  padding:6px 11px; font:inherit; font-weight:800; font-size:13px; cursor:pointer}
+.calviews{display:flex; gap:3px; margin-inline-start:auto; background:var(--chip); border-radius:10px; padding:3px}
+.calviews button{border:none; background:none; color:var(--muted); font:inherit; font-weight:800;
+  font-size:13px; padding:6px 11px; border-radius:8px; cursor:pointer}
+.calviews button.on{background:var(--card); color:var(--ink); box-shadow:var(--shadow)}
+
+/* פריט ביומן — משימה או שורה מהלוז */
+.cev{
+  display:flex; gap:5px; align-items:baseline; width:100%; text-align:start; border:none;
+  background:var(--chip); color:var(--ink); border-radius:8px; padding:5px 7px; margin-bottom:4px;
+  font:inherit; font-size:12px; font-weight:700; line-height:1.35; cursor:pointer;
+}
+.cev time{font-size:11px; font-weight:800; color:var(--muted); flex:0 0 auto; font-variant-numeric:tabular-nums}
+.cev .x{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.cev.slot{background:var(--school); color:var(--school-ink)}
+.cev.slot time{color:var(--school-ink)}
+.cev.late{background:var(--pom-soft); color:var(--pom)} .cev.late time{color:var(--pom)}
+.cev.ok{opacity:.5} .cev.ok .x{text-decoration:line-through}
+.cev.more{justify-content:center; background:none; border:1px dashed var(--line);
+  color:var(--muted); font-size:11.5px; margin-top:2px}
+
+.calweek{display:grid; grid-template-columns:minmax(0,1fr); gap:6px; margin-top:10px}
+@media (min-width:700px){.calweek{grid-template-columns:repeat(7,minmax(0,1fr))}}
+.wcol{border:1px solid var(--edge); background:var(--card); border-radius:12px; padding:8px; min-width:0}
+.wcol.today{border-color:var(--olive); background:var(--olive-soft)}
+.wcol.past{opacity:.6}
+.wcol>.h{display:flex; align-items:baseline; gap:6px; margin-bottom:6px; padding-bottom:5px;
+  border-bottom:1px solid var(--line)}
+.wcol>.h b{font-size:13px; font-weight:800}
+.wcol>.h i{font-style:normal; font-size:11.5px; color:var(--muted); font-weight:700}
+
+.calmon{margin-top:10px}
+.calmon .wd{display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:4px; margin-bottom:4px}
+.calmon .wd span{text-align:center; font-size:11px; font-weight:800; color:var(--muted)}
+.calgrid{display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:4px}
+.mcell{
+  border:1px solid var(--edge); background:var(--card); border-radius:9px; padding:4px 3px;
+  min-height:56px; cursor:pointer; font:inherit; color:var(--ink); text-align:start; overflow:hidden;
+}
+.mcell .d{display:block; text-align:center; font-size:12px; font-weight:800; font-variant-numeric:tabular-nums}
+.mcell .dots{display:flex; gap:2px; justify-content:center; flex-wrap:wrap; margin-top:3px}
+.mcell .mini{display:none}
+.mcell.out{opacity:.34}
+.mcell.today{border-color:var(--olive); background:var(--olive-soft)}
+.mcell.today .d{color:var(--olive-ink)}
+/* ברוחב גדול יש מקום לטקסט אמיתי בתא, אז הנקודות מפנות לו את המקום */
+@media (min-width:700px){
+  .mcell{min-height:98px; padding:6px}
+  .mcell .d{text-align:start}
+  .mcell .dots{display:none}
+  .mcell .mini{display:block; font-size:10.5px; font-weight:700; margin-top:3px; padding:2px 4px;
+    border-radius:5px; background:var(--chip); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .mcell .mini.slot{background:var(--school); color:var(--school-ink)}
+  .mcell .mini.late{background:var(--pom-soft); color:var(--pom)}
+}
+
+.calday{margin-top:10px; border:1px solid var(--edge); background:var(--card);
+  border-radius:12px; padding:11px 12px}
+.calday h4{font-family:'Karantina','Assistant',sans-serif; font-size:22px; font-weight:700;
+  color:var(--olive-ink); margin-bottom:9px}
+.calday .cev{font-size:13.5px; padding:8px 10px; margin-bottom:5px}
+.calday .cev .x{white-space:normal}
+.calnone{color:var(--muted); font-size:12.5px; font-weight:700; padding:4px 2px}
 </style>
 
 <div class="wrap">
@@ -462,6 +568,7 @@ nav.bar .add:active{transform:scale(.95)}
     <div class="offbar" id="offbar"></div>
     <div class="pinned" id="pinned"></div>
   </header>
+  <section class="cal" id="cal"></section>
   <main id="board"></main>
   <footer style="text-align:center;padding:22px 0 8px;font-size:12px;color:var(--muted);font-weight:600"><a href="https://github.com/yaelavgil/avgil-board" target="_blank" rel="noopener" style="color:var(--muted)">קוד המקור ב-GitHub</a></footer>
 </div>
@@ -497,6 +604,7 @@ const CATS={trip:'✈️ פולין', reno:'🏠 שיפוץ', home:'🧺 בית'
             idea:'💡 רעיונות', school:'🎒 בי"ס', health:'🩺 בריאות'};
 const OWNERS=['יעל','רועי','שנינו'];
 const WD=['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+const WD1=['א׳','ב׳','ג׳','ד׳','ה׳','ו׳','ש׳'];
 const BUCKETS=[
   {key:'ongoing',name:'מתמשך',   ong:true, hint:'לא נגמר — להציף בכל פגישה'},
   {key:'hot',    name:'דחוף והיום', hot:true},
@@ -757,7 +865,7 @@ function counts(){
 function render(){
   document.getElementById('datel').textContent=
     new Date().toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long'});
-  renderWho(); renderShare(); renderPinned(); renderDays(); renderBar(); renderBoard();
+  renderWho(); renderShare(); renderPinned(); renderCal(); renderDays(); renderBar(); renderBoard();
 }
 /* standing items live here instead of scrolling away with the list */
 /* a short WhatsApp nudge: what is late, what is today, and the link back */
@@ -1313,6 +1421,184 @@ function dayBuckets(){
   });
   return {days:[...m.entries()].sort((a,z)=>a[0]<z[0]?-1:1).map(([k,n])=>({key:k,n,du:daysUntil(k)})), none};
 }
+/* ================= יומן =================
+   משימה נושאת תאריך בלבד, בלי שעה, ולכן היא יושבת בראש היום כמו
+   אירוע "כל היום" בגוגל קלנדר. מה שיש לו שעה הוא פריט חוזר שבועי
+   שנשמר על המשימה עצמה: slots:[{d:0..6, t0:'15:00', t1:'16:00', t:'…', ic:'🏀'}]
+   d הוא getDay() — 0 ראשון עד 6 שבת. */
+const CALK='av_cal_v1';
+ui.cal={open:false, view:'week', anchor:todayStr()};
+try{ Object.assign(ui.cal, JSON.parse(localStorage.getItem(CALK)||'{}')); }catch(e){}
+if(!/^\d{4}-\d{2}-\d{2}$/.test(ui.cal.anchor||''))ui.cal.anchor=todayStr();
+function calSave(){ try{ localStorage.setItem(CALK,JSON.stringify(ui.cal)); }catch(e){} }
+
+function isoOf(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+/* שעה 12:00 ולא חצות — כך מעבר שעון קיץ לא מזיז יום אחורה */
+function dOf(iso){return new Date(iso+'T12:00')}
+function isoAdd(iso,n){const d=dOf(iso); d.setDate(d.getDate()+n); return isoOf(d)}
+function weekStart(iso){return isoAdd(iso,-dOf(iso).getDay())}
+
+/* היומן מכבד את אותם מסננים כמו הלוח — אחראי וקטגוריה — אבל לא את
+   הטאב או טווח הימים, כי לו יש טווח משלו */
+function calPass(t){
+  if(ui.owner && t.owner!==ui.owner && !(ui.owner!=='שנינו'&&t.owner==='שנינו'))return false;
+  if(ui.cats.size && !ui.cats.has(t.cat))return false;
+  return true;
+}
+function calDay(iso){
+  const wd=dOf(iso).getDay(), out=[];
+  tasks.forEach(t=>{
+    if(!calPass(t))return;
+    if(!t.ongoing && t.due===iso)
+      out.push({kind:'task', iso, done:!!t.done, txt:t.title, id:t.id});
+    (Array.isArray(t.slots)?t.slots:[]).forEach(s=>{
+      if(s && s.d===wd)
+        out.push({kind:'slot', iso, t0:s.t0, t1:s.t1, id:t.id,
+                  txt:(s.ic?s.ic+' ':'')+(s.t||t.title)});
+    });
+  });
+  /* משימות למעלה ("כל היום"), אחר כך הלוז לפי שעה */
+  out.sort((a,z)=>(a.kind==='task'?0:1)-(z.kind==='task'?0:1)||
+                  String(a.t0||'').localeCompare(String(z.t0||'')));
+  return out;
+}
+function evEl(e,withTime){
+  const late=e.kind==='task'&&!e.done&&e.iso<todayStr();
+  const cls=e.kind==='slot'?'slot':(e.done?'ok':(late?'late':''));
+  const b=el(`<button class="cev ${cls}">${withTime&&e.t0?`<time>${esc(e.t0)}</time>`:''}<span class="x">${esc(e.txt)}</span></button>`);
+  b.onclick=ev=>{ ev.stopPropagation(); openDetail(e.id); };
+  return b;
+}
+function calTitle(){
+  const d=dOf(ui.cal.anchor);
+  if(ui.cal.view==='month')return d.toLocaleDateString('he-IL',{month:'long',year:'numeric'});
+  if(ui.cal.view==='day')  return d.toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long'});
+  const a=weekStart(ui.cal.anchor);
+  return fmtDate(a)+' – '+fmtDate(isoAdd(a,6));
+}
+function calStrip(from){
+  const g=el('<div class="calstrip"></div>');
+  const overdue=tasks.some(t=>!t.done&&!t.ongoing&&t.due&&t.due<from&&calPass(t));
+  for(let i=0;i<7;i++){
+    const iso=isoAdd(from,i), d=dOf(iso), ev=calDay(iso);
+    const dots=(i===0&&overdue?'<span class="dot late"></span>':'')+
+      ev.slice(0,4).map(e=>`<span class="dot ${e.kind==='slot'?'ev':(e.done?'ok':'')}"></span>`).join('');
+    const c=el(`<button class="cday ${i===0?'today':''} ${ui.days.has(iso)?'sel':''}">
+      <b>${i===0?'היום':WD1[d.getDay()]}</b><i>${d.getDate()}</i>
+      <span class="dots">${dots}</span></button>`);
+    c.onclick=()=>{
+      if(ui.days.has(iso)&&ui.days.size===1)ui.days.clear();
+      else{ ui.days.clear(); ui.days.add(iso); }
+      render();
+    };
+    g.appendChild(c);
+  }
+  return g;
+}
+function calHead(){
+  const h=el('<div class="calhead"></div>');
+  const step=n=>{
+    const v=ui.cal.view;
+    if(v==='month'){ const d=dOf(ui.cal.anchor); d.setDate(1); d.setMonth(d.getMonth()+n); ui.cal.anchor=isoOf(d); }
+    else ui.cal.anchor=isoAdd(ui.cal.anchor, v==='day'?n:7*n);
+    calSave(); renderCal();
+  };
+  /* בעברית הקודם מצביע ימינה */
+  const prev=el('<button class="calnav" aria-label="הקודם">›</button>'); prev.onclick=()=>step(-1);
+  const next=el('<button class="calnav" aria-label="הבא">‹</button>');   next.onclick=()=>step(1);
+  h.appendChild(prev);
+  h.appendChild(el(`<div class="calttl">${esc(calTitle())}</div>`));
+  h.appendChild(next);
+  const tb=el('<button class="caltoday">היום</button>');
+  tb.onclick=()=>{ ui.cal.anchor=todayStr(); calSave(); renderCal(); };
+  h.appendChild(tb);
+  const vs=el('<div class="calviews"></div>');
+  [['day','יום'],['week','שבוע'],['month','חודש']].forEach(([k,n])=>{
+    const b=el(`<button class="${ui.cal.view===k?'on':''}">${n}</button>`);
+    b.onclick=()=>{ ui.cal.view=k; calSave(); renderCal(); };
+    vs.appendChild(b);
+  });
+  h.appendChild(vs);
+  return h;
+}
+/* כמה פריטים ליום בתצוגת שבוע לפני שעוברים ל"עוד" */
+const WEEKMAX=6;
+function calWeek(anchor){
+  const s=weekStart(anchor), today=todayStr(), g=el('<div class="calweek"></div>');
+  for(let i=0;i<7;i++){
+    const iso=isoAdd(s,i), d=dOf(iso), ev=calDay(iso);
+    const col=el(`<div class="wcol ${iso===today?'today':''} ${iso<today?'past':''}">
+      <div class="h"><b>${WD[d.getDay()]}</b><i>${d.getDate()}/${d.getMonth()+1}</i></div></div>`);
+    if(!ev.length)col.appendChild(el('<div class="calnone">—</div>'));
+    else{
+      /* יום עמוס יכול להחזיק עשרים פריטים, וזה הופך שבוע לעמוד ארוך.
+         מראים את הראשונים ושולחים את השאר לתצוגת היום. */
+      ev.slice(0,WEEKMAX).forEach(e=>col.appendChild(evEl(e,true)));
+      if(ev.length>WEEKMAX){
+        const more=el(`<button class="cev more">+ עוד ${ev.length-WEEKMAX}</button>`);
+        more.onclick=()=>{ ui.cal.anchor=iso; ui.cal.view='day'; calSave(); renderCal(); };
+        col.appendChild(more);
+      }
+    }
+    g.appendChild(col);
+  }
+  return g;
+}
+function calMonth(anchor){
+  const a=dOf(anchor); a.setDate(1);
+  const mon=a.getMonth(), first=isoAdd(isoOf(a),-a.getDay()), today=todayStr();
+  const last=new Date(a.getFullYear(),mon+1,0).getDate();
+  const cells=Math.ceil((a.getDay()+last)/7)*7;   /* בלי שורה שכולה חודש אחר */
+  const box=el('<div class="calmon"></div>');
+  const wd=el('<div class="wd"></div>');
+  WD1.forEach(n=>wd.appendChild(el(`<span>${n}</span>`)));
+  box.appendChild(wd);
+  const g=el('<div class="calgrid"></div>');
+  for(let i=0;i<cells;i++){
+    const iso=isoAdd(first,i), d=dOf(iso), ev=calDay(iso);
+    const c=el(`<button class="mcell ${d.getMonth()!==mon?'out':''} ${iso===today?'today':''}">
+      <span class="d">${d.getDate()}</span></button>`);
+    const dots=el('<span class="dots"></span>');
+    ev.slice(0,4).forEach(e=>dots.appendChild(el(`<span class="dot ${e.kind==='slot'?'ev':(e.done?'ok':'')}"></span>`)));
+    c.appendChild(dots);
+    ev.slice(0,3).forEach(e=>{
+      const late=e.kind==='task'&&!e.done&&e.iso<today;
+      c.appendChild(el(`<span class="mini ${e.kind==='slot'?'slot':(late?'late':'')}">${e.t0?esc(e.t0)+' ':''}${esc(e.txt)}</span>`));
+    });
+    if(ev.length>3)c.appendChild(el(`<span class="mini">+${ev.length-3}</span>`));
+    c.onclick=()=>{ ui.cal.anchor=iso; ui.cal.view='day'; calSave(); renderCal(); };
+    g.appendChild(c);
+  }
+  box.appendChild(g);
+  return box;
+}
+function calDayView(iso){
+  const ev=calDay(iso);
+  const box=el(`<div class="calday"><h4>${dOf(iso).toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long'})}</h4></div>`);
+  if(!ev.length)box.appendChild(el('<div class="calnone">אין כלום ביום הזה 🎉</div>'));
+  else ev.forEach(e=>box.appendChild(evEl(e,true)));
+  return box;
+}
+function renderCal(){
+  const host=document.getElementById('cal'); if(!host)return;
+  host.innerHTML=''; host.className='cal'+(ui.cal.open?' open':'');
+  const today=todayStr();
+  let nT=0,nS=0;
+  for(let i=0;i<7;i++)calDay(isoAdd(today,i)).forEach(e=>{
+    if(e.kind==='slot')nS++; else if(!e.done)nT++;
+  });
+  const tog=el(`<button class="caltog"><span>🗓️ היומן</span>
+    <span class="sub">${nT} משימות · ${nS} בלוז · שבעה ימים קרובים</span>
+    <span class="chev">▾</span></button>`);
+  tog.onclick=()=>{ ui.cal.open=!ui.cal.open; calSave(); renderCal(); };
+  host.appendChild(tog);
+  if(!ui.cal.open){ host.appendChild(calStrip(today)); return; }
+  host.appendChild(calHead());
+  host.appendChild(ui.cal.view==='day'   ? calDayView(ui.cal.anchor)
+                  :ui.cal.view==='month' ? calMonth(ui.cal.anchor)
+                                         : calWeek(ui.cal.anchor));
+}
+
 function renderDays(){
   const bar=document.getElementById('days'); bar.innerHTML='';
   const {days,none}=dayBuckets();
