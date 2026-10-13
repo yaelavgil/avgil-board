@@ -549,6 +549,154 @@ nav.bar .add:active{transform:scale(.95)}
 .calday .cev{font-size:13.5px; padding:8px 10px; margin-bottom:5px}
 .calday .cev .x{white-space:normal}
 .calnone{color:var(--muted); font-size:12.5px; font-weight:700; padding:4px 2px}
+
+/* ================= גאנט — לוח הזמנים =================
+   במובייל אין רשת גאנט. כל שלב הוא שורה ברוחב מלא: הכותרת מעל,
+   והבר מתחתיה על הציר. אין גלילה אופקית בשום רוחב — מדפדפים בזמן
+   עם ‹ ›, והטווח קובע כמה ימים נכנסים למסך.
+   הזמן זורם מימין לשמאל, כמו ביומן ובשאר הלוח. */
+.gantt{display:flex; flex-direction:column; gap:10px;
+  width:min(96vw,1180px); margin-inline:calc(50% - min(48vw,590px))}
+body.ganttmode .cal, body.ganttmode .days, body.ganttmode .toolrow,
+body.ganttmode .pinned, body.ganttmode .sharebar, body.ganttmode .who{display:none}
+
+.ghead{display:flex; align-items:center; gap:7px; flex-wrap:wrap}
+.gttl{font-family:'Karantina','Assistant',sans-serif; font-size:24px; font-weight:700;
+  color:var(--olive-ink); white-space:nowrap}
+.granges{display:flex; gap:2px; margin-inline-start:auto; background:var(--chip); border-radius:10px; padding:3px}
+.granges button{border:none; background:none; color:var(--muted); font:inherit; font-weight:800;
+  font-size:12.5px; padding:6px 9px; border-radius:8px; cursor:pointer; white-space:nowrap}
+.granges button.on{background:var(--card); color:var(--ink); box-shadow:var(--shadow)}
+
+/* שורת מצב קצרה: מה נסגר, מה בוער, ומה הפריט הארוך */
+.gstats{display:flex; gap:6px; flex-wrap:wrap}
+.gstat{display:flex; align-items:baseline; gap:5px; border:1px solid var(--edge); background:var(--card);
+  border-radius:11px; padding:6px 11px; font-size:12.5px; font-weight:700; box-shadow:var(--shadow)}
+.gstat b{font-size:15px; font-weight:800}
+.gstat.hot{border-color:var(--pom); color:var(--pom); background:var(--pom-soft)}
+.gstat.wait{border-color:var(--amber); color:var(--amber); background:var(--amber-soft)}
+.glong{border:1px solid var(--edge); background:var(--card); border-radius:11px; padding:8px 11px;
+  font-size:12.5px; font-weight:700; color:var(--ink); box-shadow:var(--shadow); line-height:1.5}
+.glong b{color:var(--pom); font-weight:800}
+
+/* ציר הזמן. דביק למעלה, מתחת לכותרת הלוח */
+.ggrid{display:grid; grid-template-columns:minmax(0,1fr); gap:0}
+@media (min-width:760px){
+  .ggrid{grid-template-columns:230px minmax(0,1fr); gap:0 12px; align-items:center}
+}
+.gspacer{display:none}
+@media (min-width:760px){.gspacer{display:block}}
+.gaxis{position:sticky; top:var(--gtop,0px); z-index:6; background:var(--bg); padding:4px 0 5px}
+.gax{position:relative; height:34px; min-width:0; overflow:hidden}
+.gmon{position:absolute; top:0; height:15px; overflow:hidden; font-size:11px; font-weight:800;
+  color:var(--olive-ink); border-inline-start:1px solid var(--line); padding-inline-start:4px; white-space:nowrap}
+.gtick{position:absolute; top:17px; height:17px; font-size:10.5px; font-weight:700; color:var(--muted);
+  border-inline-start:1px solid var(--line); padding-inline-start:3px; white-space:nowrap;
+  font-variant-numeric:tabular-nums}
+.gnowlbl{position:absolute; top:15px; transform:translateX(50%); background:var(--pom); color:#fff;
+  border-radius:99px; font-size:10px; font-weight:800; padding:1px 7px; white-space:nowrap; z-index:2}
+.gnav{display:flex; gap:5px; align-items:center}
+.gnav button{width:32px; height:32px; flex:0 0 auto; border-radius:9px; border:1px solid var(--edge);
+  background:var(--card); color:var(--ink); font:inherit; font-size:17px; font-weight:800; cursor:pointer; line-height:1}
+.gnav .now{width:auto; padding:0 11px; font-size:13px}
+
+/* מקטע לפי מסלול */
+.gsec{display:flex; flex-direction:column; gap:3px; margin-top:4px}
+.gsech{display:flex; align-items:center; gap:7px; font-size:12px; font-weight:800; color:var(--muted);
+  padding:4px 2px 2px; border-bottom:1px solid var(--line)}
+.gsech .n{background:var(--chip); border-radius:99px; padding:0 7px; font-size:11px}
+.gsech.crit{color:var(--pom)}
+
+/* שורה אחת = שלב אחד.
+   במכוון לא position:relative — כך ה-offsetParent של .gtrack הוא .gbody,
+   ושם מצטיירים קווי התלות לפי מידות אמיתיות. */
+.grow{width:100%; text-align:start; border:none; background:none; color:var(--ink);
+  font:inherit; cursor:pointer; padding:7px 0 8px; border-bottom:1px solid var(--edge)}
+.grow:hover{background:var(--chip)}
+.grow.crit{border-inline-start:3px solid var(--pom); padding-inline-start:8px}
+.glab{display:block; min-width:0; padding-inline-end:6px}
+.glab .l1{display:flex; align-items:baseline; gap:5px; min-width:0}
+.glab .t{flex:1; min-width:0; font-size:13.5px; font-weight:800; line-height:1.3;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+@media (min-width:760px){
+  /* בעמודה צרה עדיף שתי שורות על שם חתוך */
+  .glab .t{white-space:normal; text-overflow:clip; display:-webkit-box;
+    -webkit-line-clamp:2; -webkit-box-orient:vertical}
+  /* שורת ״אחרי:״ מיותרת כאן — הקווים בין השורות כבר אומרים את זה */
+  .gdep{display:none}
+}
+.grow.st-done .glab .t{color:var(--done); text-decoration:line-through}
+.glab .l2{display:flex; align-items:baseline; gap:6px; font-size:11px; font-weight:700;
+  color:var(--muted); margin-top:1px; min-width:0}
+.glab .l2 .d{font-variant-numeric:tabular-nums; flex:0 0 auto}
+.glab .l2 .w{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.gflag{flex:0 0 auto; font-size:10px; font-weight:800; border-radius:99px; padding:1px 6px; white-space:nowrap}
+.gflag.crit{background:var(--pom-soft); color:var(--pom)}
+.gflag.est{background:var(--chip); color:var(--muted)}
+.gdep{font-size:10.5px; font-weight:700; color:var(--muted); margin-top:1px;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+
+/* הציר של השורה */
+.gtrack{display:block; position:relative; height:26px; min-width:0; margin-top:5px; border-radius:7px;
+  background:var(--card); border:1px solid var(--edge); overflow:hidden}
+@media (min-width:760px){.gtrack{margin-top:0}}
+.gweeks{position:absolute; inset:0; pointer-events:none}
+.gweeks i{position:absolute; top:0; bottom:0; width:1px; background:var(--line)}
+.gnow{position:absolute; top:0; bottom:0; width:0; border-inline-start:2px dashed var(--pom);
+  pointer-events:none; z-index:3}
+.gbar{position:absolute; top:4px; height:18px; min-width:5px; border-radius:5px;
+  --c:var(--chip); --ci:var(--line);
+  background:var(--c); border:1.5px solid var(--ci); z-index:2;
+  display:flex; align-items:center; justify-content:center; overflow:hidden}
+.grow.st-done .gbar{--c:var(--done); --ci:var(--done)}
+.grow.st-run  .gbar{--c:var(--olive); --ci:var(--olive-ink)}
+.grow.st-hot  .gbar{--c:var(--pom); --ci:var(--pom)}
+.grow.st-wait .gbar{--c:var(--amber-soft); --ci:var(--amber)}
+.grow.st-plan .gbar{--c:var(--chip); --ci:var(--muted)}
+/* הערכה מול ידוע — זה חייב להיראות בעין ולא רק בפרטים.
+   בר מלא = תאריך שנאמר לנו. בר מקווקו = ההערכה שלנו. */
+/* הפסים בצבע הקו ולא בצבע המילוי — אחרת בר ״הערכה״ נבלע
+   גם על רקע בהיר וגם במצב כהה */
+.gbar.est{background:repeating-linear-gradient(45deg,var(--ci) 0 3px,var(--card) 3px 8px);
+  border-style:dashed}
+.gbar .cap{font-size:9px; font-weight:800; color:var(--ink); opacity:.55}
+.gbar.cutS{border-start-start-radius:0; border-end-start-radius:0; border-inline-start-style:none}
+.gbar.cutE{border-start-end-radius:0; border-end-end-radius:0; border-inline-end-style:none}
+/* רמז לתלות: קו מנוקד מסוף השלב הקודם אל תחילת השלב הזה */
+.glead{position:absolute; top:12px; height:2px; z-index:1; pointer-events:none;
+  background:repeating-linear-gradient(to left,var(--muted) 0 3px,transparent 3px 6px); opacity:.75}
+.gleadn{position:absolute; top:9px; transform:translateX(50%); width:7px; height:7px; border-radius:50%; z-index:1;
+  background:var(--card); border:2px solid var(--muted); pointer-events:none}
+.gout{position:absolute; top:7px; font-size:11px; font-weight:800; color:var(--muted); z-index:2; white-space:nowrap}
+/* חיבורי התלות ברוחב גדול, שם יש מקום לקווים בין השורות */
+.glinks{position:absolute; inset:0; pointer-events:none; z-index:1}
+.glinks i{position:absolute; background:var(--muted); opacity:.45}
+.glinks b{position:absolute; width:0; height:0; border-style:solid; opacity:.55;
+  border-width:4px 5px 4px 0; border-color:transparent var(--muted) transparent transparent}
+.gbody{position:relative}
+
+/* מפתח */
+.gleg{display:flex; flex-wrap:wrap; gap:5px 9px; border:1px solid var(--edge); background:var(--card);
+  border-radius:11px; padding:9px 11px; box-shadow:var(--shadow)}
+.gleg .i{display:flex; align-items:center; gap:5px; font-size:11.5px; font-weight:700; color:var(--muted)}
+.gleg .sw{width:20px; height:11px; border-radius:4px; border:1.5px solid var(--ci,var(--line));
+  background:var(--c,var(--chip)); flex:0 0 auto}
+.gleg .sw.hatch{background:repeating-linear-gradient(45deg,var(--muted) 0 3px,var(--card) 3px 8px);
+  border-color:var(--muted); border-style:dashed}
+.gleg .sw.critline{width:4px; height:14px; border-radius:2px; background:var(--pom); border:none}
+
+/* גוף הפרטים של שלב */
+.pmeta{display:flex; flex-wrap:wrap; gap:5px; margin:2px 0 10px}
+.pchip{border:1px solid var(--line); background:var(--bg); border-radius:99px; padding:3px 10px;
+  font-size:12px; font-weight:700; color:var(--ink)}
+.pchip.hot{border-color:var(--pom); background:var(--pom-soft); color:var(--pom)}
+.pchip.wait{border-color:var(--amber); background:var(--amber-soft); color:var(--amber)}
+.pchip.run{border-color:var(--olive); background:var(--olive-soft); color:var(--olive-ink)}
+.pchip.done{color:var(--done)}
+.pconf{border-radius:11px; padding:9px 11px; font-size:13px; font-weight:700; line-height:1.5; margin-bottom:10px}
+.pconf.est{background:var(--amber-soft); color:var(--amber); border:1.5px dashed var(--amber)}
+.pconf.known{background:var(--olive-soft); color:var(--olive-ink); border:1.5px solid var(--olive)}
+.pchain{display:flex; flex-direction:column; gap:5px; margin-top:4px}
 </style>
 
 <div class="wrap">
@@ -618,11 +766,13 @@ const TABS=[
   {key:'today',ic:'🔥',name:'היום'},
   {key:'week', ic:'📅',name:'השבוע'},
   {key:'all',  ic:'📋',name:'הכל'},
+  {key:'gantt',ic:'📈',name:'לו״ז'},
   {key:'done', ic:'✓', name:'הושלם'}
 ];
 /* 'ongoing' is deliberately absent — those live in the pinned strip above the list */
+/* 'gantt' holds no buckets: it is the schedule, not the task list */
 const TB={today:['hot'], week:['hot','week'],
-          all:['hot','week','month','later','someday'], done:['done']};
+          all:['hot','week','month','later','someday'], done:['done'], gantt:[]};
 
 /* ================= state ================= */
 let tasks=[];
@@ -658,6 +808,16 @@ if(!tasks.length){
 function cacheTasks(){
   try{ localStorage.setItem(CACHE,JSON.stringify(tasks)); }catch(e){}
 }
+
+/* ---- לוח הזמנים ----
+   /board/plan הוא מקור נפרד מ-/board/tasks ואינו משכפל אותו: שלב מצביע
+   על משימה בשדה task. התצוגה כאן קוראת בלבד; מי שמעדכן את הלוח הוא
+   השיחה, לא העמוד. כמו במשימות, הציור הראשון בא מה-localStorage. */
+const PLANK='av_plan_v1';
+let plan=null;
+try{ plan=JSON.parse(localStorage.getItem(PLANK)||'null'); }catch(e){}
+function phases(){ return (plan&&Array.isArray(plan.phases))?plan.phases:[]; }
+function phById(id){ return phases().find(p=>p.id===id); }
 
 /* ================= helpers ================= */
 const DAY=864e5;
@@ -865,6 +1025,8 @@ function counts(){
 function render(){
   document.getElementById('datel').textContent=
     new Date().toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long'});
+  /* בלו״ז המסננים של המשימות לא עושים כלום, אז הם יורדים מהמסך */
+  document.body.classList.toggle('ganttmode',ui.tab==='gantt');
   renderWho(); renderShare(); renderPinned(); renderCal(); renderDays(); renderBar(); renderBoard();
 }
 /* standing items live here instead of scrolling away with the list */
@@ -1240,7 +1402,18 @@ function paintPick(box,t){
   q.oninput=draw; draw();
 }
 function paintSheet(){
-  const v=ui.view||{}; const t=byId(v.task);
+  const v=ui.view||{};
+  if(v.phase){                              /* שלב מלוח הזמנים, לא משימה */
+    const p=phById(v.phase);
+    if(!p){ closeDetail(); return; }
+    const pbox=document.getElementById('dsin');
+    pbox.innerHTML='<div class="dsgrip"></div>';
+    paintPhase(pbox,p);
+    document.getElementById('dsheet').classList.add('on');
+    pbox.scrollTop=0;
+    return;
+  }
+  const t=byId(v.task);
   if(!t){ closeDetail(); return; }
   const box=document.getElementById('dsin');
   box.innerHTML='<div class="dsgrip"></div>';
@@ -1599,6 +1772,295 @@ function renderCal(){
                                          : calWeek(ui.cal.anchor));
 }
 
+/* ================= גאנט =================
+   הנתונים הם /board/plan, קריאה בלבד. הציר זורם מימין לשמאל כמו היומן:
+   העבר מימין, העתיד משמאל, וקו ״היום״ ביניהם.
+   אין גלילה אופקית בשום רוחב — הטווח קובע כמה ימים נכנסים למסך,
+   ומדפדפים בזמן עם ‹ ›. במובייל הכותרת יושבת מעל הבר ולא בעמודה
+   לצידו, כי עמודת תוויות ב-375 פיקסל אוכלת חצי מסך. */
+const GK='av_gantt_v1';
+const GRANGES=[['2w','שבועיים',14],['1m','חודש',30],['3m','3 חודשים',90],['all','הכל',0]];
+const ST={done:'הושלם', run:'בעבודה', hot:'דחוף', wait:'ממתין', plan:'מתוכנן'};
+const TRORDER=['מסלול קריטי','מטבח','נגרות','מעקות','תאורה','חוץ','טופס 4'];
+/* הטווח נשמר, החלון לא: פתיחה של הלוח תמיד נוחתת על היום */
+ui.g={range:'1m', off:0};
+try{
+  const s=JSON.parse(localStorage.getItem(GK)||'{}');
+  if(s.range&&GRANGES.some(r=>r[0]===s.range))ui.g.range=s.range;
+}catch(e){}
+function gSave(){ try{ localStorage.setItem(GK,JSON.stringify({range:ui.g.range})); }catch(e){} }
+
+function gLen(){ const r=GRANGES.find(x=>x[0]===ui.g.range); return r?r[2]:30; }
+function dDiff(a,b){ return Math.round((dOf(b)-dOf(a))/DAY); }
+function gFmt(iso){
+  const d=dOf(iso), y=d.getFullYear()!==new Date().getFullYear();
+  return d.getDate()+'.'+(d.getMonth()+1)+(y?'.'+String(d.getFullYear()).slice(2):'');
+}
+function gSpan(p){ return p.s===p.e?gFmt(p.s):gFmt(p.s)+'–'+gFmt(p.e); }
+
+function gWin(){
+  const P=phases();
+  if(ui.g.range==='all'&&P.length){
+    let s=P[0].s, e=P[0].e;
+    P.forEach(p=>{ if(p.s<s)s=p.s; if(p.e>e)e=p.e; });
+    return {s:weekStart(isoAdd(s,-3)), e:weekStart(isoAdd(e,8))};
+  }
+  /* החלון מיושר לתחילת שבוע כדי שקווי הרשת יפלו על ימי ראשון, אבל
+     הוא נבחר כך שהיום יישב בערך במרחק הרצוי מההתחלה ולא ייזרק לקצה. */
+  const n=gLen(), back=Math.min(7,Math.round(n*0.22)), today=todayStr();
+  let s=weekStart(isoAdd(today,-back));
+  if(Math.abs(dDiff(s,today)-back)>Math.abs(dDiff(isoAdd(s,7),today)-back))s=isoAdd(s,7);
+  s=isoAdd(s, ui.g.off*7*Math.max(1,Math.round(n/14)));   /* דפדוף בשבועות שלמים */
+  return {s, e:isoAdd(s,n)};
+}
+/* אחוז על הציר. לא מקוצץ — מי שקורא צריך לדעת שהבר יוצא מהחלון */
+function gRaw(w,iso){ const tot=dDiff(w.s,w.e)||1; return (dDiff(w.s,iso)/tot)*100; }
+const pc=x=>x.toFixed(3)+'%';
+
+function gWeeks(w){
+  const tot=dDiff(w.s,w.e)||1, g=el('<i class="gweeks"></i>');
+  for(let d=7;d<tot;d+=7)g.appendChild(el(`<i style="inset-inline-start:${pc(d/tot*100)}"></i>`));
+  return g;
+}
+function gBar(w,p){
+  let x1=gRaw(w,p.s), x2=gRaw(w,isoAdd(p.e,1));
+  if(x2<=0||x1>=100)return null;
+  const cutS=x1<0, cutE=x2>100;
+  x1=Math.max(0,x1); x2=Math.min(100,x2);
+  return el(`<i class="gbar${p.conf==='הערכה'?' est':''}${cutS?' cutS':''}${cutE?' cutE':''}"
+    style="inset-inline-start:${pc(x1)}; width:${pc(Math.max(x2-x1,0.1))}"></i>`);
+}
+/* שלב שכולו מחוץ לחלון — סימון בקצה עם התאריך, כדי שלא ייעלם מהרשימה */
+function gOut(w,p){
+  const fut=gRaw(w,p.s)>=100;
+  return el(`<i class="gout" style="inset-inline-${fut?'end':'start'}:6px">${fut?'◂':'▸'} ${esc(gFmt(fut?p.s:p.e))}</i>`);
+}
+/* רמז לתלות בתוך הציר: קו מנוקד מסוף הקודם אל תחילת הנוכחי */
+function gLead(w,dep,p){
+  const x1=gRaw(w,isoAdd(dep.e,1)), x2=gRaw(w,p.s);
+  if(!(x2>x1))return [];
+  const a=Math.max(0,x1), b=Math.min(100,x2);
+  if(!(b>a))return [];
+  const out=[el(`<i class="glead" style="inset-inline-start:${pc(a)}; width:${pc(b-a)}"></i>`)];
+  if(x1>=0&&x1<=100)out.push(el(`<i class="gleadn" style="inset-inline-start:${pc(x1)}"></i>`));
+  return out;
+}
+function gNow(w){
+  const x=gRaw(w,todayStr());
+  return (x>=0&&x<=100)?el(`<i class="gnow" style="inset-inline-start:${pc(x)}"></i>`):null;
+}
+function gAxis(w){
+  const tot=dDiff(w.s,w.e)||1, ax=el('<div class="gax"></div>');
+  let cur=w.s;
+  while(cur<w.e){
+    const d=dOf(cur), next=isoOf(new Date(d.getFullYear(),d.getMonth()+1,1));
+    const to=next<w.e?next:w.e, x=gRaw(w,cur), wd=gRaw(w,to)-x;
+    const lbl=d.toLocaleDateString('he-IL',{month:'long'})+
+      (d.getFullYear()!==new Date().getFullYear()?' '+d.getFullYear():'');
+    ax.appendChild(el(`<i class="gmon" style="inset-inline-start:${pc(x)}; width:${pc(wd)}">${wd>7?esc(lbl):''}</i>`));
+    cur=next;
+  }
+  const step=tot<=16?1:7;
+  for(let i=0;i<tot;i+=step){
+    const iso=isoAdd(w.s,i), d=dOf(iso);
+    const t=step===1?WD1[d.getDay()]+' '+d.getDate():String(d.getDate());
+    ax.appendChild(el(`<i class="gtick" style="inset-inline-start:${pc(gRaw(w,iso))}">${t}</i>`));
+  }
+  const tx=gRaw(w,todayStr());
+  if(tx>=0&&tx<=100)ax.appendChild(el(`<i class="gnowlbl" style="inset-inline-start:${pc(tx)}">היום</i>`));
+  return ax;
+}
+function gRow(w,p){
+  const row=el(`<button class="grow ggrid st-${esc(p.st||'plan')}${p.crit?' crit':''}" data-p="${esc(p.id)}"></button>`);
+  const lab=el('<span class="glab"></span>');
+  const l1=el('<span class="l1"></span>');
+  l1.appendChild(el(`<span class="t">${esc(p.t||'')}</span>`));
+  if(p.crit)l1.appendChild(el('<span class="gflag crit">קריטי</span>'));
+  if(p.conf==='הערכה')l1.appendChild(el('<span class="gflag est">הערכה</span>'));
+  lab.appendChild(l1);
+  lab.appendChild(el(`<span class="l2"><span class="d">${esc(gSpan(p))}</span>`+
+    `<span class="w">${esc(p.who||'')}</span><span class="d">${ST[p.st]||''}</span></span>`));
+  const deps=(p.deps||[]).map(phById).filter(Boolean);
+  if(deps.length)lab.appendChild(el(`<span class="gdep">⛓ אחרי: ${esc(deps.map(d=>d.t).join(' · '))}</span>`));
+  row.appendChild(lab);
+  const tr=el('<span class="gtrack"></span>');
+  tr.appendChild(gWeeks(w));
+  deps.forEach(d=>gLead(w,d,p).forEach(x=>tr.appendChild(x)));
+  const bar=gBar(w,p);
+  tr.appendChild(bar||gOut(w,p));
+  const now=gNow(w); if(now)tr.appendChild(now);
+  row.appendChild(tr);
+  row.onclick=()=>openPhase(p.id);
+  return row;
+}
+/* ברוחב גדול התווית יושבת לצד הציר, ואז יש מקום לקווי תלות בין השורות.
+   במובייל הכותרות יושבות בין הצירים וקו אנכי היה חותך טקסט — שם מספיקים
+   הקו המנוקד שבתוך הציר ושורת ״אחרי:״ שמעליו. */
+function gLinks(body,w){
+  if(!matchMedia('(min-width:760px)').matches)return;
+  try{
+    const rows={}; body.querySelectorAll('.grow').forEach(r=>rows[r.dataset.p]=r);
+    const lay=el('<i class="glinks"></i>'); let any=false;
+    phases().forEach(p=>(p.deps||[]).forEach(id=>{
+      const A=rows[id], B=rows[p.id], dep=phById(id);
+      if(!A||!B||!dep)return;
+      const ta=A.querySelector('.gtrack'), tb=B.querySelector('.gtrack');
+      if(!ta||!tb)return;
+      const xr=gRaw(w,isoAdd(dep.e,1)), xs=gRaw(w,p.s);
+      if(xr<0||xr>100)return;
+      const x=ta.offsetLeft+ta.offsetWidth*(1-xr/100);
+      const ya=ta.offsetTop+ta.offsetHeight/2, yb=tb.offsetTop+tb.offsetHeight/2;
+      if(yb<=ya)return;
+      lay.appendChild(el(`<i style="left:${x.toFixed(1)}px; top:${ya.toFixed(1)}px; width:1.5px; height:${(yb-ya).toFixed(1)}px"></i>`));
+      if(xs>=0&&xs<=100){
+        const xb=tb.offsetLeft+tb.offsetWidth*(1-xs/100);
+        if(xb<x-2){
+          lay.appendChild(el(`<i style="left:${xb.toFixed(1)}px; top:${yb.toFixed(1)}px; width:${(x-xb).toFixed(1)}px; height:1.5px"></i>`));
+          lay.appendChild(el(`<b style="left:${(xb-5).toFixed(1)}px; top:${(yb-4).toFixed(1)}px"></b>`));
+        }
+      }
+      any=true;
+    }));
+    if(any)body.appendChild(lay);
+  }catch(e){}
+}
+function gLegend(){
+  const g=el('<div class="gleg"></div>');
+  const sw=(vars,txt,extra)=>g.appendChild(el(`<span class="i"><i class="sw ${extra||''}" style="${vars}"></i>${txt}</span>`));
+  sw('--c:var(--pom);--ci:var(--pom)','דחוף');
+  sw('--c:var(--olive);--ci:var(--olive-ink)','בעבודה');
+  sw('--c:var(--amber-soft);--ci:var(--amber)','ממתין לתשובה');
+  sw('--c:var(--chip);--ci:var(--line)','מתוכנן');
+  sw('--c:var(--done);--ci:var(--done)','הושלם');
+  sw('','מקווקו = הערכה שלנו, לא תאריך שנמסר','hatch');
+  sw('','מסלול קריטי — חוסם את כל מה שאחריו','critline');
+  return g;
+}
+function gStats(P){
+  const box=el('<div class="gstats"></div>');
+  const n=s=>P.filter(p=>p.st===s).length;
+  box.appendChild(el(`<span class="gstat"><b>${n('done')}</b> מתוך ${P.length} שלבים הושלמו</span>`));
+  if(n('hot'))box.appendChild(el(`<span class="gstat hot"><b>${n('hot')}</b> דחוף עכשיו</span>`));
+  if(n('wait'))box.appendChild(el(`<span class="gstat wait"><b>${n('wait')}</b> ממתין לתשובה</span>`));
+  if(n('run'))box.appendChild(el(`<span class="gstat"><b>${n('run')}</b> בעבודה</span>`));
+  return box;
+}
+function gLong(P){
+  const open=P.filter(p=>p.st!=='done');
+  if(!open.length)return null;
+  let last=open[0], dur=open[0];
+  open.forEach(p=>{
+    if(p.e>last.e)last=p;
+    if(dDiff(p.s,p.e)>dDiff(dur.s,dur.e))dur=p;
+  });
+  return el(`<div class="glong">⛳ קו הסיום לפי התכנון: <b>${esc(last.t)}</b> — ${esc(gFmt(last.e))}`+
+    `${last.conf==='הערכה'?' <span style="font-weight:700">(הערכה)</span>':''}<br>`+
+    `🐌 הפריט הארוך ביותר: <b>${esc(dur.t)}</b> — ${dDiff(dur.s,dur.e)} ימים</div>`);
+}
+function gHead(){
+  const h=el('<div class="ghead"></div>');
+  h.appendChild(el('<span class="gttl">לוח הזמנים</span>'));
+  if(ui.g.range!=='all'){
+    const nav=el('<span class="gnav"></span>');
+    const mk=(txt,fn,cls)=>{ const b=el(`<button class="${cls||''}">${txt}</button>`); b.onclick=fn; nav.appendChild(b); };
+    mk('›',()=>{ ui.g.off--; render(); });
+    mk('היום',()=>{ ui.g.off=0; render(); },'now');
+    mk('‹',()=>{ ui.g.off++; render(); });
+    h.appendChild(nav);
+  }
+  const rg=el('<span class="granges"></span>');
+  GRANGES.forEach(([k,label])=>{
+    const b=el(`<button class="${ui.g.range===k?'on':''}">${esc(label)}</button>`);
+    b.onclick=()=>{ ui.g.range=k; ui.g.off=0; gSave(); render(); };
+    rg.appendChild(b);
+  });
+  h.appendChild(rg);
+  return h;
+}
+function renderGantt(host){
+  const P=phases();
+  host.appendChild(gHead());
+  if(!P.length){
+    host.appendChild(el('<div class="empty">לוח הזמנים עוד לא הגיע מהשרת.<br>רגע אחד, או רענון של העמוד.</div>'));
+    return;
+  }
+  const w=gWin();
+  host.appendChild(gStats(P));
+  const long=gLong(P); if(long)host.appendChild(long);
+  const ax=el('<div class="gaxis ggrid"></div>');
+  ax.appendChild(el('<span class="gspacer"></span>'));
+  ax.appendChild(gAxis(w));
+  host.appendChild(ax);
+  const body=el('<div class="gbody"></div>');
+  gTracks(P).forEach(tr=>{
+    const items=P.filter(p=>(p.tr||'אחר')===tr)
+                 .sort((a,z)=>a.s<z.s?-1:a.s>z.s?1:0);
+    const sec=el(`<section class="gsec"><div class="gsech${tr==='מסלול קריטי'?' crit':''}">`+
+      `<span>${esc(tr)}</span><span class="n">${items.length}</span></div></section>`);
+    items.forEach(p=>sec.appendChild(gRow(w,p)));
+    body.appendChild(sec);
+  });
+  host.appendChild(body);
+  host.appendChild(gLegend());
+  /* setTimeout ולא requestAnimationFrame: טאב שרץ ברקע לא מצייר פריימים,
+     והכותרת הדביקה הייתה נשארת בלי הגובה שלה עד שנוגעים במסך */
+  setTimeout(()=>{
+    try{
+      const top=document.getElementById('top');
+      if(top&&top.offsetHeight)document.documentElement.style.setProperty('--gtop',top.offsetHeight+'px');
+      gLinks(body,w);
+    }catch(e){}
+  },0);
+}
+function gTracks(P){
+  const seen=[...new Set(P.map(p=>p.tr||'אחר'))];
+  return seen.sort((a,b)=>{
+    const ia=TRORDER.indexOf(a), ib=TRORDER.indexOf(b);
+    return (ia<0?99:ia)-(ib<0?99:ib);
+  });
+}
+function openPhase(id){ ui.view={phase:id}; paintSheet(); }
+function phRow(pre,q){
+  const b=el(`<button class="subrow"><span class="st ${q.st==='done'?'ok':q.st==='hot'?'late':''}"></span>`+
+    `<span class="n">${pre}: ${esc(q.t)}</span><span class="d">${esc(gFmt(q.e))}</span></button>`);
+  b.onclick=()=>openPhase(q.id);
+  return b;
+}
+function paintPhase(box,p){
+  sheetTop(box,'',null);
+  box.appendChild(el(`<h3>${p.crit?'🔗 ':''}${esc(p.t)}</h3>`));
+  const meta=el('<div class="pmeta"></div>');
+  meta.appendChild(el(`<span class="pchip ${esc(p.st||'plan')}">${ST[p.st]||'מתוכנן'}</span>`));
+  if(p.who)meta.appendChild(el(`<span class="pchip">👤 ${esc(p.who)}</span>`));
+  meta.appendChild(el(`<span class="pchip">📅 ${esc(gSpan(p))}</span>`));
+  if(p.tr&&p.tr!=='מסלול קריטי')meta.appendChild(el(`<span class="pchip">${esc(p.tr)}</span>`));
+  if(p.crit)meta.appendChild(el('<span class="pchip hot">מסלול קריטי</span>'));
+  box.appendChild(meta);
+  box.appendChild(el(p.conf==='הערכה'
+    ? '<div class="pconf est">⚠️ התאריכים האלה הם <b>הערכה שלנו</b> לפי משכי ביצוע סבירים — אף אחד לא מסר אותם. אפשר לתכנן לפיהם, אסור להישבע בהם.</div>'
+    : '<div class="pconf known">✓ התאריכים האלה <b>נמסרו לנו במפורש</b> על ידי הספק או בעל המקצוע.</div>'));
+  if(p.note)box.appendChild(el(`<div class="notes">${md(p.note)}</div>`));
+  const before=(p.deps||[]).map(phById).filter(Boolean);
+  const after=phases().filter(q=>(q.deps||[]).includes(p.id));
+  if(before.length||after.length){
+    box.appendChild(el('<div class="subhead">השרשרת — מה זז אם זה זז</div>'));
+    const ch=el('<div class="pchain"></div>');
+    before.forEach(q=>ch.appendChild(phRow('⬅ ממתין ל',q)));
+    after.forEach(q=>ch.appendChild(phRow('➡ חוסם את',q)));
+    box.appendChild(ch);
+  }
+  const t=p.task&&byId(p.task);
+  if(t){
+    const b=el(`<button class="linkbtn">📋 המשימה בלוח — ${esc(t.title)}</button>`);
+    b.onclick=()=>openDetail(t.id);
+    box.appendChild(b);
+  }else if(p.task){
+    box.appendChild(el(`<div class="refnote" style="margin-top:12px">המשימה המקושרת (${esc(p.task)}) לא נמצאה בלוח.</div>`));
+  }
+  const close=el('<button class="dsclose">סגירה</button>');
+  close.onclick=closeDetail; box.appendChild(close);
+}
+
 function renderDays(){
   const bar=document.getElementById('days'); bar.innerHTML='';
   const {days,none}=dayBuckets();
@@ -1621,12 +2083,15 @@ function renderDays(){
 function renderBar(){
   const c=counts();
   const n={today:c.hot, week:c.hot+c.week,
-           all:c.hot+c.week+c.month+c.later+c.someday, done:c.done};
+           all:c.hot+c.week+c.month+c.later+c.someday, done:c.done,
+           gantt:phases().filter(p=>p.st!=='done').length};
   const bar=document.getElementById('bar'); bar.innerHTML='';
   TABS.forEach(t=>{
     const b=el(`<button class="t ${(!ui.days.size&&ui.tab===t.key)?'on':''}">
       <span class="ic">${t.ic}</span><span>${t.name}</span><span class="n">${n[t.key]}</span></button>`);
-    b.onclick=()=>{ ui.tab=t.key; ui.days.clear(); scrollTo({top:0,behavior:'smooth'}); render() };
+    b.onclick=()=>{ ui.tab=t.key; ui.days.clear(); scrollTo({top:0,behavior:'smooth'});
+      if(t.key==='gantt')pullPlan();        /* לו״ז טרי בכל כניסה — הוא קטן */
+      render() };
     bar.appendChild(b);
   });
   const add=el('<button class="add" aria-label="משימה חדשה">+</button>');
@@ -1634,6 +2099,11 @@ function renderBar(){
 }
 function renderBoard(){
   const board=document.getElementById('board'); board.innerHTML='';
+  if(ui.tab==='gantt'){
+    const g=el('<div class="gantt"></div>');
+    board.appendChild(g);
+    return renderGantt(g);
+  }
   if(ui.days.size)return renderByDay(board);
   const g={}; BUCKETS.forEach(b=>g[b.key]=[]);
   tasks.filter(visible).forEach(t=>g[bucketOf(t)].push(t));
@@ -2115,8 +2585,32 @@ async function pull(){
     setOffline(true,'לא ניתן להגיע למסד הנתונים מהעמוד הזה.');
   }
 }
+/* לוח הזמנים — קריאה בלבד, ולכן די בשליפה ולא בהזרמה */
+const PLANNODE=DB+'/board/plan';
+async function pullPlan(){
+  try{
+    const r=await fetch(PLANNODE+'.json?t='+Date.now(),{cache:'no-store'});
+    if(!r.ok)throw 0;
+    const d=await r.json();
+    if(!d||!Array.isArray(d.phases))return;
+    plan=d;
+    try{ localStorage.setItem(PLANK,JSON.stringify(d)); }catch(e){}
+    if(!ui.editing)render();
+  }catch(e){}
+}
+/* קווי התלות מחושבים מהמידות על המסך, אז שינוי רוחב מחייב ציור מחדש */
+let gRz=null;
+addEventListener('resize',()=>{
+  if(ui.tab!=='gantt')return;
+  clearTimeout(gRz);
+  gRz=setTimeout(()=>{ if(ui.tab==='gantt'&&!ui.editing)render(); },180);
+});
+
 (async()=>{
   setSync(fromCache?'מתעדכן…':'טוען…','off');
+  /* ?v=gantt — לינק שנפתח ישר על לוח הזמנים, לשליחה לרועי */
+  if((new URLSearchParams(location.search).get('v')||'')==='gantt')ui.tab='gantt';
+  pullPlan();
   await pull();
   loadAllMeta().then(()=>{ if(!ui.editing)render(); });
   /* לינק שמצביע על משימה אחת נפתח ישר עליה */
@@ -2134,6 +2628,6 @@ async function pull(){
     es.onerror=()=>{ if(es.readyState===2){ es=null; setInterval(pull,20000); } };
   }catch(e){ setInterval(pull,20000); }
   /* a phone that was asleep reconnects the moment it comes back */
-  addEventListener('visibilitychange',()=>{ if(!document.hidden)pull(); });
+  addEventListener('visibilitychange',()=>{ if(!document.hidden){ pull(); pullPlan(); } });
 })();
 </script>
