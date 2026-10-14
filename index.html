@@ -584,8 +584,9 @@ body.ganttmode .pinned, body.ganttmode .sharebar, body.ganttmode .who{display:no
 @media (min-width:760px){
   .ggrid{grid-template-columns:230px minmax(0,1fr); gap:0 12px; align-items:center}
 }
-.gspacer{display:none}
-@media (min-width:760px){.gspacer{display:block}}
+/* תא הניווט: במובייל שורה מעל הציר, במסך רחב העמודה שלצידו */
+.gspacer{display:flex; align-items:center; justify-content:center; gap:5px; padding-bottom:5px}
+@media (min-width:760px){.gspacer{padding-bottom:0}}
 .gaxis{position:sticky; top:var(--gtop,0px); z-index:6; background:var(--bg); padding:4px 0 5px}
 .gax{position:relative; height:34px; min-width:0; overflow:hidden}
 .gmon{position:absolute; top:0; height:15px; overflow:hidden; font-size:11px; font-weight:800;
@@ -596,6 +597,7 @@ body.ganttmode .pinned, body.ganttmode .sharebar, body.ganttmode .who{display:no
 .gnowlbl{position:absolute; top:15px; transform:translateX(50%); background:var(--pom); color:#fff;
   border-radius:99px; font-size:10px; font-weight:800; padding:1px 7px; white-space:nowrap; z-index:2}
 .gnav{display:flex; gap:5px; align-items:center}
+.gnav:empty{display:none}
 .gnav button{width:32px; height:32px; flex:0 0 auto; border-radius:9px; border:1px solid var(--edge);
   background:var(--card); color:var(--ink); font:inherit; font-size:17px; font-weight:800; cursor:pointer; line-height:1}
 .gnav .now{width:auto; padding:0 11px; font-size:13px}
@@ -1957,17 +1959,22 @@ function gLong(P){
     `${last.conf==='הערכה'?' <span style="font-weight:700">(הערכה)</span>':''}<br>`+
     `🐌 הפריט הארוך ביותר: <b>${esc(dur.t)}</b> — ${dDiff(dur.s,dur.e)} ימים</div>`);
 }
+/* צעד אחד בזמן. הכפתורים והחלקה על המסך מזיזים אותו אותו הדבר. */
+function gStep(d){ if(ui.g.range==='all')return; ui.g.off+=d; render(); }
+/* הניווט יושב בתוך הכותרת הדביקה ולא בראש העמוד, אחרת הוא נעלם
+   ברגע שגוללים, ואז נראה כאילו אי אפשר לזוז בזמן בכלל. */
+function gNav(){
+  const nav=el('<span class="gnav"></span>');
+  if(ui.g.range==='all')return nav;
+  const mk=(txt,fn,cls)=>{ const b=el(`<button class="${cls||''}">${txt}</button>`); b.onclick=fn; nav.appendChild(b); };
+  mk('›',()=>gStep(-1));
+  mk('היום',()=>{ ui.g.off=0; render(); },'now');
+  mk('‹',()=>gStep(1));
+  return nav;
+}
 function gHead(){
   const h=el('<div class="ghead"></div>');
   h.appendChild(el('<span class="gttl">לוח הזמנים</span>'));
-  if(ui.g.range!=='all'){
-    const nav=el('<span class="gnav"></span>');
-    const mk=(txt,fn,cls)=>{ const b=el(`<button class="${cls||''}">${txt}</button>`); b.onclick=fn; nav.appendChild(b); };
-    mk('›',()=>{ ui.g.off--; render(); });
-    mk('היום',()=>{ ui.g.off=0; render(); },'now');
-    mk('‹',()=>{ ui.g.off++; render(); });
-    h.appendChild(nav);
-  }
   const rg=el('<span class="granges"></span>');
   GRANGES.forEach(([k,label])=>{
     const b=el(`<button class="${ui.g.range===k?'on':''}">${esc(label)}</button>`);
@@ -1988,9 +1995,12 @@ function renderGantt(host){
   host.appendChild(gStats(P));
   const long=gLong(P); if(long)host.appendChild(long);
   const ax=el('<div class="gaxis ggrid"></div>');
-  ax.appendChild(el('<span class="gspacer"></span>'));
+  const sp=el('<span class="gspacer"></span>');
+  sp.appendChild(gNav());
+  ax.appendChild(sp);
   ax.appendChild(gAxis(w));
   host.appendChild(ax);
+  gSwipe(host);
   const body=el('<div class="gbody"></div>');
   gTracks(P).forEach(tr=>{
     const items=P.filter(p=>(p.tr||'אחר')===tr)
@@ -2011,6 +2021,31 @@ function renderGantt(host){
       gLinks(body,w);
     }catch(e){}
   },0);
+}
+/* הציר לא נגלל, אבל האצבע והטראקפד מזיזים אותו בזמן — כי זה מה
+   שכל אחד מנסה לעשות מול גאנט. אצבע שנעה ימינה = קדימה בזמן,
+   כי בעברית הזמן זורם מימין לשמאל. */
+function gSwipe(host){
+  let acc=0, tx=0, ty=0, live=false;
+  host.addEventListener('wheel',e=>{
+    if(ui.g.range==='all')return;
+    if(Math.abs(e.deltaX)<=Math.abs(e.deltaY))return;   /* גלילה אנכית — לא נוגעים */
+    e.preventDefault();
+    acc+=e.deltaX;
+    if(Math.abs(acc)<70)return;
+    gStep(acc<0?1:-1); acc=0;
+  },{passive:false});
+  host.addEventListener('touchstart',e=>{
+    if(e.touches.length!==1){live=false;return}
+    tx=e.touches[0].clientX; ty=e.touches[0].clientY; live=true;
+  },{passive:true});
+  host.addEventListener('touchend',e=>{
+    if(!live||ui.g.range==='all')return;
+    live=false;
+    const t=e.changedTouches[0], dx=t.clientX-tx, dy=t.clientY-ty;
+    if(Math.abs(dx)<45||Math.abs(dx)<Math.abs(dy)*1.5)return;
+    gStep(dx>0?1:-1);
+  },{passive:true});
 }
 function gTracks(P){
   const seen=[...new Set(P.map(p=>p.tr||'אחר'))];
