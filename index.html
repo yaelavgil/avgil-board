@@ -351,8 +351,12 @@ section.bucket{margin:18px 0}
 .notes b{color:var(--ink); font-weight:700}
 .notes code{background:var(--chip); border-radius:5px; padding:1px 5px; font-size:12.5px}
 .notes a{color:var(--olive-ink)}
-.notes .li{padding-inline-start:12px; position:relative}
-.notes .li::before{content:'·'; position:absolute; inset-inline-start:3px; font-weight:800}
+.notes .li{padding-inline-start:15px; position:relative; margin-block:4px}
+.notes .li::before{content:'•'; position:absolute; inset-inline-start:2px; top:0; color:var(--olive-ink); font-weight:700}
+.notes>div+div:not(.li){margin-top:6px}
+.notes .li+div:not(.li){margin-top:6px}
+/* מכווץ: שתי שורות זה כלום כשההערה היא רשימה. ארבע נותנות את הכותרת ועוד שניים */
+.notes.clamp{-webkit-line-clamp:4}
 .chev{
   flex:0 0 auto; width:30px; height:30px; border:none; background:transparent; color:var(--muted);
   font-size:13px; cursor:pointer; display:grid; place-items:center; transition:transform .18s; margin-top:2px;
@@ -871,16 +875,45 @@ function refsToChips(html){
   html=html.replace(/([\u05d0-\u05ea])-(\u0000\d+\u0000)/g,'$1 $2');
   return html.replace(/\u0000(\d+)\u0000/g,(x,i)=>slots[i]);
 }
+/* ההערות נכתבו לאורך הדרך כשורה אחת ארוכה עם מפרידי ' · '. שורה כזאת היא
+   בפועל רשימה, ולכן מפרקים אותה לבולטים. מפריד שיושב בתוך סוגריים הוא חלק
+   מהטקסט — ‎*(r35 · התשתית…)*‎ — ולכן לא נחשב, וכך גם שורה קצרה שבה ה-'·'
+   הוא רק מפריד בין שתי מידות. */
+const LIST_MIN=110;
+function dotParts(line){
+  const out=[]; let buf='', depth=0;
+  for(let i=0;i<line.length;i++){
+    const c=line[i];
+    if('(['.includes(c))depth++;
+    else if(')]'.includes(c))depth=Math.max(0,depth-1);
+    if(!depth&&c==='·'&&/\s/.test(line[i-1]||' ')&&/\s/.test(line[i+1]||' ')){
+      out.push(buf.trim()); buf=''; continue;
+    }
+    buf+=c;
+  }
+  out.push(buf.trim());
+  return out.filter(Boolean);
+}
 function md(s){
-  return refsToChips(esc(s||'')
-    .replace(/`([^`]+)`/g,'<code>$1</code>')
-    .replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>')
-    .replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>')
-    .split('\n').map(l=>{
-      const t=l.trim();
-      if(/^[•·]\s?/.test(t))return '<div class="li">'+t.replace(/^[•·]\s?/,'')+'</div>';
-      return '<div>'+(t||'&nbsp;')+'</div>';
-    }).join(''));
+  const seg=[];
+  String(s||'').split('\n').forEach(raw=>{
+    const t=raw.trim();
+    if(/^[•·]\s?/.test(t)){ seg.push([1,t.replace(/^[•·]\s?/,'')]); return; }
+    if(t.length>LIST_MIN){
+      const p=dotParts(t);
+      if(p.length>2){ p.forEach(x=>seg.push([1,x])); return; }
+    }
+    seg.push([0,t]);
+  });
+  return seg.map(([li,txt])=>{
+    const h=refsToChips(esc(txt)
+      .replace(/`([^`]+)`/g,'<code>$1</code>')
+      .replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>')
+      /* תאריך שפותח פריט הוא ציר הזמן של ההערה — להבליט אותו */
+      .replace(/^((?:[⏰🔴⚠️✅]\s*)*)(\d{1,2}[./]\d{1,2}(?:[./]\d{2,4})?)\s*:/,'$1<b>$2:</b>')
+      .replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>'));
+    return li?'<div class="li">'+h+'</div>':'<div>'+(h||'&nbsp;')+'</div>';
+  }).join('');
 }
 /* one delegated handler covers every chip the renderer ever emits */
 addEventListener('click',e=>{
