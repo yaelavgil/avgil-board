@@ -395,10 +395,14 @@ nav.bar{
   box-shadow:0 -2px 14px rgba(60,58,38,.06);
 }
 nav.bar .t{
-  flex:1; border:none; background:transparent; color:var(--muted); font:inherit; font-weight:700;
+  /* min-width:0 — בלעדיו פריט flex לא מתכווץ מתחת לרוחב הטקסט שלו,
+     והטאב החמישי דחף את כל הסרגל אל מחוץ למסך ב-375 פיקסל */
+  flex:1; min-width:0; border:none; background:transparent; color:var(--muted); font:inherit; font-weight:700;
   font-size:11.5px; cursor:pointer; border-radius:11px; padding:5px 2px 4px;
   display:flex; flex-direction:column; align-items:center; gap:2px; min-height:48px; justify-content:center;
 }
+nav.bar .t>span{max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+
 nav.bar .t .ic{font-size:17px; line-height:1}
 nav.bar .t .n{font-size:10px; font-weight:800; background:var(--chip); border-radius:99px; padding:0 5px; color:var(--muted)}
 nav.bar .t.on{color:var(--ink); background:var(--chip)}
@@ -408,6 +412,11 @@ nav.bar .add{
   font-size:27px; font-weight:400; cursor:pointer; line-height:1;
 }
 nav.bar .add:active{transform:scale(.95)}
+/* באייפון צר נותנים לחמש התוויות את המקום שלהן על חשבון הרווחים */
+@media (max-width:400px){
+  nav.bar{gap:2px; padding-inline:5px}
+  nav.bar .add{width:48px}
+}
 
 /* add sheet */
 .sheet{position:fixed; inset:0; z-index:60; background:rgba(20,20,16,.5); display:none; align-items:flex-end}
