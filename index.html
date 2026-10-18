@@ -650,6 +650,10 @@ body.ganttmode .pinned, body.ganttmode .sharebar, body.ganttmode .who{display:no
 .gflag.est{background:var(--chip); color:var(--muted)}
 .gdep{font-size:10.5px; font-weight:700; color:var(--muted); margin-top:1px;
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+/* דגל — משהו שדורש החלטה ולא רק מידע. נשאר גלוי בכל רוחב, כולל
+   במסך רחב שבו שורת התלויות יורדת, כי דגל הוא בדיוק מה שאסור לפספס. */
+.gwarn{display:block; font-size:10.5px; font-weight:800; color:var(--pom); margin-top:2px;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
 
 /* הציר של השורה */
 .gtrack{display:block; position:relative; height:26px; min-width:0; margin-top:5px; border-radius:7px;
@@ -711,6 +715,7 @@ body.ganttmode .pinned, body.ganttmode .sharebar, body.ganttmode .who{display:no
 .pconf{border-radius:11px; padding:9px 11px; font-size:13px; font-weight:700; line-height:1.5; margin-bottom:10px}
 .pconf.est{background:var(--amber-soft); color:var(--amber); border:1.5px dashed var(--amber)}
 .pconf.known{background:var(--olive-soft); color:var(--olive-ink); border:1.5px solid var(--olive)}
+.pconf.warn{background:var(--pom-soft); color:var(--pom); border:1.5px solid var(--pom)}
 .pchain{display:flex; flex-direction:column; gap:5px; margin-top:4px}
 </style>
 
@@ -1926,6 +1931,7 @@ function gRow(w,p){
     `<span class="w">${esc(p.who||'')}</span><span class="d">${ST[p.st]||''}</span></span>`));
   const deps=(p.deps||[]).map(phById).filter(Boolean);
   if(deps.length)lab.appendChild(el(`<span class="gdep">⛓ אחרי: ${esc(deps.map(d=>d.t).join(' · '))}</span>`));
+  if(p.flag)lab.appendChild(el(`<span class="gwarn">⚠️ ${esc(p.flag)}</span>`));
   row.appendChild(lab);
   const tr=el('<span class="gtrack"></span>');
   tr.appendChild(gWeeks(w));
@@ -1987,6 +1993,8 @@ function gStats(P){
   if(n('hot'))box.appendChild(el(`<span class="gstat hot"><b>${n('hot')}</b> דחוף עכשיו</span>`));
   if(n('wait'))box.appendChild(el(`<span class="gstat wait"><b>${n('wait')}</b> ממתין לתשובה</span>`));
   if(n('run'))box.appendChild(el(`<span class="gstat"><b>${n('run')}</b> בעבודה</span>`));
+  const fl=P.filter(p=>p.flag).length;
+  if(fl)box.appendChild(el(`<span class="gstat hot">⚠️ <b>${fl}</b> ${fl===1?'צומת שדורש החלטה':'צמתים שדורשים החלטה'}</span>`));
   return box;
 }
 function gLong(P){
@@ -2113,6 +2121,7 @@ function paintPhase(box,p){
   if(p.tr&&p.tr!=='מסלול קריטי')meta.appendChild(el(`<span class="pchip">${esc(p.tr)}</span>`));
   if(p.crit)meta.appendChild(el('<span class="pchip hot">מסלול קריטי</span>'));
   box.appendChild(meta);
+  if(p.flag)box.appendChild(el(`<div class="pconf warn">⚠️ <b>${esc(p.flag)}</b> — דורש הכרעה, ולכן התאריך כאן לא נגוע עד שתחליטו.</div>`));
   box.appendChild(el(p.conf==='הערכה'
     ? '<div class="pconf est">⚠️ התאריכים האלה הם <b>הערכה שלנו</b> לפי משכי ביצוע סבירים — אף אחד לא מסר אותם. אפשר לתכנן לפיהם, אסור להישבע בהם.</div>'
     : '<div class="pconf known">✓ התאריכים האלה <b>נמסרו לנו במפורש</b> על ידי הספק או בעל המקצוע.</div>'));
@@ -2465,8 +2474,9 @@ async function exportDoc(id){
   const MARK={1:'דחוף',2:'',3:''};
   let body='';
   groups.forEach(g=>{
-    if(g.head)body+=`<h2>${esc(g.head)}</h2>`;
-    body+='<table><tr><th style="width:26px"></th><th>נושא</th><th style="width:150px">הערות / מה סוכם</th></tr>';
+    if(g.head)body+=`<h2 dir="rtl">${esc(g.head)}</h2>`;
+    /* ‎dir="rtl"‎ על הטבלה עצמה — בלעדיו וורד הופך את סדר העמודות, גם כש-body הוא rtl */
+    body+='<table dir="rtl"><tr><th style="width:26px"></th><th>נושא</th><th style="width:150px">הערות / מה סוכם</th></tr>';
     g.rows.forEach(r=>{
       const shots=(r.imgs||[]).map(src=>`<img src="${src}" width="210">`).join(' ');
       body+=`<tr><td style="text-align:center">${r.done?'✔':'☐'}</td>`+
@@ -2477,23 +2487,26 @@ async function exportDoc(id){
     body+='</table>';
   });
   const n=(t.items||[]).length, open=(t.items||[]).filter(i=>!i.done).length;
-  const html=`<html xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8">
+  /* וורד וגוגל דוקס לא יורשים כיוון מ-CSS בלבד: צריך dir על html, על body,
+     על כל טבלה ועל פסקאות הטקסט, וגם mso-bidi כדי שהפסקה עצמה תהיה ימין-לשמאל */
+  const html=`<html xmlns:w="urn:schemas-microsoft-com:office:word" lang="he" dir="rtl"><head><meta charset="utf-8">
 <title>${esc(t.title)}</title><style>
-body{font-family:Arial,sans-serif;direction:rtl;font-size:11pt;color:#222}
+body{font-family:Arial,sans-serif;direction:rtl;text-align:right;font-size:11pt;color:#222;mso-bidi-language:HE}
+h1,h2,p,div,td,th{direction:rtl;text-align:right;mso-bidi-language:HE}
 h1{font-size:18pt;margin:0 0 2pt}
 .sub{color:#777;font-size:9.5pt;margin-bottom:14pt}
 h2{font-size:12.5pt;margin:16pt 0 5pt;padding-bottom:3pt;border-bottom:1.5pt solid #6C7A44;color:#4E5A2E}
-table{border-collapse:collapse;width:100%;margin-bottom:6pt}
-th{background:#EAEBD8;font-size:9.5pt;text-align:right;padding:4pt 6pt;border:0.5pt solid #C9C8B4}
+table{border-collapse:collapse;width:100%;margin-bottom:6pt;direction:rtl}
+th{background:#EAEBD8;font-size:9.5pt;padding:4pt 6pt;border:0.5pt solid #C9C8B4}
 td{padding:5pt 6pt;border:0.5pt solid #C9C8B4;vertical-align:top;font-size:10.5pt}
 .foot{margin-top:22pt;font-size:9.5pt;color:#777;border-top:0.5pt solid #ccc;padding-top:8pt}
 .shots{margin-top:5pt}
 .shots img{border:0.5pt solid #C9C8B4;margin:0 0 4pt 4pt}
-</style></head><body>
-<h1>${esc(plain(t.title))}</h1>
-<div class="sub">אשל 57, בת חפר · ${today} · ${open} פתוחים מתוך ${n}${pics?` · ${pics} תמונות`:''}</div>
+</style></head><body dir="rtl">
+<h1 dir="rtl">${esc(plain(t.title))}</h1>
+<div class="sub" dir="rtl">אשל 57, בת חפר · ${today} · ${open} פתוחים מתוך ${n}${pics?` · ${pics} תמונות`:''}</div>
 ${body}
-<div class="foot">נחתם בתאריך ___________ &nbsp;&nbsp; שם ___________________ &nbsp;&nbsp; חתימה ___________________<br>
+<div class="foot" dir="rtl">נחתם בתאריך ___________ &nbsp;&nbsp; שם ___________________ &nbsp;&nbsp; חתימה ___________________<br>
 מועד משוער לסיום ההשלמות: ___________________</div>
 </body></html>`;
   const blob=new Blob(['\ufeff'+html],{type:'application/msword'});
@@ -2508,13 +2521,17 @@ function waText(id){
   const t=byId(id); if(!t)return '';
   const groups=groupItems(t,true);
   const today=new Date().toLocaleDateString('he-IL',{day:'numeric',month:'numeric'});
-  let s=`*${plain(t.title)}*\n_אשל 57 · ${today}_\n`;
+  /* וואטסאפ קובע כיוון שורה לפי התו החזק הראשון בה. שורה שמתחילה ב-'•',
+     באימוג׳י או בספרה נפתחת בתו ניטרלי, ואז הבולט או המספר קופצים שמאלה.
+     RLM בראש כל שורה מכריח ימין-לשמאל בלי להופיע בטקסט. */
+  const R='‏';
+  let s=`${R}*${plain(t.title)}*\n${R}_אשל 57 · ${today}_\n`;
   groups.forEach(g=>{
     s+='\n';
-    if(g.head)s+=`*${g.head}*\n`;
-    g.rows.forEach(r=>{ s+=(r.lv===1?'🔴 ':'• ')+r.text+'\n'; });
+    if(g.head)s+=`${R}*${g.head}*\n`;
+    g.rows.forEach(r=>{ s+=R+(r.lv===1?'🔴 ':'• ')+r.text+'\n'; });
   });
-  s+='\nנשמח לדעת מה מתוך זה אתם מתקנים ועד מתי 🙏';
+  s+=`\n${R}נשמח לדעת מה מתוך זה אתם מתקנים ועד מתי 🙏`;
   return s;
 }
 function open_wa(text){ window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank','noopener'); }
