@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>היום — אשל 57</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Karantina:wght@400;700&family=Assistant:wght@400;600;700;800&display=swap">
+<style>
+:root{
+  --paper:#FBFAF5; --card:#fff; --ink:#2C2A26; --muted:#7D7A70;
+  --line:#E6E3D7; --line2:#D5D1C0;
+  --olive:#6C7A44; --olive-ink:#4E5A2E; --olive-soft:#EFF1E2;
+  --red:#C0452F; --red-soft:#FBEDEA;
+  --amber:#B4832B; --amber-soft:#FBF2DF;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#1A1917; --card:#232220; --ink:#ECE9E0; --muted:#9B968A;
+  --line:#333230; --line2:#444240;
+  --olive:#9DAE6E; --olive-ink:#B6C586; --olive-soft:#2A2E22;
+  --red:#E07A63; --red-soft:#33211D; --amber:#D7A64A; --amber-soft:#2F2819;
+}}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);
+  font:15px/1.5 Assistant,-apple-system,"system-ui","Segoe UI",Arial,sans-serif;
+  padding:0 14px 30px;-webkit-text-size-adjust:100%}
+.wrap{max-width:620px;margin:0 auto}
+h1{font-family:Karantina,Assistant,sans-serif;font-weight:700;font-size:36px;line-height:1;margin:22px 0 4px}
+.sub{color:var(--muted);font-size:14px;margin:0 0 14px}
+
+/* ===== הווידג׳ט — אותו DOM גם בעמוד וגם בחלון הצף ===== */
+#w{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 14px}
+#w.pip{border:none;border-radius:0;height:100%;overflow:auto;padding:11px 12px}
+
+.now{display:flex;align-items:baseline;gap:9px;margin-bottom:10px}
+.now .t{font-family:Karantina,Assistant,sans-serif;font-size:34px;font-weight:700;line-height:1}
+.now .d{color:var(--muted);font-size:13px;flex:1}
+.now .dot{width:8px;height:8px;border-radius:50%;background:var(--olive)}
+
+.next{background:var(--olive-soft);border:1px solid var(--olive);border-radius:11px;
+  padding:9px 11px;margin-bottom:10px;font-size:14px}
+.next.soon{background:var(--amber-soft);border-color:var(--amber)}
+.next.now{background:var(--red-soft);border-color:var(--red);animation:pulse 1.1s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+.next b{font-weight:800}
+.next .cd{float:left;font-weight:800;font-variant-numeric:tabular-nums}
+
+h3{font-size:12px;color:var(--muted);margin:12px 0 6px;font-weight:700;letter-spacing:.02em}
+.row{display:flex;gap:8px;align-items:flex-start;padding:7px 9px;background:var(--paper);
+  border:1px solid var(--line);border-radius:9px;margin-bottom:5px;font-size:13.5px;line-height:1.4}
+.row .tm{font-weight:800;white-space:nowrap;font-variant-numeric:tabular-nums}
+.row .tx{flex:1;min-width:0}
+.row.hot{border-color:var(--red);background:var(--red-soft)}
+.row.past{opacity:.45}
+.more{color:var(--muted);font-size:12.5px;padding:3px 2px;cursor:pointer;background:none;border:none;font:inherit}
+
+.bar{display:flex;gap:7px;margin-top:12px;flex-wrap:wrap}
+.b{flex:1;min-width:120px;padding:10px;border-radius:10px;border:none;cursor:pointer;
+  font:700 14px Assistant,sans-serif;-webkit-tap-highlight-color:transparent}
+.b.go{background:var(--olive);color:#fff}
+.b.gh{background:var(--card);color:var(--olive-ink);border:1.5px solid var(--olive)}
+#w.pip .bar{position:sticky;bottom:0;background:var(--card);padding-top:7px}
+#w.pip h1,#w.pip .sub{display:none}
+
+.note{color:var(--muted);font-size:12.5px;margin-top:16px;line-height:1.65}
+.warn{background:var(--amber-soft);border:1px solid var(--amber);border-radius:10px;
+  padding:9px 11px;font-size:13px;margin-top:12px;display:none}
+.warn.on{display:block}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>היום</h1>
+  <p class="sub">אשל 57 · מה קורה היום, ומה דחוף</p>
+
+  <div id="w">
+    <div class="now"><span class="dot"></span><span class="t" id="clock">—</span><span class="d" id="today">—</span></div>
+    <div id="next"></div>
+    <div id="body"></div>
+    <div class="bar">
+      <button class="b go" id="float">🎈 להצפה על המסך</button>
+      <button class="b gh" id="bg">שליחה לרקע</button>
+    </div>
+  </div>
+
+  <div class="warn" id="warn"></div>
+
+  <p class="note">
+    <b>להצפה</b> פותח חלון אמיתי שצף מעל כל החלונות, גם מעל אפליקציות אחרות. אפשר לגרור אותו לפינה.<br>
+    <b>שליחה לרקע</b> סוגר את החלון הצף, והטאב ממשיך לעקוב. כשמגיע זמן של תזכורת תקבלי <b>התראת מערכת</b>, ולחיצה עליה מחזירה את החלון.<br>
+    ההצפה עובדת ב-Chrome ו-Edge. בדפדפנים אחרים הווידג׳ט נשאר בעמוד ורק ההתראות עובדות.
+  </p>
+</div>
+
+<script>
+const DB='https://home-picks-47450-default-rtdb.europe-west1.firebasedatabase.app';
+const LEAD=30;            /* דקות לפני תזכורת שבהן היא נחשבת "מתקרבת" */
+const DAYS=['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const plain=s=>String(s||'').replace(/\*\*(.+?)\*\*/g,'$1').replace(/\*\((.*?)\)\*/g,'').trim();
+const mins=t=>{const m=/^(\d{1,2}):(\d{2})/.exec(t||'');return m?+m[1]*60+ +m[2]:null;};
+const hhmm=n=>String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');
+
+let DATA={slots:[],today:[],over:[]}, pipWin=null, fired=new Set(), showAll=false;
+
+async function load(){
+  try{
+    const r=await fetch(DB+'/board/tasks.json?t='+Date.now(),{cache:'no-store'});
+    const d=await r.json()||{};
+    const now=new Date(), iso=new Date(now.getTime()-now.getTimezoneOffset()*6e4).toISOString().slice(0,10);
+    const dow=now.getDay();
+    const slots=[],today=[],over=[];
+    for(const [id,t] of Object.entries(d)){
+      if(!t||typeof t!=='object')continue;
+      (t.slots||[]).forEach(s=>{ if(s&&s.d===dow) slots.push({...s,id}); });
+      if(t.done||t.ongoing||!t.due)continue;
+      const title=plain(t.title);
+      if(t.due===iso) today.push({id,title});
+      else if(t.due<iso) over.push({id,title,due:t.due});
+    }
+    slots.sort((a,b)=>(mins(a.t0)||0)-(mins(b.t0)||0));
+    over.sort((a,b)=>a.due<b.due?-1:1);
+    DATA={slots,today,over};
+  }catch(e){}
+  render();
+}
+
+function render(){
+  const now=new Date(), nm=now.getHours()*60+now.getMinutes();
+  $('#clock').textContent=now.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'});
+  $('#today').textContent='יום '+DAYS[now.getDay()]+' · '+now.toLocaleDateString('he-IL',{day:'numeric',month:'long'});
+
+  /* התזכורת הבאה היום */
+  const nx=DATA.slots.find(s=>{const m=mins(s.t0);return m!=null&&m>=nm-15;});
+  const n=$('#next');
+  if(nx){
+    const m=mins(nx.t0), left=m-nm;
+    const cls=left<=0?'now':(left<=LEAD?'soon':'');
+    const cd=left<=0?'עכשיו':(left<60?left+' דק׳':Math.floor(left/60)+':'+String(left%60).padStart(2,'0')+' שע׳');
+    n.className='next '+cls;
+    n.innerHTML=`<span class="cd">${cd}</span>${nx.ic||'⏰'} <b>${esc(nx.t)}</b> · ${esc(nx.t0)}–${esc(nx.t1||'')}`;
+  } else n.className='next', n.innerHTML='<span style="color:var(--muted)">אין עוד תזכורות היום ⏰</span>';
+
+  let h='';
+  if(DATA.slots.length){
+    h+='<h3>הלו״ז של היום</h3>';
+    DATA.slots.forEach(s=>{const m=mins(s.t0),p=m!=null&&m<nm-15;
+      h+=`<div class="row ${p?'past':''}"><span class="tm">${esc(s.t0)}</span><span class="tx">${s.ic||''} ${esc(s.t)}</span></div>`;});
+  }
+  if(DATA.today.length){
+    h+='<h3>משימות להיום</h3>';
+    DATA.today.forEach(t=>h+=`<div class="row"><span class="tx">${esc(t.title)}</span></div>`);
+  }
+  if(DATA.over.length){
+    const show=showAll?DATA.over:DATA.over.slice(0,3);
+    h+=`<h3>באיחור · ${DATA.over.length}</h3>`;
+    show.forEach(t=>h+=`<div class="row hot"><span class="tm">${t.due.slice(8,10)}.${t.due.slice(5,7)}</span><span class="tx">${esc(t.title)}</span></div>`);
+    if(DATA.over.length>3) h+=`<button class="more" id="more">${showAll?'להציג פחות':'+ עוד '+(DATA.over.length-3)}</button>`;
+  }
+  if(!h) h='<div style="color:var(--muted);padding:8px 2px">אין כלום להיום. 🎉</div>';
+  $('#body').innerHTML=h;
+  const mb=$('#more'); if(mb) mb.onclick=()=>{showAll=!showAll;render();};
+
+  /* אם החלון הצף סגור — התראת מערכת בזמן התזכורת */
+  DATA.slots.forEach(s=>{
+    const m=mins(s.t0); if(m==null)return;
+    const key=s.id+'@'+s.t0;
+    if(nm>=m-LEAD&&nm<m+5&&!fired.has(key)){
+      fired.add(key);
+      if(!pipWin) notify(`${s.ic||'⏰'} ${plain(s.t)}`, `מתחיל ב-${s.t0}`);
+    }
+  });
+}
+
+function notify(title,body){
+  if(!('Notification' in window)||Notification.permission!=='granted')return;
+  const n=new Notification(title,{body,icon:'icon-192.png',tag:'avgil-today'});
+  n.onclick=()=>{window.focus();n.close();};
+}
+
+
+/* כשאין PiP — חלון קופץ קטן. הוא לא נשאר מעל הכל, אבל הוא חלון נפרד
+   שאפשר להשאיר בצד, וזה הקרוב ביותר שאפשר בלי PiP. */
+function fallback(why){
+  $('#warn').className='warn on';
+  $('#warn').innerHTML=esc(why)+' פותחת במקום זה חלון נפרד קטן — הוא לא יישאר מעל כל החלונות, '
+    +'אבל אפשר להשאיר אותו בצד. ההצפה האמיתית עובדת ב-Chrome או Edge רגילים.';
+  const u=location.href.split('#')[0];
+  window.open(u+'#solo','avgilToday','width=350,height=470,menubar=no,toolbar=no,location=no,status=no');
+}
+
+/* ===== החלון הצף =====
+   Document Picture-in-Picture פותח חלון אמיתי שנשאר מעל כל האפליקציות.
+   מעבירים אליו את אותו צומת DOM, ומחזירים אותו לעמוד כשהוא נסגר. */
+async function openFloat(){
+  const w=$('#w'), ph=document.createComment('w');
+  if(!('documentPictureInPicture' in window)) return fallback('הדפדפן הזה לא תומך בהצפה אמיתית.');
+  try{
+    pipWin=await documentPictureInPicture.requestWindow({width:330,height:430});
+  }catch(e){
+    /* קורה בדפדפן מוטמע, בחלונית תצוגה, או כשהלחיצה לא נספרה כפעולת משתמש */
+    pipWin=null;
+    return fallback('ההצפה נחסמה כאן ('+e.name+').');
+  }
+  /* גיליונות הסגנון לא עוברים לבד */
+  [...document.styleSheets].forEach(ss=>{
+    try{
+      const css=[...ss.cssRules].map(r=>r.cssText).join('');
+      const st=pipWin.document.createElement('style'); st.textContent=css;
+      pipWin.document.head.appendChild(st);
+    }catch(e){
+      if(ss.href){const l=pipWin.document.createElement('link');
+        l.rel='stylesheet'; l.href=ss.href; pipWin.document.head.appendChild(l);}
+    }
+  });
+  pipWin.document.documentElement.lang='he';
+  pipWin.document.documentElement.dir='rtl';
+  pipWin.document.body.style.margin='0';
+  w.parentNode.replaceChild(ph,w);
+  w.classList.add('pip');
+  pipWin.document.body.appendChild(w);
+  pipWin.addEventListener('pagehide',()=>{
+    w.classList.remove('pip');
+    ph.parentNode.replaceChild(w,ph);
+    pipWin=null; wire();
+  });
+  wire();
+  if('Notification' in window && Notification.permission==='default') Notification.requestPermission();
+}
+
+/* הכפתורים חיים גם בעמוד וגם בחלון הצף, ולכן מחברים אותם מחדש בכל מעבר */
+function wire(){
+  const f=$('#float'), b=$('#bg');
+  if(f) f.onclick=openFloat;
+  if(b) b.onclick=()=>{
+    if(pipWin){ pipWin.close(); }
+    else if('Notification' in window && Notification.permission==='default'){
+      Notification.requestPermission().then(p=>{
+        $('#warn').className='warn on';
+        $('#warn').textContent=p==='granted'
+          ?'הווידג׳ט ברקע. תקבלי התראת מערכת 30 דקות לפני כל תזכורת.'
+          :'בלי אישור התראות אי אפשר להודיע לך ברקע. אפשר לאשר בהגדרות האתר.';
+      });
+    } else {
+      $('#warn').className='warn on';
+      $('#warn').textContent='הווידג׳ט ברקע. תקבלי התראת מערכת 30 דקות לפני כל תזכורת.';
+    }
+  };
+}
+
+
+if(location.hash==='#solo'){
+  document.body.style.padding='0';
+  const w=$('#w'); w.classList.add('pip');
+  document.querySelector('.wrap').style.maxWidth='none';
+  document.querySelectorAll('h1,.sub,.note').forEach(e=>e.style.display='none');
+}
+
+wire();
+load();
+setInterval(render,1000*20);
+setInterval(load,1000*180);
+</script>
+</body>
+</html>
