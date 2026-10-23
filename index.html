@@ -97,6 +97,8 @@ h1{font-family:'Karantina','Assistant',sans-serif; font-weight:700; font-size:26
 .pinrow .c{background:var(--pom); color:#fff; border-radius:99px; font-size:11px; font-weight:800; padding:2px 8px; flex:0 0 auto; white-space:nowrap}
 .pinrow .c2{background:var(--card); color:var(--muted); border:1px solid var(--line); border-radius:99px; font-size:11px; font-weight:800; padding:1px 8px; flex:0 0 auto; white-space:nowrap}
 .pinrow .go{color:var(--amber); font-size:12px; flex:0 0 auto}
+.pinrow.allclosed{opacity:.62; border-style:dashed}
+.pinrow .c2.ok{background:var(--olive-soft); color:var(--olive-ink); border-color:var(--olive)}
 /* ---- detail sheet ---- */
 .dsheet{position:fixed; inset:0; z-index:65; background:rgba(20,20,16,.55); display:none}
 .dsheet.on{display:block}
@@ -132,6 +134,10 @@ h1{font-family:'Karantina','Assistant',sans-serif; font-weight:700; font-size:26
   border:2px solid var(--line); border-radius:50%; background:transparent; cursor:pointer; position:relative;
   transition:background .16s, border-color .16s;
 }
+/* הסימון הוא הפעולה עצמה. אצבע על נייד לא פוגעת ב-22px, ולכן יש לו
+   אזור לחיצה בלתי נראה סביבו — הציור נשאר קטן, המגע נדיב. */
+.chkbox::before{content:''; position:absolute; inset:-11px; border-radius:50%}
+.chkbox:hover{border-color:var(--olive); transform:scale(1.08)}
 .chkbox::after{content:'✓'; position:absolute; inset:0; display:grid; place-items:center; color:var(--line); font-size:12px; font-weight:800; transition:color .16s}
 .chkrow:hover .chkbox{border-color:var(--olive)} .chkrow:hover .chkbox::after{color:var(--olive)}
 .chkbox[data-on]{background:var(--olive); border-color:var(--olive)} .chkbox[data-on]::after{color:#fff}
@@ -224,6 +230,17 @@ h1{font-family:'Karantina','Assistant',sans-serif; font-weight:700; font-size:26
 .itembtns button{flex:1; border:none; border-radius:12px; padding:13px; font:inherit; font-weight:800; font-size:15px; cursor:pointer}
 .itembtns .done{background:var(--olive); color:#fff}
 .itembtns .reopen{background:transparent; border:1.5px solid var(--line); color:var(--ink)}
+.improw{display:flex; align-items:flex-start; gap:9px; padding:8px 10px; border-radius:10px;
+  border:1px solid var(--edge); background:var(--bg); margin-bottom:6px; cursor:pointer}
+.improw.skip{opacity:.45}
+.improw .dup{font-size:11px; font-weight:800; color:var(--pom); flex:0 0 auto}
+.improw .tx{flex:1; min-width:0; font-size:13.5px; line-height:1.4; word-break:break-word}
+.impdrop{border:2px dashed var(--line); border-radius:13px; padding:16px; text-align:center;
+  color:var(--muted); font-weight:800; font-size:13.5px; cursor:pointer; background:var(--bg)}
+.impdrop.hot{border-color:var(--olive); color:var(--olive-ink); background:var(--olive-soft)}
+.savehint{font-size:11.5px; font-weight:700; color:var(--muted); margin-top:5px; height:14px;
+  opacity:0; transition:opacity .2s}
+.savehint.on{opacity:1; color:var(--olive-ink)}
 .chkrow{user-select:none}
 /* ---- גרירה לשינוי סדר ---- */
 .grip{
@@ -370,6 +387,9 @@ section.bucket{margin:18px 0}
   padding:7px 12px; font:inherit; font-size:13px; font-weight:700; cursor:pointer;
 }
 .acts button.wa{border-color:var(--olive); color:var(--olive-ink); background:var(--olive-soft)}
+/* סיום המשימה — הפעולה העיקרית, ולכן מלא ולא מתואר */
+.acts button.finish{background:var(--olive); border-color:var(--olive); color:#fff; font-weight:800; flex-basis:100%}
+.acts button.unfinish{border-color:var(--line2); color:var(--muted); flex-basis:100%}
 .acts .sep{flex-basis:100%; height:0}
 .acts .lbl{font-size:12px; color:var(--muted); font-weight:700; align-self:center; padding-inline-end:2px}
 
@@ -1121,8 +1141,12 @@ function renderShare(){
 }
 function renderPinned(){
   const bar=document.getElementById('pinned'); bar.innerHTML='';
+  /* ״0 פתוח״ אמר שהנושא פעיל ושאין בו כלום — שתי אמירות סותרות.
+     נושא שכולו סגור אומר זאת במילים, ויורד לתחתית הרשימה. */
+  const openOf=t=>((Array.isArray(t.items)?t.items.filter(i=>!i.done).length:0)
+                   +childrenOf(t.id).filter(k=>!k.done).length);
   tasks.filter(t=>t.ongoing&&!t.done)
-       .sort((a,z)=>(a.order||0)-(z.order||0))
+       .sort((a,z)=>(openOf(a)?0:1)-(openOf(z)?0:1)||(a.order||0)-(z.order||0))
        .forEach(t=>{
     const items=Array.isArray(t.items)?t.items:null;
     const kids=childrenOf(t.id);
@@ -1130,10 +1154,12 @@ function renderPinned(){
     const urgent=items ? items.filter(i=>!i.done&&(i.lv||2)===1).length
                        : ((t.notes||'').match(/🔴/g)||[]).length;
     /* a bare number reads as nothing — say what is being counted */
-    const row=el(`<button class="pinrow">
-      <span>🔁</span><span class="t">${esc(t.title.replace(/^🔁\s*/,'').split(/\s[—–]\s/)[0])}</span>
+    const empty=(items||kids.length)&&!open;
+    const row=el(`<button class="pinrow${empty?' allclosed':''}">
+      <span>${empty?'✓':'🔁'}</span><span class="t">${esc(t.title.replace(/^🔁\s*/,'').split(/\s[—–]\s/)[0])}</span>
       ${urgent?`<span class="c">${urgent} דחוף</span>`:''}
-      ${items?`<span class="c2">${open} פתוח</span>`:''}<span class="go">▸</span></button>`);
+      ${empty?'<span class="c2 ok">הכל סגור · לארכיון</span>'
+             :(items?`<span class="c2">${open} פתוח</span>`:'')}<span class="go">▸</span></button>`);
     row.onclick=()=>openDetail(t.id);
     bar.appendChild(row);
   });
@@ -1311,6 +1337,16 @@ function linksEl(t){
   });
   return w.children.length?w:null;
 }
+/* סימון סעיף כבוצע הוא פעולה אחת ולא שלוש: לא לפתוח חלון, לא לכתוב,
+   לא לאשר. הטקסט שנכתב נשמר מעצמו, ולכן אין מה ללכוד כאן. */
+function toggleItem(id,k){
+  const cur=byId(id); if(!cur)return;
+  const tgt=(cur.items||[]).find(x=>x.k===k); if(!tgt)return;
+  tgt.done=!tgt.done;
+  tgt.doneAt=tgt.done?(tgt.doneAt||Date.now()):0;
+  save(cur,true); renderPinned(); paintSheet();
+  toast(tgt.done?'בוצע ✓':'חזר לפתוחים');
+}
 function checklistEl(id,onChange){
   const t=byId(id); if(!t||!Array.isArray(t.items)||!t.items.length)return null;
   const wrap=el('<div class="chk"></div>');
@@ -1322,7 +1358,9 @@ function checklistEl(id,onChange){
       <span class="chkbox" ${it.done?'data-on="1"':''}></span>
       ${attCount(id+'__'+it.k)?`<span class="pin">📎${attCount(id+'__'+it.k)}</span>`:''}
       <span class="chktxt">${md(body).replace(/<\/?div>/g,'')}</span></div>`);
-    r.onclick=ev=>{ if(ev.target.closest('.reflink,.tel,a,.grip'))return; openItem(id,it.k); };
+    r.onclick=ev=>{ if(ev.target.closest('.reflink,.tel,a,.grip'))return;
+      if(ev.target.closest('.chkbox')){ ev.stopPropagation(); toggleItem(id,it.k); return; }
+      openItem(id,it.k); };
     setTimeout(()=>{
       const box=r.parentElement; if(!box)return;
       enableDrag(r.querySelector('.grip'),r,box,'.chkrow',idx=>{
@@ -1414,6 +1452,7 @@ function sheetTop(box,backLabel,onBack){
   bar.appendChild(b); bar.appendChild(x); box.appendChild(bar);
 }
 function openPick(id){ ui.view={task:id,item:null,pick:true}; paintSheet(); }
+function openImport(id){ ui.view={task:id,item:null,imp:true}; paintSheet(); }
 function openEdit(id){ ui.view={task:id,edit:true}; paintSheet(); }
 function paintEdit(box,t){
   sheetTop(box,'חזרה למשימה',()=>openDetail(t.id));
@@ -1450,6 +1489,173 @@ function paintPick(box,t){
   };
   q.oninput=draw; draw();
 }
+/* ─── ייבוא סעיפים מתוך מסמך ────────────────────────────────────────────
+   הסעיפים נולדים אצל בעל המקצוע — בהצעת מחיר, בגיליון, ברשימה שנשלחה
+   בוואטסאפ. ההקלדה מחדש שלהם היא העבודה, ולכן מותר להדביק. */
+function decEnt(s){
+  return (s||'').replace(/&#(\d+);/g,(m,d)=>String.fromCharCode(+d))
+    .replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&nbsp;/g,' ')
+    .replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
+}
+/* docx הוא zip. הדפדפן יודע לפרוס deflate לבדו, ולכן אין כאן ספרייה. */
+async function zipEntry(buf,wanted){
+  const dv=new DataView(buf), u8=new Uint8Array(buf), td=new TextDecoder();
+  let eo=-1;
+  for(let i=u8.length-22;i>=0&&i>u8.length-66000;i--)
+    if(dv.getUint32(i,true)===0x06054b50){eo=i;break}
+  if(eo<0)throw new Error('לא קובץ zip תקין');
+  const cnt=dv.getUint16(eo+10,true); let off=dv.getUint32(eo+16,true);
+  for(let i=0;i<cnt&&off+46<u8.length;i++){
+    const method=dv.getUint16(off+10,true), csize=dv.getUint32(off+20,true);
+    const nlen=dv.getUint16(off+28,true), elen=dv.getUint16(off+30,true),
+          clen=dv.getUint16(off+32,true), lho=dv.getUint32(off+42,true);
+    const name=td.decode(u8.subarray(off+46,off+46+nlen));
+    if(name===wanted){
+      const ln=dv.getUint16(lho+26,true), le=dv.getUint16(lho+28,true);
+      const raw=u8.subarray(lho+30+ln+le, lho+30+ln+le+csize);
+      if(method===0)return td.decode(raw);
+      const st=new Blob([raw]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+      return td.decode(await new Response(st).arrayBuffer());
+    }
+    off+=46+nlen+elen+clen;
+  }
+  throw new Error('לא נמצא טקסט בקובץ');
+}
+async function fileToLines(f){
+  const nm=(f.name||'').toLowerCase();
+  if(nm.endsWith('.docx')){
+    const xml=await zipEntry(await f.arrayBuffer(),'word/document.xml');
+    return xml.split(/<\/w:p>/).map(pp=>{
+      const t=(pp.match(/<w:t[^>]*>[\s\S]*?<\/w:t>/g)||[])
+        .map(x=>x.replace(/<[^>]+>/g,'')).join('');
+      return decEnt(t).replace(/\s+/g,' ').trim();
+    });
+  }
+  const txt=await f.text();
+  if(/<\/(p|tr|li|div|h\d)>/i.test(txt)){            /* .doc/.html מיוצא */
+    return txt.replace(/<(script|style)[\s\S]*?<\/\1>/gi,'')
+      .replace(/<\/(p|tr|li|div|h\d|br)[^>]*>/gi,'\n')
+      .replace(/<\/t[dh]>/gi,'\t').replace(/<[^>]+>/g,'')
+      .split('\n').map(x=>decEnt(x).replace(/[ \t]+$/,'').trim());
+  }
+  return txt.split(/\r?\n/);
+}
+/* שורה מגיליון מגיעה עם טאבים, ושורה ממסמך מגיעה עם בולט. שתיהן
+   אותו סעיף — מה שנשאר אחרי הקילוף הוא הטקסט. */
+function parseLines(raw){
+  const out=[];
+  raw.forEach(line=>{
+    if(!line)return;
+    let cells=line.split('\t').map(c=>c.trim().replace(/^"|"$/g,'')).filter(Boolean);
+    if(cells.length<2&&/,/.test(line)&&/^[^,]{1,60},/.test(line)&&line.split(',').length<=4)
+      cells=line.split(',').map(c=>c.trim().replace(/^"|"$/g,'')).filter(Boolean);
+    if(!cells.length)return;
+    let body=cells[0], note=cells.slice(1).join(' · ');
+    body=body.replace(/^\s*(?:[•·●▪⁃\-–—*>]+|\d{1,3}[.)]|[☐☑☒✓✔]|\[\s*[xX]?\s*\])\s*/,'').trim();
+    if(!body||body.length<2)return;
+    if(/^(סה[״"']?כ|סיכום|total|שם|תיאור|item|description)$/i.test(body))return;
+    const lv=/🔴|דחוף|בהקדם|קריטי/.test(line)?1:(/🟡|בהמשך|לא דחוף/.test(line)?3:2);
+    out.push({body:body.replace(/^🔴\s*|^🟡\s*/,''),note,lv});
+  });
+  return out;
+}
+function paintImport(box,t){
+  sheetTop(box,'חזרה למשימה',()=>openDetail(t.id));
+  box.appendChild(el('<h3>ייבוא סעיפים</h3>'));
+  box.appendChild(el(`<div class="ansmeta" style="margin-bottom:10px">${esc(t.title)}</div>`));
+
+  const drop=el('<div class="impdrop">📄 קובץ מהמחשב — או גרירה לכאן<br>'+
+    '<span style="font-weight:700;font-size:12px">Google Docs ⟵ הורדה כ-docx · Google Sheets ⟵ הורדה כ-CSV · גם txt ו-doc</span></div>');
+  const fi=el('<input type="file" accept=".docx,.txt,.csv,.tsv,.md,.doc,.html" style="display:none">');
+  box.appendChild(drop); box.appendChild(fi);
+
+  box.appendChild(el('<div class="anslbl">או פשוט להדביק — סמני הכל במסמך, להעתיק, ולהדביק כאן</div>'));
+  const ta=el('<textarea class="ansbox" style="min-height:120px" placeholder="כל שורה = סעיף. בולטים, מספור וטאבים מהגיליון נקלפים לבד…"></textarea>');
+  box.appendChild(ta);
+
+  const head=el('<div class="anslbl"></div>'); box.appendChild(head);
+  const list=el('<div></div>'); box.appendChild(list);
+  const btns=el('<div class="itembtns"></div>'); box.appendChild(btns);
+  const go=el('<button class="done">הוספה</button>');
+  const cancel=el('<button class="reopen">ביטול</button>');
+  cancel.onclick=()=>openDetail(t.id);
+  btns.appendChild(cancel); btns.appendChild(go);
+
+  let rows=[];
+  const norm=x=>(x||'').replace(/[*_`]/g,'').replace(/\s+/g,' ').trim().toLowerCase();
+  const existing=new Set((t.items||[]).map(i=>norm(splitRefs(i.t).body)));
+  const draw=()=>{
+    list.innerHTML='';
+    const on=rows.filter(r=>r.use).length;
+    head.textContent=rows.length?`זוהו ${rows.length} סעיפים · ${on} מסומנים להוספה · אפשר להוריד סימון`:'';
+    go.textContent=on?`✓ הוספה של ${on} סעיפים`:'הוספה';
+    go.disabled=!on; go.style.opacity=on?1:.5;
+    rows.forEach((r,i)=>{
+      const dup=existing.has(norm(r.body));
+      const d=el(`<div class="improw ${r.use?'':'skip'}">
+        <span class="chkbox" ${r.use?'data-on="1"':''}></span>
+        <span class="tx">${esc(r.body)}${r.note?`<span style="color:var(--muted)"> · ${esc(r.note)}</span>`:''}</span>
+        ${dup?'<span class="dup">כבר קיים</span>':''}</div>`);
+      d.onclick=()=>{ rows[i].use=!rows[i].use; draw(); };
+      list.appendChild(d);
+    });
+  };
+  const feed=raw=>{
+    rows=parseLines(raw).map(r=>({...r,use:!existing.has(norm(r.body))}));
+    draw();
+    if(!rows.length)toast('לא נמצאו שורות בקובץ');
+  };
+  ta.addEventListener('input',()=>feed(ta.value.split(/\r?\n/)));
+  drop.onclick=()=>fi.click();
+  fi.onchange=async()=>{
+    const f=fi.files&&fi.files[0]; if(!f)return;
+    drop.textContent='קורא…';
+    try{ feed(await fileToLines(f)); drop.textContent='📄 '+f.name+' — אפשר להחליף קובץ'; }
+    catch(e){ drop.textContent='📄 קובץ מהמחשב'; toast('לא הצלחתי לקרוא: '+e.message); }
+  };
+  ['dragover','dragenter'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('hot')}));
+  ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('hot')}));
+  drop.addEventListener('drop',async e=>{
+    const f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0]; if(!f)return;
+    try{ feed(await fileToLines(f)); drop.textContent='📄 '+f.name; }
+    catch(err){ toast('לא הצלחתי לקרוא: '+err.message); }
+  });
+
+  go.onclick=()=>{
+    const add=rows.filter(r=>r.use); if(!add.length)return;
+    const cur=byId(t.id); if(!cur)return;
+    if(!Array.isArray(cur.items))cur.items=[];
+    add.forEach((r,i)=>cur.items.push({
+      k:'x'+Date.now()+i+Math.floor(Math.random()*99), lv:r.lv, done:false, ans:'',
+      t:r.body+(r.note?` *(${r.note})*`:'')
+    }));
+    save(cur,true); renderPinned();
+    toast(`נוספו ${add.length} סעיפים ✓`);
+    openDetail(t.id);
+  };
+  draw();
+}
+/* גיליון לשליחה — עמודה לסעיף, עמודה לסטטוס, כדי שהספק יוכל למלא */
+function exportCsv(id){
+  const t=byId(id); if(!t)return;
+  const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+  const lines=[['סעיף','דחיפות','סטטוס','תשובה / הערות'].map(q).join(',')];
+  (t.items||[]).forEach(i=>{
+    const {body,note}=splitRefs(i.t);
+    lines.push([
+      q(body.replace(/[*_`]/g,'')+(note?' · '+note:'')),
+      q(({1:'דחוף',2:'רגיל',3:'בהמשך'})[i.lv||2]),
+      q(i.done?'בוצע':'פתוח'),
+      q(i.ans||'')
+    ].join(','));
+  });
+  const blob=new Blob(['﻿'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=(t.title.replace(/[^֐-׿a-zA-Z0-9 ]/g,'').trim()||'משימה')+'.csv';
+  a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+  toast('הגיליון ירד — אפשר לפתוח בגוגל שיטס ✓');
+}
 function paintSheet(){
   const v=ui.view||{};
   if(v.phase){                              /* שלב מלוח הזמנים, לא משימה */
@@ -1468,6 +1674,7 @@ function paintSheet(){
   box.innerHTML='<div class="dsgrip"></div>';
   if(v.edit){ paintEdit(box,t); }
   else if(v.pick){ paintPick(box,t); }
+  else if(v.imp){ paintImport(box,t); }
   else if(v.item){ paintItem(box,t,v.item); }
   else { paintTask(box,t); }
   document.getElementById('dsheet').classList.add('on');
@@ -1505,25 +1712,34 @@ function paintItem(box,t,key){
   if(it.done&&it.doneAt){
     box.appendChild(el(`<div class="ansmeta">נסגר ב-${new Date(it.doneAt).toLocaleDateString('he-IL',{day:'numeric',month:'numeric'})}</div>`));
   }
-  const btns=el('<div class="itembtns"></div>');
-  const commit=(markDone)=>{
-    const cur=byId(t.id); const tgt=(cur.items||[]).find(x=>x.k===key); if(!tgt)return;
-    tgt.ans=ta.value.trim();
-    tgt.done=markDone;
-    tgt.doneAt=markDone?(tgt.doneAt||Date.now()):0;
-    save(cur,true); renderPinned();
-    toast(markDone?'נסגר ונשמר ✓':'הוחזר לרשימה');
-    openDetail(t.id);
+  /* התשובה נשמרת מעצמה. ״שמירה״ לא היתה צריכה להיות החלטה שלך,
+     והצימוד שלה לסגירה הכריח לסגור נושא רק כדי לא לאבד טקסט. */
+  const hint=el('<div class="savehint">נשמר ✓</div>');
+  box.appendChild(hint);
+  let tmr=null, last=ta.value;
+  const flush=()=>{
+    clearTimeout(tmr); tmr=null;
+    const v=ta.value.trim(); if(v===last.trim())return;
+    const cur=byId(t.id); const tgt=(cur&&(cur.items||[]).find(x=>x.k===key)); if(!tgt)return;
+    tgt.ans=v; last=v;
+    save(cur,true);
+    hint.classList.add('on'); setTimeout(()=>hint.classList.remove('on'),1400);
   };
-  if(!it.done){
-    const d=el('<button class="done">✓ סגירה עם התשובה</button>');
-    d.onclick=()=>commit(true); btns.appendChild(d);
-  }else{
-    const r=el('<button class="reopen">↩ החזרה לרשימה</button>');
-    r.onclick=()=>commit(false); btns.appendChild(r);
-    const sv=el('<button class="done">שמירת התשובה</button>');
-    sv.onclick=()=>commit(true); btns.appendChild(sv);
-  }
+  ta.addEventListener('input',()=>{ clearTimeout(tmr); tmr=setTimeout(flush,700); });
+  ta.addEventListener('blur',flush);
+
+  const btns=el('<div class="itembtns"></div>');
+  const b=el(`<button class="${it.done?'reopen':'done'}">${it.done?'↩ החזרה לפתוחים':'✓ בוצע'}</button>`);
+  b.onclick=()=>{
+    flush();
+    const cur=byId(t.id); const tgt=(cur.items||[]).find(x=>x.k===key); if(!tgt)return;
+    tgt.done=!tgt.done;
+    tgt.doneAt=tgt.done?(tgt.doneAt||Date.now()):0;
+    save(cur,true); renderPinned();
+    toast(tgt.done?'בוצע ✓':'חזר לפתוחים');
+    if(tgt.done)openDetail(t.id); else paintSheet();
+  };
+  btns.appendChild(b);
   box.appendChild(btns);
 }
 function paintTask(box,t){
@@ -1548,7 +1764,8 @@ function paintTask(box,t){
     kids.forEach(k=>{
       const du=daysUntil(k.due);
       const cls=k.done?'ok':(du!==null&&du<0?'late':(du!==null&&du<=1?'soon':''));
-      const r=el(`<button class="subrow ${k.done?'off':''}">
+      const tip=k.done?'בוצע':(cls==='late'?'באיחור':(cls==='soon'?'היום או מחר':(k.due?'עתידי':'בלי תאריך')));
+      const r=el(`<button class="subrow ${k.done?'off':''}" title="${tip}">
         <span class="st ${cls}"></span>
         <span class="n">${esc(k.title.replace(/^[🔴🟠🟡🔵✅⛔📦🔧🗑️👤🔁]\s*/,''))}</span>
         <span class="d">${k.done?'✓':(k.due?fmtDate(k.due):'')}</span></button>`);
@@ -1565,6 +1782,21 @@ function paintTask(box,t){
 
   box.appendChild(el(`<div class="notes">${md(t.notes)}</div>`));
   const acts=el('<div class="acts" style="border:0;padding-top:12px"></div>');
+  /* משימה מלאה לא היתה ניתנת לסגירה מתוך הפרטים — רק תתי־משימות.
+     אפשר היה רק למחוק או לערוך, וזה לא אותו דבר. */
+  {
+    const lbl=t.done?'↩ החזרה לפתוחות':(t.ongoing?'✓ הורדה לארכיון':'✓ סיום המשימה');
+    const dn=el(`<button class="${t.done?'unfinish':'finish'}">${lbl}</button>`);
+    dn.onclick=()=>{
+      const cur=byId(id); if(!cur)return;
+      cur.done=!cur.done;
+      cur.doneAt=cur.done?(cur.doneAt||Date.now()):0;
+      save(cur,true); renderPinned();
+      toast(cur.done?(cur.ongoing?'ירד לארכיון ✓':'המשימה הושלמה ✓'):'הוחזרה לפתוחות');
+      openDetail(id);
+    };
+    acts.appendChild(dn);
+  }
   if(t.wa){
     const c=el('<button class="wa">📋 העתקת הודעה'+(t.waTo?' ל'+esc(t.waTo):'')+'</button>');
     c.onclick=async()=>{ try{ await navigator.clipboard.writeText(byId(id).wa||''); toast('ההודעה הועתקה ✓'); }catch(e){ toast('ההעתקה נכשלה') } };
@@ -1575,6 +1807,9 @@ function paintTask(box,t){
   const cal=el('<button>📅 ליומן</button>');
   cal.onclick=()=>addToCalendar(id);
   acts.appendChild(cal);
+  const imp=el('<button>📥 ייבוא סעיפים מקובץ</button>');
+  imp.onclick=()=>openImport(id);
+  acts.appendChild(imp);
   if(Array.isArray(t.items)&&t.items.length){
     const dc=el('<button>📄 מסמך לקבלן</button>');
     dc.onclick=async()=>{ dc.disabled=true; dc.textContent='מכין…'; await exportDoc(id);
@@ -1590,6 +1825,9 @@ function paintTask(box,t){
       catch(e){ toast('ההעתקה נכשלה'); }
     };
     acts.appendChild(sl);
+    const cs=el('<button>📊 גיליון לספק (CSV)</button>');
+    cs.onclick=()=>exportCsv(id);
+    acts.appendChild(cs);
     const wb=el('<button class="wa">💬 רשימה לוואטסאפ</button>');
     wb.onclick=async()=>{
       const txt=waText(id);
@@ -1617,11 +1855,11 @@ function closeDetail(){ ui.view=null; document.getElementById('dsheet').classLis
 /* tapping outside steps back one level, then closes */
 document.getElementById('dsheet').onclick=e=>{
   if(e.target.id!=='dsheet')return;
-  if(ui.view&&(ui.view.item||ui.view.pick||ui.view.edit))openDetail(ui.view.task); else closeDetail();
+  if(ui.view&&(ui.view.item||ui.view.pick||ui.view.edit||ui.view.imp))openDetail(ui.view.task); else closeDetail();
 };
 addEventListener('keydown',e=>{
   if(e.key!=='Escape')return;
-  if(ui.view&&(ui.view.item||ui.view.pick||ui.view.edit))openDetail(ui.view.task); else closeDetail();
+  if(ui.view&&(ui.view.item||ui.view.pick||ui.view.edit||ui.view.imp))openDetail(ui.view.task); else closeDetail();
 });
 
 function renderWho(){
