@@ -2331,7 +2331,7 @@ function gStats(P){
   if(n('wait'))box.appendChild(el(`<span class="gstat wait"><b>${n('wait')}</b> ממתין לתשובה</span>`));
   if(n('run'))box.appendChild(el(`<span class="gstat"><b>${n('run')}</b> בעבודה</span>`));
   const fl=P.filter(p=>p.flag).length;
-  if(fl)box.appendChild(el(`<span class="gstat hot">⚠️ <b>${fl}</b> ${fl===1?'צומת שדורש החלטה':'צמתים שדורשים החלטה'}</span>`));
+  if(fl)box.appendChild(el(`<span class="gstat hot">⚠️ <b>${fl}</b> ${fl===1?'דורש בירור או הכרעה':'דורשים בירור או הכרעה'}</span>`));
   return box;
 }
 function gLong(P){
@@ -2458,7 +2458,7 @@ function paintPhase(box,p){
   if(p.tr&&p.tr!=='מסלול קריטי')meta.appendChild(el(`<span class="pchip">${esc(p.tr)}</span>`));
   if(p.crit)meta.appendChild(el('<span class="pchip hot">מסלול קריטי</span>'));
   box.appendChild(meta);
-  if(p.flag)box.appendChild(el(`<div class="pconf warn">⚠️ <b>${esc(p.flag)}</b> — דורש הכרעה, ולכן התאריך כאן לא נגוע עד שתחליטו.</div>`));
+  if(p.flag)box.appendChild(el(`<div class="pconf warn">⚠️ <b>${esc(p.flag)}</b> — פתוח לבירור או להכרעה, ולכן התאריך כאן לא נגוע עד שיוכרע.</div>`));
   box.appendChild(el(p.conf==='הערכה'
     ? '<div class="pconf est">⚠️ התאריכים האלה הם <b>הערכה שלנו</b> לפי משכי ביצוע סבירים — אף אחד לא מסר אותם. אפשר לתכנן לפיהם, אסור להישבע בהם.</div>'
     : '<div class="pconf known">✓ התאריכים האלה <b>נמסרו לנו במפורש</b> על ידי הספק או בעל המקצוע.</div>'));
