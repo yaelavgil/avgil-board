@@ -230,6 +230,30 @@ h1{font-family:'Karantina','Assistant',sans-serif; font-weight:700; font-size:26
 .itembtns button{flex:1; border:none; border-radius:12px; padding:13px; font:inherit; font-weight:800; font-size:15px; cursor:pointer}
 .itembtns .done{background:var(--olive); color:#fff}
 .itembtns .reopen{background:transparent; border:1.5px solid var(--line); color:var(--ink)}
+.dotback{position:fixed; inset:0; z-index:120; background:rgba(0,0,0,.2)}
+.dotmenu{position:fixed; z-index:121; background:var(--card); border:1px solid var(--line);
+  border-radius:15px; box-shadow:0 16px 44px rgba(0,0,0,.24); padding:13px; width:min(292px,92vw)}
+.dotmenu h4{margin:0; font-size:15px; font-weight:800}
+.dotmenu .sub{font-size:12px; color:var(--muted); font-weight:700; margin-top:2px}
+.dotmenu .ttl{font-size:12.5px; line-height:1.4; margin:9px 0 11px; padding-top:9px;
+  border-top:1px solid var(--edge); color:var(--ink)}
+.dotmenu .lbl{display:block; font-size:11.5px; font-weight:800; color:var(--muted); margin:12px 0 5px}
+.dotmenu .snz{display:flex; gap:5px}
+.dotmenu .snz button{flex:1; border:1px solid var(--line); background:var(--bg); color:var(--ink);
+  border-radius:10px; padding:9px 0; font:inherit; font-weight:800; font-size:13px; cursor:pointer}
+.dotmenu .snz button:hover{border-color:var(--olive); color:var(--olive-ink); background:var(--olive-soft)}
+.dotmenu .big{width:100%; border:none; border-radius:11px; padding:12px; font:inherit;
+  font-weight:800; font-size:14.5px; cursor:pointer}
+.dotmenu .big.ok{background:var(--olive); color:#fff}
+.dotmenu .big.re{background:transparent; border:1.5px solid var(--line); color:var(--ink)}
+.dotmenu .big.plain{background:transparent; color:var(--muted); font-size:13px; margin-top:10px;
+  border-top:1px solid var(--edge); border-radius:0; padding:10px 0 2px}
+.dotmenu .pickd{display:flex; align-items:center; gap:8px; margin-top:7px; font-size:12.5px;
+  font-weight:800; color:var(--muted)}
+.dotmenu .pickd input{flex:1; border:1px solid var(--line); background:var(--bg); color:var(--ink);
+  border-radius:10px; padding:8px; font:inherit; font-size:13px}
+.subrow .st{cursor:pointer}
+.subrow .st:hover{transform:scale(1.35)}
 .improw{display:flex; align-items:flex-start; gap:9px; padding:8px 10px; border-radius:10px;
   border:1px solid var(--edge); background:var(--bg); margin-bottom:6px; cursor:pointer}
 .improw.skip{opacity:.45}
@@ -1656,6 +1680,77 @@ function exportCsv(id){
   a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),4000);
   toast('הגיליון ירד — אפשר לפתוח בגוגל שיטס ✓');
 }
+/* ─── מה שהנקודה אומרת, ומה אפשר לעשות עם זה ─────────────────────────
+   צבע הוא רמז, לא מידע. מי שלא זוכר את המקרא רואה עיגול אדום ולא יודע
+   אם זה איחור, דחיפות או תקלה — ולכן לחיצה עליו אומרת את זה במילים,
+   ומציעה את שתי הפעולות שממילא רוצים אחריה. */
+function dotState(t){
+  if(t.done)return {cls:'ok', head:'✅ בוצע', sub:t.due?('התאריך שנקבע: '+fmtDate(t.due)):''};
+  const du=daysUntil(t.due);
+  if(du===null)return {cls:'', head:'⚪ בלי תאריך', sub:'לא נקבע מתי'};
+  if(du<0){ const n=-du;
+    return {cls:'late', head:'🔴 באיחור',
+      sub:(n===1?'היה אמור להיות אתמול':`${n} ימים אחרי התאריך`)+' · '+fmtDate(t.due)}; }
+  if(du===0)return {cls:'soon', head:'🟠 להיום', sub:fmtDate(t.due)};
+  if(du===1)return {cls:'soon', head:'🟠 למחר', sub:fmtDate(t.due)};
+  return {cls:'', head:`⚪ בעוד ${du} ימים`, sub:fmtDate(t.due)};
+}
+function closeDot(){ document.querySelectorAll('.dotback,.dotmenu').forEach(x=>x.remove()); }
+function openDot(anchor,id,after){
+  closeDot();
+  const t=byId(id); if(!t)return;
+  const st=dotState(t);
+  const back=el('<div class="dotback"></div>');
+  back.onclick=closeDot;
+  const m=el(`<div class="dotmenu">
+    <h4>${st.head}</h4>
+    <div class="sub">${esc(st.sub||'')}</div>
+    <div class="ttl">${esc(t.title.replace(/^[🔴🟠🟡🔵✅⛔📦🔧🗑️👤🔁]\s*/,''))}</div>
+  </div>`);
+  const done=()=>{ const c=byId(id); if(!c)return;
+    c.done=!c.done; c.doneAt=c.done?(c.doneAt||Date.now()):0;
+    save(c,true); renderPinned(); closeDot();
+    toast(c.done?'בוצע ✓':'חזרה לפתוחות');
+    if(after)after(); };
+  const b=el(`<button class="big ${t.done?'re':'ok'}">${t.done?'↩ החזרה לפתוחות':'✓ סימון כבוצע'}</button>`);
+  b.onclick=done; m.appendChild(b);
+
+  if(!t.done){
+    m.appendChild(el('<span class="lbl">העברה לתאריך אחר</span>'));
+    const snz=el('<div class="snz"></div>');
+    [['היום',0],['מחר',1],['+3',3],['שבוע',7]].forEach(([lab,n])=>{
+      const s=el(`<button>${lab}</button>`);
+      s.onclick=()=>{ const c=byId(id); if(!c)return;
+        c.due=addDays(n); delete c.pin; save(c,true); renderPinned(); closeDot();
+        toast('הועבר ל'+(n===0?'היום':fmtDate(c.due))); if(after)after(); };
+      snz.appendChild(s);
+    });
+    m.appendChild(snz);
+    const dw=el('<div class="pickd"><span>📅 תאריך מדויק</span><input type="date"></div>');
+    const inp=dw.querySelector('input');
+    if(t.due)inp.value=t.due;
+    inp.onchange=()=>{ if(!inp.value)return;
+      const c=byId(id); if(!c)return;
+      c.due=inp.value; delete c.pin; save(c,true); renderPinned(); closeDot();
+      toast('הועבר ל'+fmtDate(c.due)); if(after)after(); };
+    m.appendChild(dw);
+  }
+  const op=el('<button class="big plain">↗ פתיחת המשימה</button>');
+  op.onclick=()=>{ closeDot(); openDetail(id); };
+  m.appendChild(op);
+
+  document.body.appendChild(back); document.body.appendChild(m);
+  /* התפריט נפתח ליד הנקודה שנלחצה, ונשאר בתוך המסך גם בתחתיתו */
+  const r=anchor.getBoundingClientRect(), mb=m.getBoundingClientRect();
+  let top=r.bottom+8, left=r.right-mb.width;
+  if(top+mb.height>innerHeight-8)top=r.top-mb.height-8;
+  /* נקודה שנלחצה בתחתית גלילה ארוכה יושבת מחוץ למסך — התפריט נצמד
+     לקצה הנראה ולא הולך איתה */
+  top=Math.min(Math.max(8,top), Math.max(8,innerHeight-mb.height-8));
+  left=Math.min(Math.max(8,left), Math.max(8,innerWidth-mb.width-8));
+  m.style.top=top+'px'; m.style.left=left+'px';
+}
+addEventListener('keydown',e=>{ if(e.key==='Escape')closeDot(); });
 function paintSheet(){
   const v=ui.view||{};
   if(v.phase){                              /* שלב מלוח הזמנים, לא משימה */
@@ -1764,12 +1859,16 @@ function paintTask(box,t){
     kids.forEach(k=>{
       const du=daysUntil(k.due);
       const cls=k.done?'ok':(du!==null&&du<0?'late':(du!==null&&du<=1?'soon':''));
-      const tip=k.done?'בוצע':(cls==='late'?'באיחור':(cls==='soon'?'היום או מחר':(k.due?'עתידי':'בלי תאריך')));
-      const r=el(`<button class="subrow ${k.done?'off':''}" title="${tip}">
-        <span class="st ${cls}"></span>
+      const tip=k.done?'בוצע':(cls==='late'?'באיחור — לחיצה לפרטים':(cls==='soon'?'היום או מחר':(k.due?'עתידי':'בלי תאריך')));
+      const r=el(`<button class="subrow ${k.done?'off':''}">
+        <span class="st ${cls}" title="${tip}"></span>
         <span class="n">${esc(k.title.replace(/^[🔴🟠🟡🔵✅⛔📦🔧🗑️👤🔁]\s*/,''))}</span>
         <span class="d">${k.done?'✓':(k.due?fmtDate(k.due):'')}</span></button>`);
-      r.onclick=()=>openDetail(k.id);
+      r.onclick=ev=>{
+        const d=ev.target.closest('.st');
+        if(d){ ev.stopPropagation(); return openDot(d,k.id,()=>paintSheet()); }
+        openDetail(k.id);
+      };
       wrap.appendChild(r);
     });
     box.appendChild(wrap);
