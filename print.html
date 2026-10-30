@@ -1,0 +1,729 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>ייצוא והדפסה — לוח של האבגילים</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#6C7A44">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="robots" content="noindex">
+<meta property="og:type" content="website">
+<meta property="og:title" content="רשימת משימות — אשל 57">
+<meta property="og:description" content="רשימה מסודרת לפי דחיפות, מוכנה להדפסה.">
+<meta property="og:locale" content="he_IL">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Karantina:wght@400;700&family=Assistant:wght@400;600;700;800&display=swap">
+<style>
+/* ===== שתי שכבות נפרדות =====
+   .bar  — הכלים. קיימת רק על המסך, נעלמת לגמרי בהדפסה.
+   .page — המסמך עצמו. נראה על המסך כדף A4 לבן, ובהדפסה הוא כל מה שיוצא.
+   הצבעים והמידות של .page לקוחים מ״רשימת חשמל — קרלוס״ ולא מערכת
+   הצבעים של האפליקציה: זה מסמך שנמסר ליד, לא מסך. */
+:root{
+  --bg:#F5F3EA; --card:#FFFDF6; --edge:#E4E0CC; --ink:#2F2E23; --muted:#8A8770;
+  --olive:#6C7A44; --olive-ink:#4E5A2E; --olive-soft:#EAEBD8; --line:#DDD9C6;
+  --pom:#C0452F;
+  /* פלטת המסמך — זהה לרשימה של קרלוס */
+  --d-ink:#0F0F0F; --d-gry:#5F5F5F; --d-blu:#19508C; --d-red:#AF1E19;
+  --d-sec:#EEEAE3; --d-box:#464646;
+  --p-hot:#CD3C32; --p-mid:#D68428; --p-chk:#963C8C; --p-new:#2D6EB4; --p-low:#969696;
+  direction:rtl;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#1F2019; --card:#2A2B21; --edge:#3A3B2D; --ink:#EDEAD9; --muted:#9C9A81;
+  --olive:#A8BA6A; --olive-ink:#C3D38A; --olive-soft:#37402A; --line:#3B3C2E;
+  --pom:#E07358;
+}}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--ink);font-family:'Assistant',-apple-system,sans-serif;
+  font-size:16px;line-height:1.5;-webkit-text-size-adjust:100%;padding-bottom:40px}
+
+/* ---------- סרגל הכלים (מסך בלבד) ---------- */
+.bar{position:sticky;top:0;z-index:20;background:var(--bg);
+  border-bottom:1px solid var(--line);padding:10px 14px calc(10px + env(safe-area-inset-top)) }
+.barin{max-width:860px;margin:0 auto}
+.brow{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:7px}
+.brow:last-child{margin-bottom:0}
+.lbl{font-size:12.5px;font-weight:800;color:var(--muted);min-width:42px}
+.chip{border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;
+  padding:5px 12px;font:inherit;font-size:13.5px;font-weight:700;cursor:pointer;line-height:1.3}
+.chip.on{background:var(--olive);border-color:var(--olive);color:#fff}
+.chip.go{background:var(--olive-soft);border-color:var(--olive);color:var(--olive-ink);font-weight:800}
+.chip.wide{flex:1;min-width:140px;text-align:center}
+.bar input[type=search],.bar input[type=date],.bar input[type=text]{
+  border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;
+  padding:6px 10px;font:inherit;font-size:13.5px;font-weight:600;min-width:0}
+.pickbox{max-height:min(46vh,330px);overflow:auto;border:1.5px solid var(--line);
+  border-radius:12px;background:var(--card);padding:5px;margin-top:4px;width:100%}
+.pk{display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:9px;cursor:pointer;
+  font-size:13.5px;font-weight:600}
+.pk:hover{background:var(--olive-soft)}
+.pk.on{background:var(--olive-soft);font-weight:800;color:var(--olive-ink)}
+.pk .bx{flex:0 0 auto;width:16px;height:16px;border:2px solid var(--muted);border-radius:4px;
+  display:grid;place-items:center;font-size:11px;color:#fff}
+.pk.on .bx{background:var(--olive);border-color:var(--olive)}
+.pk .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pk .c{flex:0 0 auto;font-size:11.5px;color:var(--muted);font-weight:700}
+.hint{font-size:12px;color:var(--muted);font-weight:600;line-height:1.5}
+.toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,16px);background:var(--ink);
+  color:var(--bg);padding:10px 18px;border-radius:999px;font-weight:800;font-size:14px;
+  opacity:0;pointer-events:none;transition:.22s;z-index:60}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* ---------- המסמך ---------- */
+.sheet{max-width:860px;margin:18px auto;padding:0 14px}
+.page{background:#fff;color:var(--d-ink);border-radius:4px;
+  box-shadow:0 1px 3px rgba(0,0,0,.14),0 10px 30px rgba(0,0,0,.09);
+  padding:30px 34px 38px;font-size:15.5px;line-height:1.45}
+.page h1{font-family:'Assistant',sans-serif;font-weight:800;font-size:30px;line-height:1.15;
+  color:var(--d-ink);letter-spacing:-.3px}
+.page .sub{color:var(--d-gry);font-size:14px;font-weight:600;margin-top:5px}
+.legend{display:flex;gap:6px;flex-wrap:wrap;margin-top:11px}
+.tag{display:inline-block;border-radius:999px;padding:1.5px 9px;font-size:11px;font-weight:800;
+  color:#fff;line-height:1.5;white-space:nowrap}
+.tag.hot{background:var(--p-hot)} .tag.mid{background:var(--p-mid)}
+.tag.chk{background:var(--p-chk)} .tag.new{background:var(--p-new)}
+.tag.low{background:var(--p-low)} .tag.ok{background:#7E8C5A}
+
+.sec{margin-top:22px}
+.sechd{background:var(--d-sec);padding:6px 12px;border-radius:3px;
+  font-size:19px;font-weight:800;color:var(--d-ink);display:flex;align-items:baseline;gap:9px}
+.sechd .c{font-size:12px;font-weight:700;color:var(--d-gry);margin-inline-start:auto}
+/* minmax(0,1fr) ולא 1fr: עמודה של 1fr אינה מתכווצת מתחת לרוחב התוכן,
+   ושורה עם מילה ארוכה הייתה דוחפת את הצ׳קבוקס אל מחוץ לדף */
+.prow{display:grid;grid-template-columns:auto minmax(0,1fr);gap:11px;
+  padding:9px 2px 9px 0;border-bottom:1px solid #F0EEE9;
+  break-inside:avoid;page-break-inside:avoid}
+.sec .prow:last-child{border-bottom:0}
+.bx{width:19px;height:19px;border:2.2px solid var(--d-box);border-radius:2px;margin-top:3px;
+  display:grid;place-items:center;font-size:14px;font-weight:800;color:var(--d-box)}
+.prow.done .bx{color:var(--d-gry);border-color:#9A9A9A}
+.ptx{min-width:0}
+.hl{font-size:15.5px;font-weight:700;line-height:1.4;color:var(--d-ink);
+  display:flex;flex-wrap:wrap;align-items:baseline;gap:7px}
+.hl .tx{min-width:0}
+.prow.hot .hl .tx{color:var(--d-red)}
+.prow.done .hl .tx{color:var(--d-gry);text-decoration:line-through;text-decoration-color:#BBB}
+.nt{font-size:12.5px;font-weight:600;line-height:1.5;color:var(--d-blu);margin-top:3px}
+.nt b{font-weight:800}
+.nt.g,.nt .g{color:var(--d-gry);font-weight:600}
+.foot{margin-top:28px;padding-top:12px;border-top:1px solid #DDD;
+  color:var(--d-gry);font-size:12.5px;font-weight:600;line-height:1.8}
+.empty{padding:50px 10px;text-align:center;color:var(--d-gry);font-weight:700}
+
+@media (max-width:560px){
+  .page{padding:22px 18px 28px;font-size:15px}
+  .page h1{font-size:25px}
+  .sechd{font-size:17px}
+}
+
+/* ---------- הדפסה ---------- */
+@page{size:A4;margin:12mm 11mm}
+@media print{
+  html,body{background:#fff}
+  body{padding:0;font-size:12pt}
+  .bar,.toast,.noprint{display:none !important}
+  .sheet{max-width:none;margin:0;padding:0}
+  .page{box-shadow:none;border-radius:0;padding:0;font-size:12pt;color:#000}
+  .page h1{font-size:22pt}
+  .page .sub{font-size:10pt}
+  .legend{margin-top:8pt}
+  .tag{font-size:7.5pt;padding:0.5pt 6pt;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .sec{margin-top:13pt;break-inside:auto}
+  /* כותרת סעיף לעולם לא נשארת לבדה בתחתית עמוד */
+  .sechd{font-size:14.5pt;padding:4pt 8pt;break-after:avoid;page-break-after:avoid;
+    break-inside:avoid;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .prow{padding:5.5pt 0;gap:8pt;break-inside:avoid;page-break-inside:avoid}
+  .bx{width:13pt;height:13pt;border-width:1.3pt;margin-top:1.5pt;font-size:10pt}
+  .hl{font-size:12pt;gap:5pt}
+  .nt{font-size:9pt;margin-top:1.5pt;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .foot{margin-top:16pt;font-size:9pt;break-inside:avoid}
+  a{color:inherit;text-decoration:none}
+}
+</style>
+</head>
+<body>
+
+<div class="bar noprint" id="bar"><div class="barin" id="barin"></div></div>
+<div class="sheet"><div class="page" id="page"><div class="empty">טוען…</div></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   ייצוא והדפסה — עמוד קריאה בלבד.
+   הוא לעולם אינו כותב ל-Firebase: אפשר לשלוח את הכתובת לספק
+   בלי לחשוש שמשהו בלוח ישתנה.
+   ============================================================ */
+const DB='https://home-picks-47450-default-rtdb.europe-west1.firebasedatabase.app';
+const SITE='https://yaelavgil.github.io/avgil-board/';
+const CACHE='av_tasks_v1';
+const $=i=>document.getElementById(i);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+const CATS={trip:'✈️ פולין', reno:'🏠 שיפוץ', home:'🧺 בית', gift:'🎁 מתנות',
+            idea:'💡 רעיונות', school:'🎒 בי״ס', health:'🩺 בריאות'};
+const LISTS={now:'עכשיו', week:'השבוע', later:'בהמשך', hot:'דחוף', someday:'מתישהו'};
+const OWNERS=['יעל','רועי','שנינו'];
+
+/* ===== ספקים =====
+   ההחלטה: שדה אמיתי `supplier` על המשימה הוא המקור הראשון, ורישום
+   הספקים כאן הוא הגיבוי. משימה שעדיין לא תויגה ידנית נקשרת לספק
+   לפי משימת-השורש שלה (או שרשרת ה-parent אליה), ורק אם גם זה לא
+   נמצא — לפי שם הספק בכותרת. כך אין צורך לתייג 181 משימות כדי
+   שהייצוא יעבוד היום, ותיוג ידני תמיד גובר על הניחוש. */
+const SUPPLIERS=[
+  {k:'carlos',  n:'קרלוס',      ic:'⚡', roots:['t-carlos'],                 alias:['קרלוס']},
+  {k:'barak',   n:'ברק',        ic:'🧱', roots:['ong-barak','f01'],          alias:['ברק']},
+  {k:'nofar',   n:'נופר',       ic:'🎨', roots:['ong-nofar','f09'],          alias:['נופר']},
+  {k:'golan',   n:'גולן',       ic:'🪚', roots:['g11','g12'],                alias:['גולן']},
+  {k:'rafael',  n:'רפאל',       ic:'🪑', roots:['w01'],                      alias:['רפאל']},
+  {k:'izat',    n:'עיזאת',      ic:'🌳', roots:['t-izat','f07'],             alias:['עיזאת']},
+  {k:'gal',     n:'גל בטון',    ic:'🧩', roots:['t-gal'],                    alias:['גל','א.א קרמיקה']},
+  {k:'formagio',n:'פורמג׳ו',    ic:'🍳', roots:['t-kitchen','k03','p01','p02'], alias:['פורמג׳ו',"פורמג'ו"]},
+  {k:'mahmoud', n:'מחמוד',      ic:'🪟', roots:['t-mahmoud'],                alias:['מחמוד']},
+  {k:'yaakov',  n:'יעקב פרקט',  ic:'🪵', roots:['t-parq'],                   alias:['יעקב פרקט']},
+  {k:'plumb',   n:'אינסטלטור',  ic:'🚰', roots:['t-plumb'],                  alias:['אינסטלטור']},
+  {k:'tile',    n:'ריצוף',      ic:'🧱', roots:['t-tile'],                   alias:[]},
+  {k:'trelidor',n:'טרלידור',    ic:'🛡', roots:['r42'],                      alias:['טרלידור']},
+  {k:'avishav', n:'אבישב',      ic:'❄️', roots:[],                           alias:['אבישב']}
+];
+const supBy=k=>SUPPLIERS.find(s=>s.k===k);
+/* ב-JS הגבול ‎\b‎ מכיר רק אותיות לטיניות, ולכן אות עברית צמודה לא הייתה
+   עוצרת התאמה: ״גלילה״ היה נתפס כ״גל״. הגבול כאן הוא ״לא אות עברית״. */
+const HE='֐-ת';
+function aliasHit(title,alias){
+  const t=' '+String(title||'')+' ';
+  return alias.some(a=>new RegExp('(^|[^'+HE+'])'+a.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'($|[^'+HE+'])').test(t));
+}
+/* הסדר הוא סדר של חוזק ראיה: תיוג ידני, אחר כך משימת-שורש, אחר כך
+   ספק ששמו כתוב בכותרת, ורק בסוף ירושה מההורה. ״גולן — לדרוש את
+   דוגמאות הצבע״ יושבת בסדר היום של נופר, אבל היא של גולן: שם מפורש
+   בכותרת חזק יותר מהתיקייה שבה המשימה יושבת. */
+function supplierOf(t,seen){
+  if(!t)return null;
+  if(t.supplier&&supBy(t.supplier))return t.supplier;
+  const byRoot=SUPPLIERS.find(s=>s.roots.includes(t.id));
+  if(byRoot)return byRoot.k;
+  const byName=SUPPLIERS.find(s=>s.alias.length&&aliasHit(t.title,s.alias));
+  if(byName)return byName.k;
+  if(t.parent){
+    const g=seen||new Set();
+    if(!g.has(t.id)){ g.add(t.id); const up=supplierOf(byId(t.parent),g); if(up)return up; }
+  }
+  return null;
+}
+
+/* ===== נתונים =====
+   הציור הראשון מגיע מה-localStorage של הדפדפן הזה, אם יש. אצל ספק
+   שפותח לינק לראשונה אין כלום שם — ולכן ממילא ממתינים ל-Firebase.
+   אף פעם לא מציגים עותק קפוא כאילו הוא המצב הנוכחי. */
+let tasks=[];
+try{ const c=localStorage.getItem(CACHE); if(c)tasks=JSON.parse(c)||[]; }catch(e){}
+function byId(id){ return tasks.find(t=>t.id===id); }
+function childrenOf(id){ return tasks.filter(t=>t.parent===id); }
+
+const DAY=864e5;
+function todayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function daysUntil(iso){ if(!iso)return null; return Math.round((new Date(iso)-new Date(todayStr()))/DAY); }
+function fmtDate(iso){ const d=new Date(iso); return d.toLocaleDateString('he-IL',{day:'numeric',month:'numeric'}); }
+function toast(m){ const n=$('toast'); n.textContent=m; n.classList.add('on');
+  clearTimeout(n._t); n._t=setTimeout(()=>n.classList.remove('on'),2400); }
+
+/* ===== הסינון, כפי שהוא מקודד ב-hash ===== */
+const F={scope:'sup', sup:'carlos', ids:[], cat:'', owner:'', list:'',
+         from:'', to:'', done:false, items:true, title:''};
+function readHash(){
+  const h=new URLSearchParams((location.hash||'').replace(/^#/,''));
+  if(!h.toString())return;
+  if(h.has('sup')){ F.scope='sup'; F.sup=h.get('sup'); }
+  else if(h.has('task')||h.has('ids')){
+    F.scope='ids';
+    F.ids=(h.get('ids')||h.get('task')||'').split(',').map(s=>s.trim()).filter(Boolean);
+  }
+  else if(h.has('cat')||h.has('owner')||h.has('list')||h.has('from')||h.has('to')){
+    F.scope='filter';
+    F.cat=h.get('cat')||''; F.owner=h.get('owner')||''; F.list=h.get('list')||'';
+    F.from=h.get('from')||''; F.to=h.get('to')||'';
+  }
+  else if(h.has('all'))F.scope='all';
+  if(h.has('done'))F.done=h.get('done')==='1';
+  if(h.has('items'))F.items=h.get('items')!=='0';
+  if(h.has('title'))F.title=h.get('title')||'';
+}
+function hashOf(){
+  const p=new URLSearchParams();
+  if(F.scope==='sup')p.set('sup',F.sup);
+  else if(F.scope==='ids'){ if(!F.ids.length)return '#all=1'; p.set('ids',F.ids.join(',')); }
+  else if(F.scope==='filter'){
+    if(F.cat)p.set('cat',F.cat); if(F.owner)p.set('owner',F.owner);
+    if(F.list)p.set('list',F.list); if(F.from)p.set('from',F.from); if(F.to)p.set('to',F.to);
+    if(!p.toString())p.set('all','1');
+  }
+  else p.set('all','1');
+  if(F.done)p.set('done','1');
+  if(!F.items)p.set('items','0');
+  if(F.title)p.set('title',F.title);
+  return '#'+p.toString();
+}
+function syncHash(){ history.replaceState(null,'',location.pathname+hashOf()); }
+
+/* ===== בחירת המשימות שנכנסות למסמך ===== */
+function pickTasks(){
+  const live=tasks.filter(t=>t&&t.id);
+  if(F.scope==='sup')      return live.filter(t=>supplierOf(t)===F.sup);
+  if(F.scope==='ids'){
+    const out=[];
+    F.ids.forEach(id=>{
+      const t=byId(id); if(!t||out.includes(t))return;
+      out.push(t);
+      childrenOf(id).forEach(k=>{ if(!out.includes(k))out.push(k); });   /* ותתי-המשימות שלה */
+    });
+    return out;
+  }
+  if(F.scope==='filter')   return live.filter(t=>{
+    if(F.cat&&t.cat!==F.cat)return false;
+    if(F.owner&&t.owner!==F.owner&&!(F.owner!=='שנינו'&&t.owner==='שנינו'))return false;
+    if(F.list&&t.list!==F.list)return false;
+    if(F.from&&(!t.due||t.due<F.from))return false;
+    if(F.to&&(!t.due||t.due>F.to))return false;
+    return true;
+  });
+  return live;
+}
+
+/* ===== טקסט =====
+   פריט בלוח נכתב כ״אימוג׳י **כותרת** המשך ההסבר״ — בדיוק הפיצול
+   שהמסמך צריך: הכותרת גדולה ושחורה, וההמשך הערה כחולה קטנה מתחתיה. */
+const EMO=/^(?:[\u{1F000}-\u{1FAFF}\u{2190}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}\u{20E3}\u{00A9}\u{00AE}\u{2122}]|\s)+/u;
+function noEmoji(s){ return String(s||'').replace(EMO,'').trim(); }
+function unmd(s){ return String(s||'').replace(/\*\*(.+?)\*\*/g,'$1').replace(/`/g,'')
+  .replace(/\s+/g,' ').trim(); }
+/* תת-קבוצה קטנה של markdown — בדיוק זו שנכתבת בפועל בפריטי הלוח.
+   הכוכבית הכפולה נבלעת ראשונה, ולכן מה שנשאר בודד הוא נטוי ולא שארית. */
+function mdNote(s){
+  return esc(String(s||''))
+    .replace(/\*\*(.+?)\*\*/g,'<b>$1</b>')
+    .replace(/(^|[\s(\[])\*([^*\n]+)\*/g,'$1<i>$2</i>')
+    .replace(/`([^`]+)`/g,'$1');
+}
+/* שורה שנפתחת בסימן רשימה — להציג אותה כרשימה, לא עם כוכבית חשופה */
+function bullet(l){
+  const s=String(l||'').replace(/^\s*[*\-–•·]\s+/,'');
+  return s===String(l||'').trim()?s:'• '+s;
+}
+
+/* `*(r06 · הערה)*` בסוף פריט הוא הפניה פנימית — לא מעניינת את מי
+   שמקבל את הדף, אבל ההערה שאחרי הנקודה כן. */
+function splitRefs(txt){
+  /* ההפניה לא תמיד יושבת בסוף המחרוזת — לפעמים יש אחריה נקודה.
+     לכן מוציאים כל מופע, לא רק מופע מסיים. */
+  const ID=/^[a-z][a-z0-9-]*(\s*,\s*[a-z][a-z0-9-]*)*$/i;   /* r06 · t-kitchen · ong-barak */
+  const D=/^\d{1,2}[./]\d{1,2}(?:[./]\d{2,4})?$/;
+  const notes=[];
+  const body=String(txt||'').replace(/\s*\*\(([^)]*)\)\*/g,(_,inner)=>{
+    inner.split('·').map(s=>s.trim()).filter(Boolean).forEach(p=>{
+      if(ID.test(p))return;                 /* מזהה פנימי — לא מעניין את מי שמקבל את הדף */
+      notes.push(D.test(p)?'עודכן '+p:p);   /* תאריך עירום על שורה משלו נקרא כזבל */
+    });
+    return ' ';
+  }).replace(/\s+([.,;:!?])/g,'$1').replace(/\s{2,}/g,' ').trim();
+  return {body, note:notes.join(' · ')};
+}
+/* ״עודכן 29.10״ הוא חותמת פנימית, לא הוראה לספק — אפור וקטן,
+   נוכח למי שמחפש אותו ולא מתחרה בהערות עצמן */
+function stamp(s){
+  const t=String(s||'');
+  return /^עודכן /.test(t)?'<span class="g">'+esc(t)+'</span>':mdNote(t);
+}
+/* פריט → כותרת + שורות הערה */
+function splitItem(raw,ans){
+  const lines=String(raw||'').split('\n').map(s=>s.trim()).filter(Boolean);
+  const first=splitRefs(lines[0]||'');
+  const notes=[];
+  let head=first.body, rest='';
+  const b=head.match(/^(.*?)\*\*(.+?)\*\*(.*)$/s);
+  if(b&&b[2].trim()){ head=b[2].trim(); rest=(b[3]||'').trim(); }
+  head=noEmoji(unmd(head));
+  rest=rest.replace(/^[—–\-:·,.]\s*/,'').trim();
+  /* בלי הדגשה: כותרת ארוכה נשברת בקו המפריד הראשון */
+  if(!b&&head.length>72){
+    const ix=head.indexOf(' — ');
+    if(ix>22){ rest=head.slice(ix+3).trim(); head=head.slice(0,ix).trim(); }
+  }
+  if(rest)notes.push(mdNote(rest));
+  lines.slice(1).forEach(l=>{ const s=splitRefs(l); if(s.body)notes.push(mdNote(bullet(s.body)));
+                              if(s.note)notes.push(stamp(s.note)); });
+  if(first.note)notes.push(stamp(first.note));
+  if(ans&&String(ans).trim())notes.push('<b>סוכם:</b> '+mdNote(String(ans).trim()));
+  return {head:head||'(ללא כותרת)', notes};
+}
+
+/* ===== דחיפות =====
+   lv של פריט הוא נתון. למשימה שאין לה lv הוא נגזר ממה שיש: תאריך
+   שעבר או היום = דחוף, ״מתישהו/בהמשך״ = משני, והשאר רגיל. */
+function lvOfTask(t){
+  if(t.lv===1||t.lv===2||t.lv===3)return t.lv;
+  const du=daysUntil(t.due);
+  if(du!==null&&du<=0)return 1;
+  if(t.list==='now'||t.list==='hot'||t.pin==='hot')return 1;
+  if(t.list==='someday'||t.list==='later')return 3;
+  return 2;
+}
+function tagsOf(r){
+  const out=[];
+  const du=r.due&&!r.done?daysUntil(r.due):null;
+  if(r.done)out.push(['ok','בוצע']);
+  /* ״באיחור · 5.10״ אומר כבר הכול — ״דחוף״ לצידו הוא רעש */
+  else if(r.lv===1&&!(du!==null&&du<0))out.push(['hot','דחוף']);
+  else if(r.lv===3)out.push(['low','משני']);
+  if(du!==null){
+    if(du<0)       out.push(['chk','באיחור · '+fmtDate(r.due)]);
+    else if(du===0)out.push(['mid','היום']);
+    else if(du<=7) out.push(['mid','עד '+fmtDate(r.due)]);
+    else           out.push(['new',fmtDate(r.due)]);
+  }
+  return out;
+}
+/* המיון תמיד לפי דחיפות: lv ואז due. הלוח עצמו לא נוגע בזה —
+   שם הסדר הוא סדר הגרירה, וכאן זה משטח אחר לגמרי. */
+const byUrgency=(a,z)=>(a.done?1:0)-(z.done?1:0)
+  || (a.lv||2)-(z.lv||2)
+  || String(a.due||'9999').localeCompare(String(z.due||'9999'));
+
+/* ===== בניית המסמך ===== */
+function headOfItem(raw){
+  /* ״🚿 מקלחת הורים · **…**״ — התחילית שלפני הנקודה היא שם הסעיף,
+     אבל רק כשהיא מחוץ להדגשה: נקודה בתוך ‎**…**‎ היא חלק מהמשפט. */
+  const s=String(raw||'').split('\n')[0]||'';
+  const ix=s.indexOf(' · ');
+  if(ix<=0||ix>34)return '';
+  if(s.slice(0,ix).includes('**'))return '';
+  return noEmoji(unmd(s.slice(0,ix)));
+}
+function rowsOfItems(t){
+  const its=(Array.isArray(t.items)?t.items:[]).filter(i=>F.done||!i.done);
+  return its.map(i=>{
+    const sp=splitItem(i.t,i.ans);
+    return {head:sp.head, notes:sp.notes, lv:i.lv||2, done:!!i.done, due:null, grp:headOfItem(i.t)};
+  });
+}
+function rowOfTask(t){
+  const sp=splitItem(t.title,'');
+  const notes=sp.notes.slice();
+  const n=String(t.notes||'').split('\n').map(s=>s.trim()).filter(Boolean)[0];
+  if(n)notes.push(mdNote(unmd(splitRefs(n).body).slice(0,180)));
+  if(t.owner)notes.push('<span class="g">אחראי: '+esc(t.owner)+'</span>');
+  return {head:sp.head, notes, lv:lvOfTask(t), done:!!t.done, due:t.due||null, grp:'', cat:t.cat||''};
+}
+function buildDoc(){
+  const picked=pickTasks().filter(t=>F.done||!t.done);
+  const secs=[], loose=[];
+  picked.forEach(t=>{
+    const rows=F.items?rowsOfItems(t):[];
+    if(!rows.length){ loose.push(rowOfTask(t)); return; }
+    /* אם רוב הפריטים נושאים תחילית — היא מחלקת לסעיפים. אם לא
+       (רשימת קרלוס, למשל) — המשימה עצמה היא הסעיף. */
+    const named=rows.filter(r=>r.grp).length;
+    if(named>=2&&named>=rows.length*0.5){
+      const m=new Map();
+      rows.forEach(r=>{ const h=r.grp||noEmoji(unmd(t.title)).split(/\s[—–]\s/)[0];
+        if(!m.has(h))m.set(h,[]); m.get(h).push(r); });
+      m.forEach((rs,h)=>secs.push({head:h,rows:rs}));
+    }else{
+      /* התחילית לא שימשה ככותרת סעיף — היא חוזרת לשורה עצמה,
+         אחרת ״מקלחת הורים · למלא רובה״ היה הופך ל״למלא רובה״ בלבד */
+      rows.forEach(r=>{ if(r.grp)r.head=r.grp+' · '+r.head; });
+      secs.push({head:noEmoji(unmd(t.title)), rows});
+    }
+  });
+  if(loose.length){
+    if(!secs.length){
+      /* רק משימות, בלי סעיפים — מחלקים לפי קטגוריה, שזה החיתוך
+         היחיד שבאמת קיים על משימה בודדת */
+      const m=new Map();
+      loose.forEach(r=>{ const h=r.cat&&CATS[r.cat]?noEmoji(CATS[r.cat]):'כללי';
+        if(!m.has(h))m.set(h,[]); m.get(h).push(r); });
+      m.forEach((rs,h)=>secs.push({head:h,rows:rs}));
+    }else secs.push({head:'משימות נוספות', rows:loose, last:true});
+  }
+  secs.forEach(s=>s.rows.sort(byUrgency));
+  /* סעיף דחוף עולה למעלה — אותו כלל מיון, רמה אחת מעל.
+     ״משימות נוספות״ הוא סל השאריות ולא נושא, ולכן נשאר בתחתית
+     גם כשיש בו פריט דחוף. */
+  secs.sort((a,z)=>{
+    const m=s=>s.rows.reduce((b,r)=>Math.min(b,r.done?9:(r.lv||2)),9);
+    const d=s=>s.rows.reduce((b,r)=>r.due&&!r.done&&r.due<b?r.due:b,'9999');
+    return (a.last?1:0)-(z.last?1:0)||m(a)-m(z)||String(d(a)).localeCompare(String(d(z)));
+  });
+  const all=secs.reduce((n,s)=>n+s.rows.length,0);
+  const open=secs.reduce((n,s)=>n+s.rows.filter(r=>!r.done).length,0);
+  const hot=secs.reduce((n,s)=>n+s.rows.filter(r=>!r.done&&r.lv===1).length,0);
+  return {title:F.title||scopeTitle(), secs, all, open, hot};
+}
+function scopeTitle(){
+  if(F.scope==='sup'){ const s=supBy(F.sup); return s?'רשימה ל'+s.n:'רשימה לספק'; }
+  if(F.scope==='ids'){
+    const t=byId(F.ids[0]);
+    if(F.ids.length===1&&t)return noEmoji(unmd(t.title)).split(/\s[—–]\s/)[0];
+    return 'רשימת משימות';
+  }
+  if(F.scope==='filter'){
+    const p=[];
+    if(F.cat&&CATS[F.cat])p.push(noEmoji(CATS[F.cat]));
+    if(F.owner)p.push(F.owner);
+    if(F.list&&LISTS[F.list])p.push(LISTS[F.list]);
+    if(F.from||F.to)p.push((F.from?fmtDate(F.from):'')+'–'+(F.to?fmtDate(F.to):''));
+    return p.length?'משימות · '+p.join(' · '):'כל המשימות';
+  }
+  return 'כל המשימות';
+}
+
+/* ===== ציור ===== */
+function paint(){
+  const d=buildDoc();
+  const today=new Date().toLocaleDateString('he-IL',{day:'numeric',month:'long',year:'numeric'});
+  let h=`<h1>${esc(d.title)}</h1>
+    <div class="sub">אשל 57, בת חפר · יעל ורועי אבגיל · ${today}</div>`;
+  /* המקרא מראה רק תגיות שבאמת מופיעות ברשימה הזאת */
+  const used=new Set();
+  d.secs.forEach(s=>s.rows.forEach(r=>tagsOf(r).forEach(([c])=>used.add(c))));
+  const LEGN={hot:'דחוף', chk:'באיחור', mid:'קרוב', new:'תאריך', low:'משני', ok:'בוצע'};
+  const leg=['hot','chk','mid','new','low','ok'].filter(c=>used.has(c))
+    .map(c=>`<span class="tag ${c}">${LEGN[c]}</span>`);
+  if(leg.length)h+=`<div class="legend">${leg.join('')}</div>`;
+  if(!d.all){
+    $('page').innerHTML=h+'<div class="empty">אין פריטים בהיקף שנבחר.</div>';
+    setHint(d); return;
+  }
+  d.secs.forEach(s=>{
+    const o=s.rows.filter(r=>!r.done).length;
+    h+=`<div class="sec"><div class="sechd"><span>${esc(s.head)}</span>
+      <span class="c">${o} מתוך ${s.rows.length}</span></div>`;
+    s.rows.forEach(r=>{
+      h+=`<div class="prow${r.lv===1&&!r.done?' hot':''}${r.done?' done':''}">
+        <div class="bx">${r.done?'✓':''}</div>
+        <div class="ptx">
+          <div class="hl"><span class="tx">${esc(r.head)}</span>${
+            tagsOf(r).map(([c,t])=>`<span class="tag ${c}">${esc(t)}</span>`).join('')}</div>
+          ${r.notes.filter(Boolean).map(n=>`<div class="nt">${n}</div>`).join('')}
+        </div></div>`;
+    });
+    h+='</div>';
+  });
+  h+=`<div class="foot">${d.open} פתוחים מתוך ${d.all}${d.hot?` · ${d.hot} דחופים`:''}<br>
+    נחתם בתאריך ___________ &nbsp; שם ___________________ &nbsp; חתימה ___________________</div>`;
+  $('page').innerHTML=h;
+  setHint(d);
+  document.title=d.title+' — אשל 57';
+}
+function setHint(d){
+  const n=$('hint'); if(!n)return;
+  n.textContent=`${d.open} פתוחים מתוך ${d.all} · ${d.secs.length} סעיפים · הסדר לפי דחיפות`;
+}
+
+/* ===== טקסט לוואטסאפ =====
+   וואטסאפ קובע כיוון לכל שורה לפי התו החזק הראשון בה, ושורה
+   שמתחילה ב-'•' נפתחת בתו ניטרלי — ואז הבולט קופץ שמאלה.
+   RLM בראש כל שורה מכריח ימין-לשמאל בלי להופיע בטקסט. */
+function waText(){
+  const d=buildDoc(), R='‏';
+  const today=new Date().toLocaleDateString('he-IL',{day:'numeric',month:'numeric'});
+  let s=`${R}*${d.title}*\n${R}_אשל 57 · ${today}_\n`;
+  d.secs.forEach(sec=>{
+    s+='\n'+R+'*'+sec.head+'*\n';
+    sec.rows.forEach(r=>{
+      const mark=r.done?'✅ ':(r.lv===1?'🔴 ':'• ');
+      let line=R+mark+r.head;
+      const tg=tagsOf(r).filter(([c])=>c==='chk'||c==='mid');
+      if(tg.length)line+=' ('+tg[0][1]+')';
+      s+=line+'\n';
+      /* הערה אחת לכל היותר — וואטסאפ ארוך מדי לא נקרא */
+      const n=r.notes.filter(Boolean)[0];
+      if(n)s+=R+'   '+n.replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').replace(/&lt;/g,'<')
+        .replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'").trim()+'\n';
+    });
+  });
+  s+=`\n${R}${d.open} פתוחים מתוך ${d.all}. נשמח לדעת מה מתוך זה נסגר ועד מתי 🙏`;
+  return s;
+}
+/* ===== HTML עשיר לגוגל דוקס =====
+   גוגל דוקס ווורד אינם יורשים כיוון מ-CSS בלבד — צריך dir על כל
+   אלמנט שיוצר פסקה, אחרת הסימנים והמספרים קופצים לצד הלא נכון. */
+function docHtml(){
+  const d=buildDoc();
+  const today=new Date().toLocaleDateString('he-IL',{day:'numeric',month:'long',year:'numeric'});
+  let b=`<h1 dir="rtl" style="font-size:19pt;margin:0 0 2pt">${esc(d.title)}</h1>
+    <p dir="rtl" style="color:#777;font-size:10pt;margin:0 0 14pt">אשל 57, בת חפר · יעל ורועי אבגיל · ${today} · ${d.open} פתוחים מתוך ${d.all}</p>`;
+  d.secs.forEach(s=>{
+    b+=`<h2 dir="rtl" style="font-size:13pt;background:#EEEAE3;padding:4pt 7pt;margin:14pt 0 6pt">${esc(s.head)}</h2>`;
+    s.rows.forEach(r=>{
+      const tg=tagsOf(r).map(([,t])=>t).join(' · ');
+      b+=`<p dir="rtl" style="font-size:11.5pt;margin:0 0 2pt">${r.done?'&#9745;':'&#9744;'} <b>${esc(r.head)}</b>`+
+         (tg?` <span style="color:${r.lv===1&&!r.done?'#CD3C32':'#888'};font-size:9.5pt">· ${esc(tg)}</span>`:'')+`</p>`;
+      r.notes.filter(Boolean).forEach(n=>{
+        b+=`<p dir="rtl" style="font-size:9.5pt;color:#19508C;margin:0 0 2pt 0;padding-right:16pt">${n}</p>`;
+      });
+      b+='<p dir="rtl" style="margin:0 0 6pt;font-size:1pt">&nbsp;</p>';
+    });
+  });
+  b+=`<p dir="rtl" style="margin-top:20pt;font-size:9.5pt;color:#777;border-top:1px solid #ccc;padding-top:8pt">
+    נחתם בתאריך ___________ &nbsp; שם ___________________ &nbsp; חתימה ___________________</p>`;
+  return `<html lang="he" dir="rtl"><head><meta charset="utf-8"></head>`+
+         `<body dir="rtl" style="font-family:Arial,sans-serif;direction:rtl;text-align:right">${b}</body></html>`;
+}
+async function copyRich(){
+  /* את שני הפורמטים בונים לפני ה-await — ספארי מבטל כתיבה ללוח
+     שלא יצאה מתוך אותו אירוע לחיצה */
+  const html=docHtml(), text=waText();
+  try{
+    await navigator.clipboard.write([new ClipboardItem({
+      'text/html':new Blob([html],{type:'text/html'}),
+      'text/plain':new Blob([text],{type:'text/plain'})
+    })]);
+    toast('הועתק — הדביקי בגוגל דוקס ✓');
+  }catch(e){
+    try{ await navigator.clipboard.writeText(text); toast('הועתק כטקסט (הדפדפן לא תומך בעיצוב)'); }
+    catch(e2){ toast('ההעתקה נכשלה'); }
+  }
+}
+
+/* ===== סרגל הכלים ===== */
+function chip(label,on,fn,cls){
+  const b=document.createElement('button');
+  b.className='chip'+(on?' on':'')+(cls?' '+cls:''); b.type='button';
+  b.textContent=label; b.onclick=fn; return b;
+}
+function row(host,lbl){
+  const r=document.createElement('div'); r.className='brow';
+  if(lbl){ const s=document.createElement('span'); s.className='lbl'; s.textContent=lbl; r.appendChild(s); }
+  host.appendChild(r); return r;
+}
+/* apply בונה מחדש גם את הסרגל — שינוי היקף משנה אילו פקדים קיימים.
+   בחירה בתוך רשימה קיימת מציירת רק את המסמך, אחרת שדה החיפוש
+   נבנה מחדש באמצע ההקלדה ומאבד את המיקוד. */
+function apply(){ syncHash(); paintBar(); paint(); }
+function paintBar(){
+  const host=$('barin'); host.innerHTML='';
+
+  const r1=row(host,'היקף');
+  [['all','הכל'],['sup','ספק'],['ids','משימות'],['filter','סינון']].forEach(([k,n])=>
+    r1.appendChild(chip(n,F.scope===k,()=>{ F.scope=k; apply(); })));
+
+  if(F.scope==='sup'){
+    const r=row(host,'מי');
+    SUPPLIERS.forEach(s=>{
+      const n=tasks.filter(t=>supplierOf(t)===s.k&&(F.done||!t.done)).length;
+      if(!n&&F.sup!==s.k)return;
+      r.appendChild(chip(s.ic+' '+s.n+(n?' · '+n:''),F.sup===s.k,()=>{ F.sup=s.k; apply(); }));
+    });
+  }
+  if(F.scope==='ids'){
+    const r=row(host,'חיפוש');
+    const q=document.createElement('input'); q.type='search'; q.placeholder='סינון הרשימה…';
+    q.style.flex='1'; q.value=paintBar._q||'';
+    q.oninput=()=>{ paintBar._q=q.value; fillPick(); };
+    r.appendChild(q);
+    r.appendChild(chip('ניקוי הבחירה',false,()=>{ F.ids=[]; apply(); }));
+    const box=document.createElement('div'); box.className='pickbox'; box.id='pickbox';
+    host.appendChild(box);
+    fillPick();
+  }
+  if(F.scope==='filter'){
+    const rc=row(host,'קטגוריה');
+    Object.entries(CATS).forEach(([k,v])=>rc.appendChild(chip(v,F.cat===k,()=>{
+      F.cat=F.cat===k?'':k; apply(); })));
+    const ro=row(host,'אחראי');
+    OWNERS.forEach(o=>ro.appendChild(chip(o,F.owner===o,()=>{ F.owner=F.owner===o?'':o; apply(); })));
+    const rl=row(host,'רשימה');
+    Object.entries(LISTS).forEach(([k,v])=>rl.appendChild(chip(v,F.list===k,()=>{
+      F.list=F.list===k?'':k; apply(); })));
+    const rd=row(host,'תאריך');
+    const a=document.createElement('input'); a.type='date'; a.value=F.from;
+    a.onchange=()=>{ F.from=a.value; apply(); };
+    const z=document.createElement('input'); z.type='date'; z.value=F.to;
+    z.onchange=()=>{ F.to=z.value; apply(); };
+    rd.appendChild(a); rd.appendChild(z);
+    rd.appendChild(chip('ניקוי',false,()=>{ F.cat=F.owner=F.list=F.from=F.to=''; apply(); }));
+  }
+
+  const r2=row(host,'תצוגה');
+  r2.appendChild(chip('כולל סעיפים',F.items,()=>{ F.items=!F.items; apply(); }));
+  r2.appendChild(chip('כולל שבוצעו',F.done,()=>{ F.done=!F.done; apply(); }));
+  const ti=document.createElement('input'); ti.type='text'; ti.placeholder='כותרת המסמך…';
+  ti.value=F.title; ti.style.flex='1';
+  ti.onchange=()=>{ F.title=ti.value.trim(); apply(); };
+  r2.appendChild(ti);
+
+  const r3=row(host,'');
+  r3.appendChild(chip('🖨 הדפסה / PDF',false,()=>window.print(),'go wide'));
+  r3.appendChild(chip('💬 וואטסאפ',false,async()=>{
+    const t=waText();
+    try{ await navigator.clipboard.writeText(t); }catch(e){}
+    if(t.length<1500)window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank','noopener');
+    else toast('הרשימה ארוכה — הועתקה, אפשר להדביק');
+  }));
+  r3.appendChild(chip('📝 לגוגל דוק',false,copyRich));
+  r3.appendChild(chip('🔗 לינק',false,async()=>{
+    try{ await navigator.clipboard.writeText(SITE+'print.html'+hashOf()); toast('הלינק הועתק ✓'); }
+    catch(e){ toast('ההעתקה נכשלה'); }
+  }));
+  r3.appendChild(chip('↩ ללוח',false,()=>location.href='./'));
+
+  const r4=row(host,'');
+  const s=document.createElement('span'); s.className='hint'; s.id='hint';
+  r4.appendChild(s);
+}
+function fillPick(){
+  const box=$('pickbox'); if(!box)return;
+  const q=(paintBar._q||'').trim();
+  box.innerHTML='';
+  const list=tasks.filter(t=>F.done||!t.done)
+    .filter(t=>!q||(t.title||'').includes(q))
+    .sort((a,z)=>((Array.isArray(z.items)?z.items.length:0)-(Array.isArray(a.items)?a.items.length:0))
+                 ||lvOfTask(a)-lvOfTask(z));
+  if(!list.length){ box.innerHTML='<div class="hint" style="padding:10px">אין משימות מתאימות</div>'; return; }
+  list.slice(0,200).forEach(t=>{
+    const on=F.ids.includes(t.id);
+    const n=Array.isArray(t.items)?t.items.filter(i=>F.done||!i.done).length:0;
+    const d=document.createElement('div');
+    d.className='pk'+(on?' on':'');
+    d.innerHTML=`<span class="bx">${on?'✓':''}</span><span class="n">${esc(unmd(t.title))}</span>`+
+                `<span class="c">${n?n+' סעיפים':'—'}</span>`;
+    d.onclick=()=>{
+      if(F.ids.includes(t.id))F.ids=F.ids.filter(x=>x!==t.id); else F.ids.push(t.id);
+      d.classList.toggle('on');
+      d.querySelector('.bx').textContent=F.ids.includes(t.id)?'✓':'';
+      syncHash(); paint();                       /* הסרגל נשאר, המיקוד נשמר */
+    };
+    box.appendChild(d);
+  });
+}
+
+/* ===== טעינה ===== */
+readHash();
+paintBar();
+if(tasks.length)paint(); else $('page').innerHTML='<div class="empty">טוען מהשרת…</div>';
+(async()=>{
+  try{
+    const r=await fetch(DB+'/board/tasks.json?t='+Date.now(),{cache:'no-store'});
+    const j=await r.json();
+    if(j&&typeof j==='object'){
+      tasks=Object.keys(j).map(k=>Object.assign({id:k},j[k]));
+      try{ localStorage.setItem(CACHE,JSON.stringify(tasks)); }catch(e){}
+    }
+  }catch(e){
+    if(!tasks.length){
+      $('page').innerHTML='<div class="empty">אין חיבור לשרת ואין עותק מקומי.<br>רעננו כשיש רשת.</div>';
+      return;
+    }
+    toast('אין חיבור — מוצג העותק האחרון');
+  }
+  paintBar(); paint();        /* מניין המשימות לכל ספק מתעדכן גם הוא */
+})();
+addEventListener('hashchange',()=>{ readHash(); paintBar(); paint(); });
+</script>
+</body>
+</html>

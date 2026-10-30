@@ -776,6 +776,7 @@ body.ganttmode .pinned, body.ganttmode .sharebar, body.ganttmode .who{display:no
     <div class="toolrow">
       <input id="q" type="search" placeholder="חיפוש…" enterkeyhint="search">
       <button class="catbtn" id="catbtn">סינון</button>
+      <button class="catbtn" id="printbtn" title="ייצוא והדפסה">🖨</button>
     </div>
     <div class="offbar" id="offbar"></div>
     <div class="pinned" id="pinned"></div>
@@ -815,6 +816,53 @@ document.documentElement.lang='he'; document.documentElement.dir='rtl';
 const CATS={trip:'✈️ פולין', reno:'🏠 שיפוץ', home:'🧺 בית', gift:'🎁 מתנות',
             idea:'💡 רעיונות', school:'🎒 בי"ס', health:'🩺 בריאות'};
 const OWNERS=['יעל','רועי','שנינו'];
+/* ===== ספקים =====
+   השדה `supplier` על המשימה הוא המקור הראשון — מי שמתייג ידנית קובע.
+   מי שלא תויגה נקשרת לפי משימת-השורש שלה או שרשרת ה-parent אליה,
+   ורק אם גם זה לא — לפי שם הספק בכותרת. כך הייצוא לפי ספק עובד על
+   הנתונים הקיימים בלי לתייג 181 משימות מראש.
+   הרשימה הזאת משוכפלת ב-print.html: שני עמודים נפרדים, בלי קוד משותף. */
+const SUPPLIERS=[
+  {k:'carlos',  n:'קרלוס',      ic:'⚡', roots:['t-carlos'],                 alias:['קרלוס']},
+  {k:'barak',   n:'ברק',        ic:'🧱', roots:['ong-barak','f01'],          alias:['ברק']},
+  {k:'nofar',   n:'נופר',       ic:'🎨', roots:['ong-nofar','f09'],          alias:['נופר']},
+  {k:'golan',   n:'גולן',       ic:'🪚', roots:['g11','g12'],                alias:['גולן']},
+  {k:'rafael',  n:'רפאל',       ic:'🪑', roots:['w01'],                      alias:['רפאל']},
+  {k:'izat',    n:'עיזאת',      ic:'🌳', roots:['t-izat','f07'],             alias:['עיזאת']},
+  {k:'gal',     n:'גל בטון',    ic:'🧩', roots:['t-gal'],                    alias:['גל','א.א קרמיקה']},
+  {k:'formagio',n:'פורמג׳ו',    ic:'🍳', roots:['t-kitchen','k03','p01','p02'], alias:['פורמג׳ו',"פורמג'ו"]},
+  {k:'mahmoud', n:'מחמוד',      ic:'🪟', roots:['t-mahmoud'],                alias:['מחמוד']},
+  {k:'yaakov',  n:'יעקב פרקט',  ic:'🪵', roots:['t-parq'],                   alias:['יעקב פרקט']},
+  {k:'plumb',   n:'אינסטלטור',  ic:'🚰', roots:['t-plumb'],                  alias:['אינסטלטור']},
+  {k:'tile',    n:'ריצוף',      ic:'🧱', roots:['t-tile'],                   alias:[]},
+  {k:'trelidor',n:'טרלידור',    ic:'🛡', roots:['r42'],                      alias:['טרלידור']},
+  {k:'avishav', n:'אבישב',      ic:'❄️', roots:[],                           alias:['אבישב']}
+];
+const supBy=k=>SUPPLIERS.find(s=>s.k===k);
+/* ‎\b‎ ב-JS מכיר רק אותיות לטיניות, ולכן ״גלילה״ היה נתפס כ״גל״.
+   הגבול כאן הוא ״לא אות עברית״. */
+function aliasHit(title,alias){
+  const HE='֐-ת';
+  return alias.some(a=>new RegExp('(^|[^'+HE+'])'+a.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'($|[^'+HE+'])')
+    .test(' '+String(title||'')+' '));
+}
+/* הסדר הוא סדר של חוזק ראיה: תיוג ידני, אחר כך משימת-שורש, אחר כך
+   ספק ששמו כתוב בכותרת, ורק בסוף ירושה מההורה. ״גולן — לדרוש את
+   דוגמאות הצבע״ יושבת בסדר היום של נופר, אבל היא של גולן: שם מפורש
+   בכותרת חזק יותר מהתיקייה שבה המשימה יושבת. */
+function supplierOf(t,seen){
+  if(!t)return null;
+  if(t.supplier&&supBy(t.supplier))return t.supplier;
+  const byRoot=SUPPLIERS.find(s=>s.roots.includes(t.id));
+  if(byRoot)return byRoot.k;
+  const byName=SUPPLIERS.find(s=>s.alias.length&&aliasHit(t.title,s.alias));
+  if(byName)return byName.k;
+  if(t.parent){
+    const g=seen||new Set();
+    if(!g.has(t.id)){ g.add(t.id); const up=supplierOf(byId(t.parent),g); if(up)return up; }
+  }
+  return null;
+}
 const WD=['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
 const WD1=['א׳','ב׳','ג׳','ד׳','ה׳','ו׳','ש׳'];
 const BUCKETS=[
@@ -1936,6 +1984,17 @@ function paintTask(box,t){
     };
     acts.appendChild(wb);
   }
+  /* ייצוא והדפסה — המשימה הזאת עם כל סעיפיה ותתי-המשימות שלה.
+     יש לה ספק מזוהה? הכפתור השני מוציא את כל מה שפתוח מולו. */
+  const pr=el('<button>🖨 ייצוא והדפסה</button>');
+  pr.onclick=()=>window.open('print.html#task='+encodeURIComponent(id),'_blank','noopener');
+  acts.appendChild(pr);
+  const sup=supplierOf(t);
+  if(sup){
+    const sp=el(`<button>🖨 כל מה שפתוח מול ${esc(supBy(sup).n)}</button>`);
+    sp.onclick=()=>window.open('print.html#sup='+encodeURIComponent(sup),'_blank','noopener');
+    acts.appendChild(sp);
+  }
   const lnk=el('<button>🔗 לינק למשימה</button>');
   lnk.onclick=async()=>{
     const u='https://yaelavgil.github.io/avgil-board/?task='+encodeURIComponent(id);
@@ -2884,6 +2943,8 @@ function editorEl(t,onDone){
     <div class="erow"><span class="lbl">אחראי</span>
       ${OWNERS.map(o=>`<button type="button" class="catbtn ${t.owner===o?'on':''}" data-o="${o}">${o}</button>`).join('')}
       <button type="button" class="catbtn e-ong ${t.ongoing?'on':''}">↻ מתמשך</button></div>
+    <div class="erow"><span class="lbl">ספק</span>
+      ${SUPPLIERS.map(s=>`<button type="button" class="catbtn ${t.supplier===s.k?'on':''}" data-s="${s.k}">${s.ic} ${esc(s.n)}</button>`).join('')}</div>
     <textarea class="e-n" placeholder="הערות…">${esc(t.notes||'')}</textarea>
     <div class="ebtns"><button class="save">שמירה ✓</button><button class="del">מחיקה</button></div>
   </div>`);
@@ -2895,6 +2956,12 @@ function editorEl(t,onDone){
     t.notes=node.querySelector('.e-n').value;
   };
   node.querySelector('.e-nodate').onclick=()=>{node.querySelector('.e-d').value=''};
+  /* ביטול התיוג מוחק את השדה ולא מאפס אותו — כך הזיהוי האוטומטי
+     לפי שורש/כותרת חוזר לפעול, במקום להישאר ״שויך לאף אחד״ */
+  node.querySelectorAll('.catbtn[data-s]').forEach(b=>b.onclick=()=>{
+    if(t.supplier===b.dataset.s)delete t.supplier; else t.supplier=b.dataset.s;
+    node.querySelectorAll('.catbtn[data-s]').forEach(x=>x.classList.toggle('on',x.dataset.s===t.supplier));
+  });
   node.querySelectorAll('.catbtn[data-k]').forEach(b=>b.onclick=()=>{
     t.cat=(t.cat===b.dataset.k?null:b.dataset.k);
     node.querySelectorAll('.catbtn[data-k]').forEach(x=>x.classList.toggle('on',x.dataset.k===t.cat));
@@ -2923,6 +2990,18 @@ function editorEl(t,onDone){
 /* ================= filters & add ================= */
 document.getElementById('q').oninput=e=>{ui.q=e.target.value.trim(); renderBoard()};
 document.getElementById('catbtn').onclick=()=>{ui.showCats=!ui.showCats; renderCatRow()};
+/* הסינון שעל המסך ממשיך אל מסך הייצוא — מי שסינן ״שיפוץ של יעל״
+   ולחץ הדפסה מצפה לקבל בדיוק את זה, ולא להתחיל לבחור מחדש */
+function printHash(){
+  const p=new URLSearchParams();
+  if(ui.cats.size===1)p.set('cat',[...ui.cats][0]);
+  if(ui.owner)p.set('owner',ui.owner);
+  if(!p.toString())p.set('all','1');
+  return '#'+p.toString();
+}
+document.getElementById('printbtn').onclick=()=>{
+  location.href='print.html'+printHash();
+};
 function renderCatRow(){
   let row=document.getElementById('catrow');
   if(row)row.remove();
