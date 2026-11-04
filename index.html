@@ -1987,12 +1987,12 @@ function paintTask(box,t){
   /* ייצוא והדפסה — המשימה הזאת עם כל סעיפיה ותתי-המשימות שלה.
      יש לה ספק מזוהה? הכפתור השני מוציא את כל מה שפתוח מולו. */
   const pr=el('<button>🖨 ייצוא והדפסה</button>');
-  pr.onclick=()=>window.open('print.html#task='+encodeURIComponent(id),'_blank','noopener');
+  pr.onclick=()=>window.open('print.html#task='+encodeURIComponent(id)+'&edit=1','_blank','noopener');
   acts.appendChild(pr);
   const sup=supplierOf(t);
   if(sup){
     const sp=el(`<button>🖨 כל מה שפתוח מול ${esc(supBy(sup).n)}</button>`);
-    sp.onclick=()=>window.open('print.html#sup='+encodeURIComponent(sup),'_blank','noopener');
+    sp.onclick=()=>window.open('print.html#sup='+encodeURIComponent(sup)+'&edit=1','_blank','noopener');
     acts.appendChild(sp);
   }
   const lnk=el('<button>🔗 לינק למשימה</button>');
@@ -2992,11 +2992,15 @@ document.getElementById('q').oninput=e=>{ui.q=e.target.value.trim(); renderBoard
 document.getElementById('catbtn').onclick=()=>{ui.showCats=!ui.showCats; renderCatRow()};
 /* הסינון שעל המסך ממשיך אל מסך הייצוא — מי שסינן ״שיפוץ של יעל״
    ולחץ הדפסה מצפה לקבל בדיוק את זה, ולא להתחיל לבחור מחדש */
+/* נכנסים ממסך הלוח = זו היא, ולכן מצב הסימון דלוק מראש ואפשר לסמן
+   תוך כדי מעבר על הרשימה. הלינק שמעתיקים שם לשיתוף מסיר אותו, כך
+   שמה שנשלח לספק נשאר לקריאה בלבד. */
 function printHash(){
   const p=new URLSearchParams();
   if(ui.cats.size===1)p.set('cat',[...ui.cats][0]);
   if(ui.owner)p.set('owner',ui.owner);
   if(!p.toString())p.set('all','1');
+  p.set('edit','1');
   return '#'+p.toString();
 }
 document.getElementById('printbtn').onclick=()=>{

@@ -99,6 +99,13 @@ body{background:var(--bg);color:var(--ink);font-family:'Assistant',-apple-system
 .bx{width:19px;height:19px;border:2.2px solid var(--d-box);border-radius:2px;margin-top:3px;
   display:grid;place-items:center;font-size:14px;font-weight:800;color:var(--d-box)}
 .prow.done .bx{color:var(--d-gry);border-color:#9A9A9A}
+/* מצב סימון — הריבוע הופך ללחיץ, והשורה מראה שהיא בדרך לשרת */
+.page.edit .bx{cursor:pointer;transition:background .15s,border-color .15s}
+.page.edit .bx:hover{border-color:var(--olive);background:var(--olive-soft)}
+.page.edit .bx:active{transform:scale(.9)}
+.prow.saving{opacity:.5}
+.prow.moved{animation:flash .55s ease-out}
+@keyframes flash{from{background:#FFF4D0}to{background:transparent}}
 .ptx{min-width:0}
 .hl{font-size:15.5px;font-weight:700;line-height:1.4;color:var(--d-ink);
   display:flex;flex-wrap:wrap;align-items:baseline;gap:7px}
@@ -140,6 +147,9 @@ body{background:var(--bg);color:var(--ink);font-family:'Assistant',-apple-system
   .hl{font-size:12pt;gap:5pt}
   .nt{font-size:9pt;margin-top:1.5pt;
     -webkit-print-color-adjust:exact;print-color-adjust:exact}
+  /* שורה שנשמרת בדיוק ברגע ההדפסה לא תצא דהויה */
+  .prow.saving{opacity:1}
+  .prow.moved{animation:none}
   .foot{margin-top:16pt;font-size:9pt;break-inside:avoid}
   a{color:inherit;text-decoration:none}
 }
@@ -233,9 +243,18 @@ function toast(m){ const n=$('toast'); n.textContent=m; n.classList.add('on');
   clearTimeout(n._t); n._t=setTimeout(()=>n.classList.remove('on'),2400); }
 
 /* ===== הסינון, כפי שהוא מקודד ב-hash ===== */
-const F={scope:'sup', sup:'carlos', ids:[], cat:'', owner:'', list:'',
-         from:'', to:'', done:false, items:true, title:''};
+const DEF={scope:'sup', sup:'carlos', ids:[], cat:'', owner:'', list:'',
+           from:'', to:'', done:false, items:true, title:'', edit:false};
+const F=Object.assign({},DEF,{ids:[]});
+/* מה שסומן בביקור הזה נשאר על המסך גם כשהתצוגה מסתירה את מה שבוצע.
+   בלי זה לחיצה על ״בוצע״ נראית כאילו השורה נעלמה, ואי אפשר לבטל. */
+const justDone=new Set();
+const rk=(tid,k)=>tid+'::'+(k||'');
 function readHash(){
+  /* כל קריאה מתחילה מברירות המחדל. בלי זה מעבר בין לינקים באותו
+     ביקור גורר איתו סינון שהלינק החדש לא ביקש — ״כולל שבוצעו״
+     נשאר דלוק, והמקבל רואה רשימה אחרת מזו שנשלחה לו. */
+  Object.assign(F,DEF,{ids:[]});
   const h=new URLSearchParams((location.hash||'').replace(/^#/,''));
   if(!h.toString())return;
   if(h.has('sup')){ F.scope='sup'; F.sup=h.get('sup'); }
@@ -252,8 +271,11 @@ function readHash(){
   if(h.has('done'))F.done=h.get('done')==='1';
   if(h.has('items'))F.items=h.get('items')!=='0';
   if(h.has('title'))F.title=h.get('title')||'';
+  if(h.has('edit'))F.edit=h.get('edit')==='1';
 }
-function hashOf(){
+/* share=true מחזיר את אותו היקף בלי מצב הסימון: לינק שנשלח לספק
+   הוא תמיד לקריאה בלבד, גם אם הוא נוצר ממסך שנמצא במצב סימון. */
+function hashOf(share){
   const p=new URLSearchParams();
   if(F.scope==='sup')p.set('sup',F.sup);
   else if(F.scope==='ids'){ if(!F.ids.length)return '#all=1'; p.set('ids',F.ids.join(',')); }
@@ -266,6 +288,7 @@ function hashOf(){
   if(F.done)p.set('done','1');
   if(!F.items)p.set('items','0');
   if(F.title)p.set('title',F.title);
+  if(F.edit&&!share)p.set('edit','1');
   return '#'+p.toString();
 }
 function syncHash(){ history.replaceState(null,'',location.pathname+hashOf()); }
@@ -404,10 +427,12 @@ function headOfItem(raw){
   return noEmoji(unmd(s.slice(0,ix)));
 }
 function rowsOfItems(t){
-  const its=(Array.isArray(t.items)?t.items:[]).filter(i=>F.done||!i.done);
+  const its=(Array.isArray(t.items)?t.items:[])
+    .filter(i=>F.done||!i.done||justDone.has(rk(t.id,i.k)));
   return its.map(i=>{
     const sp=splitItem(i.t,i.ans);
-    return {head:sp.head, notes:sp.notes, lv:i.lv||2, done:!!i.done, due:null, grp:headOfItem(i.t)};
+    return {head:sp.head, notes:sp.notes, lv:i.lv||2, done:!!i.done, due:null,
+            grp:headOfItem(i.t), tid:t.id, k:i.k};
   });
 }
 function rowOfTask(t){
@@ -416,10 +441,11 @@ function rowOfTask(t){
   const n=String(t.notes||'').split('\n').map(s=>s.trim()).filter(Boolean)[0];
   if(n)notes.push(mdNote(unmd(splitRefs(n).body).slice(0,180)));
   if(t.owner)notes.push('<span class="g">אחראי: '+esc(t.owner)+'</span>');
-  return {head:sp.head, notes, lv:lvOfTask(t), done:!!t.done, due:t.due||null, grp:'', cat:t.cat||''};
+  return {head:sp.head, notes, lv:lvOfTask(t), done:!!t.done, due:t.due||null, grp:'',
+          cat:t.cat||'', tid:t.id, k:''};
 }
 function buildDoc(){
-  const picked=pickTasks().filter(t=>F.done||!t.done);
+  const picked=pickTasks().filter(t=>F.done||!t.done||justDone.has(rk(t.id,'')));
   const secs=[], loose=[];
   picked.forEach(t=>{
     const rows=F.items?rowsOfItems(t):[];
@@ -503,7 +529,8 @@ function paint(){
     h+=`<div class="sec"><div class="sechd"><span>${esc(s.head)}</span>
       <span class="c">${o} מתוך ${s.rows.length}</span></div>`;
     s.rows.forEach(r=>{
-      h+=`<div class="prow${r.lv===1&&!r.done?' hot':''}${r.done?' done':''}">
+      h+=`<div class="prow${r.lv===1&&!r.done?' hot':''}${r.done?' done':''}"
+             data-t="${esc(r.tid||'')}" data-k="${esc(r.k||'')}">
         <div class="bx">${r.done?'✓':''}</div>
         <div class="ptx">
           <div class="hl"><span class="tx">${esc(r.head)}</span>${
@@ -516,12 +543,14 @@ function paint(){
   h+=`<div class="foot">${d.open} פתוחים מתוך ${d.all}${d.hot?` · ${d.hot} דחופים`:''}<br>
     נחתם בתאריך ___________ &nbsp; שם ___________________ &nbsp; חתימה ___________________</div>`;
   $('page').innerHTML=h;
+  $('page').classList.toggle('edit',F.edit);
   setHint(d);
   document.title=d.title+' — אשל 57';
 }
 function setHint(d){
   const n=$('hint'); if(!n)return;
-  n.textContent=`${d.open} פתוחים מתוך ${d.all} · ${d.secs.length} סעיפים · הסדר לפי דחיפות`;
+  n.textContent=`${d.open} פתוחים מתוך ${d.all} · ${d.secs.length} סעיפים · הסדר לפי דחיפות`
+    +(F.edit?' · לחיצה על ריבוע מסמנת בוצע ויורדת לסוף הסעיף. הלינק לשיתוף נשאר לקריאה בלבד.':'');
 }
 
 /* ===== טקסט לוואטסאפ =====
@@ -590,6 +619,73 @@ async function copyRich(){
   }
 }
 
+/* ===== סימון בוצע =====
+   העמוד הזה קורא בלבד כברירת מחדל. מצב הסימון נדלק במפורש, ורק אז
+   הריבועים לחיצים — כך לינק שנשלח לספק לא יכול לשנות כלום בלוח.
+   לחיצה אחת סוגרת, השמירה אוטומטית, בלי שלב אישור נפרד. */
+const NODE=DB+'/board/tasks';
+async function writeDone(tid,k,want){
+  const now=Date.now();
+  try{
+    if(!k){
+      /* PATCH ברמת המשימה ממזג את שלושת השדות ומשאיר את כל השאר.
+         PUT היה מוחק כל שדה שלא נשלח — ובדיוק ככה נמחק פעם ongoing. */
+      const r=await fetch(`${NODE}/${encodeURIComponent(tid)}.json`,{method:'PATCH',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({done:want, doneAt:want?now:0, updatedAt:now})});
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      const t=byId(tid); if(t){ t.done=want; t.doneAt=want?now:0; t.updatedAt=now; }
+    }else{
+      /* סעיפים שמורים כמערך, ואי אפשר למזג איבר בודד. לכן קוראים את
+         המשימה העדכנית מהשרת, מחליפים בה סעיף אחד ומחזירים את המערך
+         כולו — כך לא נדרס סעיף שסומן בינתיים מטלפון אחר. */
+      const g=await fetch(`${NODE}/${encodeURIComponent(tid)}.json?t=`+now,{cache:'no-store'});
+      const fresh=await g.json();
+      if(!fresh||!Array.isArray(fresh.items))throw new Error('no items');
+      let hit=false;
+      const items=fresh.items.map(i=>{
+        if(i.k!==k)return i;
+        hit=true; return Object.assign({},i,{done:want, doneAt:want?now:0});
+      });
+      if(!hit)throw new Error('item gone');
+      const r=await fetch(`${NODE}/${encodeURIComponent(tid)}.json`,{method:'PATCH',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({items, updatedAt:now})});
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      const t=byId(tid); if(t){ t.items=items; t.updatedAt=now; }
+    }
+    try{ localStorage.setItem(CACHE,JSON.stringify(tasks)); }catch(e){}
+    return true;
+  }catch(e){ return false; }
+}
+async function toggleDone(row){
+  if(row.classList.contains('saving'))return;
+  const tid=row.dataset.t, k=row.dataset.k||'';
+  if(!tid)return;
+  const want=!row.classList.contains('done');
+  const bx=row.querySelector('.bx');
+  /* הסימון נראה מיד, השמירה רצה אחריו — וכשהיא נכשלת חוזרים אחורה,
+     כדי שלא יישאר על המסך ✓ שלא קיים בלוח */
+  row.classList.toggle('done',want); bx.textContent=want?'✓':'';
+  row.classList.add('saving');
+  const ok=await writeDone(tid,k,want);
+  row.classList.remove('saving');
+  if(!ok){
+    row.classList.toggle('done',!want); bx.textContent=!want?'✓':'';
+    toast('השמירה נכשלה — בלוח לא השתנה כלום');
+    return;
+  }
+  if(want)justDone.add(rk(tid,k)); else justDone.delete(rk(tid,k));
+  row.classList.add('moved');
+  /* רגע לראות מה קרה, ואז השורה יורדת לתחתית הסעיף */
+  setTimeout(paint,520);
+}
+$('page').addEventListener('click',e=>{
+  if(!F.edit)return;
+  const bx=e.target.closest&&e.target.closest('.bx'); if(!bx)return;
+  const row=bx.closest('.prow'); if(row)toggleDone(row);
+});
+
 /* ===== סרגל הכלים ===== */
 function chip(label,on,fn,cls){
   const b=document.createElement('button');
@@ -650,6 +746,9 @@ function paintBar(){
   }
 
   const r2=row(host,'תצוגה');
+  r2.appendChild(chip(F.edit?'✓ מצב סימון · פעיל':'✓ מצב סימון',F.edit,()=>{
+    F.edit=!F.edit; apply(); toast(F.edit?'לחיצה על ריבוע מסמנת בוצע ונשמרת ללוח':'חזרה לקריאה בלבד');
+  }));
   r2.appendChild(chip('כולל סעיפים',F.items,()=>{ F.items=!F.items; apply(); }));
   r2.appendChild(chip('כולל שבוצעו',F.done,()=>{ F.done=!F.done; apply(); }));
   const ti=document.createElement('input'); ti.type='text'; ti.placeholder='כותרת המסמך…';
@@ -667,7 +766,8 @@ function paintBar(){
   }));
   r3.appendChild(chip('📝 לגוגל דוק',false,copyRich));
   r3.appendChild(chip('🔗 לינק',false,async()=>{
-    try{ await navigator.clipboard.writeText(SITE+'print.html'+hashOf()); toast('הלינק הועתק ✓'); }
+    try{ await navigator.clipboard.writeText(SITE+'print.html'+hashOf(true));
+      toast(F.edit?'הלינק הועתק — לקריאה בלבד ✓':'הלינק הועתק ✓'); }
     catch(e){ toast('ההעתקה נכשלה'); }
   }));
   r3.appendChild(chip('↩ ללוח',false,()=>location.href='./'));
