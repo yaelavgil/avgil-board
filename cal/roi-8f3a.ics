@@ -1,0 +1,593 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//avgil-board//HE
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:משימות רועי
+X-PUBLISHED-TTL:PT30M
+REFRESH-INTERVAL;VALUE=DURATION:PT30M
+BEGIN:VEVENT
+UID:f01@avgil-board
+DTSTAMP:20261007T101514Z
+DTSTART:20261008T090000
+DTEND:20261008T091500
+SUMMARY:ברק — לקבל פירוט כתוב על הפער
+DESCRIPTION:ברק אומר שנותרו ~400\,000 ₪. לפי התקצי
+ ב ב-Base44 (865\,317) פחות 306\,096 שרשומים שם ופחות
+  249\,264 מאסמכתאות הבנק של אוגוסט-ספטמבר —
+  נותרו ~309\,957. פער של כ-90 אלף לרעתנו. ברק א
+ מר שייתן פירוט. 📌 לבקש: הסכום הכולל המע
+ ודכן כולל תוספות · מה רשום אצלו כשולם · 
+ אילו תוספות אושרו ומתי. ⚠️ סעיף החשמל ב
+ הצעה המקורית כתוב כ'הערכה גסה 63\,000' — זה 
+ המקום הסביר שבו זה צמח. 💰 claude.ai/artifact/HqLAJa
+ TAdfgWA4tU6e4jKC\n\nhttps://yaelavgil.github.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:ברק — לקבל פירוט כתוב על הפער
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:ברק — לקבל פירוט כתוב על הפער
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:f04@avgil-board
+DTSTAMP:20261007T101514Z
+DTSTART:20261005T090000
+DTEND:20261005T091500
+SUMMARY:עמית — לקבל רשימה מלאה של מה חייב לה
+ יות מוכן ומה חייב לרדת לפני הפקח
+DESCRIPTION:✅ 4.10: דיברתם עם עמית על קידום הפקח
+  לטופס 4 לפי התוכניות.\n✅ קיבלתם תשובה אח
+ ת: מחסן נמוך בגודל המכונות עובר (r15).\n\n⚠
+ ️ **אבל שאלתם על פריט אחד. צריך את הרשימה
+  המלאה — לפני שהוא קובע תאריך.**\n\n🔴 **הס
+ יכון הגדול: המעקות.** מעקה מרפסת ומעקה מד
+ רגות הם אלמנט בטיחות\, והם עדיין לא הוזמ
+ נו — אין אפילו הצעת מחיר (n17\, r33). אם הפקח 
+ דורש אותם מותקנים\, זה חוסם טופס 4 לשבועו
+ ת. **זאת השאלה הראשונה לעמית.**\n\n📋 **עוד ד
+ ברים לשאול עליהם:**\n• מחיצות הבמבוק לפר
+ טיות שרועי רצה (r20) — נחשבות מבנה?\n• הדש
+ א הסינתטי ואבני המדרך (g02\, g03)\n• יחידות ה
+ מיזוג החיצוניות — תלויות\, מאושר על ידי 
+ ברק\n• עמדת הטעינה לרכב חשמלי (o05) — התשת
+ ית כבר הוכנה\n• הקמין (דצמבר\, מוקד חום) 
+ — אחרי טופס 4 ממילא\n\n💰 התשלום לעמית הו
+ א באוקטובר\, יחד\n\nhttps://yaelavgil.github.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:עמית — לקבל רשימה מלאה של מה חייב 
+ להיות מוכן ומה חייב לרדת לפני הפקח
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:עמית — לקבל רשימה מלאה של מה חייב 
+ להיות מוכן ומה חייב לרדת לפני הפקח
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:f05@avgil-board
+DTSTAMP:20261007T101514Z
+DTSTART:20261007T090000
+DTEND:20261007T091500
+SUMMARY:רועי — מה סוכם עם יעקב מהפרקט (שולמו
+  14\,160)
+DESCRIPTION:⛔ **חיפשתי בכל מקום ואין שום סיכום
+  כתוב עם יעקב** — לא בוואטסאפ עם נופר\, לא
+  במסמכי השיפוץ\, לא ב-Base44\, לא בקבצי הכספי
+ ם.\nכל מה שקיים: **8\,260 ₪ ששולמו 10.9**\, אסמכת
+ ה [הוסר]\, רשומים כ**״חלקי״**.\nבתקציב אין ל
+ ו שורה בכלל — שורת הפרקט (27\,660 ₪) רשומה ע
+ ל **קרמיקה**\, וזה החומר. **ההתקנה מעולם לא 
+ תוקצבה.**\n\n🔴 **הוא מבקש עכשיו 5\,000 + מע״מ =
+  5\,850 ₪.** יחד עם המקדמה: **14\,110 ₪**.\n\n📋 **מה
+  להשלים:**\n1. התכתבות הוואטסאפ איתו — מה 
+ סוכם ומתי\n2. אישור ההעברה מ-10.9 (8\,260) — אם 
+ יש צילום\n3. האם סוכם מחיר כולל\, ועל כמה מ
+ ״ר\n\n❓ **שלוש שאלות אליו לפני שמעבירים:**\
+ n• מה הסכום הכולל שסוכם ועל כמה מטר? ההז
+ מנה המקורית הייתה 173 מ׳ פרקט + 142 מ׳ פנל\, *
+ *בלי מדרגות**.\n• **האם המדרגות כלולות?** י
+ עקב עצמו אמר 0.7 מ״ר \n\nhttps://yaelavgil.github.io/avgil-
+ board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:רועי — מה סוכם עם יעקב מהפרקט (שול
+ מו 14\,160)
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:רועי — מה סוכם עם יעקב מהפרקט (שול
+ מו 14\,160)
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:g08@avgil-board
+DTSTAMP:20261007T101514Z
+DTSTART:20261006T161200
+DTEND:20261006T162700
+SUMMARY:אותנטיק בטון — שלוש עבודות שנשארו\, 
+ לקבוע תאריך בכתב
+DESCRIPTION:💰 **שולם במלואו 5.10: 57\,702 ₪** · אסמכ
+ תה [הוסר] · 16:12 · דיסקונט → מזרחי טפחות · 
+ ״בטון מוטבע״.\n📁 האסמכתה ב-`שיפוץ/כספים/
+ 03 אסמכתאות תשלום`.\n\n⚠️ **שולם לפני שהעב
+ ודה הושלמה.** זה אומר שאין יותר מנוף לחיצ
+ ה\, וההשלמות תלויות ברצון הטוב שלהם.\n🎯 *
+ *לכן הצעד הראשון הוא לקבל מהם תאריך בכתב
+  בוואטסאפ — היום או מחר\, לא בעוד שבוע.** 
+ הודעה כתובה עם שלושת הסעיפים ותאריך היא
+  מה שיישאר לכם ביד.\n\n📋 **מה שנשאר:**\n1. **ר
+ מפה לחנייה**\n2. **אבני מדרך חסרות בכניסה ה
+ ראשית** — להשלים\n3. **לעגל את המדרגות** — 
+ זה הנושא שנופר אמורה הייתה לראות בשטח *(n
+ 12)*\n\n📌 לצלם את שלושת המקומות לפני השיחה
+ \, ולצרף להודעה. תמונה חוסכת ויכוח על מה 
+ בדיוק סוכם.\n📌 בעודם בשטח — לסגור גם את 
+ ההבדל בין הבטון המערבי למזרחי *(n13)\n\nhttps:/
+ /yaelavgil.github.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:אותנטיק בטון — שלוש עבודות שנשאר
+ ו\, לקבוע תאריך בכתב
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:אותנטיק בטון — שלוש עבודות שנשאר
+ ו\, לקבוע תאריך בכתב
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:h03@avgil-board
+DTSTAMP:20261007T101514Z
+DTSTART:20261006T220000
+DTEND:20261006T221500
+SUMMARY:רועי — לנקות מזרקת מים לחיות ולהחלי
+ ף פילטר
+DESCRIPTION:🕙 **הערב ב-22:00.** אפשר לדחות למחר (7.1
+ 0) — אבל לא מעבר לזה.\n\nhttps://yaelavgil.github.io/avgil
+ -board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:רועי — לנקות מזרקת מים לחיות ולהח
+ ליף פילטר
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:רועי — לנקות מזרקת מים לחיות ולהח
+ ליף פילטר
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:k03@avgil-board
+DTSTAMP:20261007T101514Z
+DTSTART:20261008T090000
+DTEND:20261008T091500
+SUMMARY:משלוח מתואם — חמישי 8.10\, 09:00–13:00 [שני
+ נו]
+DESCRIPTION:✅ **תואם: יום חמישי 8.10\, חלון הגעה 09
+ :00–13:00.** הזמנה **60114949** · פורטל סלע (emobile).\n
+ \n❓ **לא הצלחתי לזהות מהמייל איזו הזמנה ז
+ ו** — התיאום הגיע ב-SMS ולא במייל. שלוש הזמ
+ נות בדרך כרגע\, קל להצליב לפי מספר:\n• **2 
+ טלוויזיות Samsung** — KSP\, הזמנה 954968472\, 4.10\, ח
+ שבונית 3997979\n• **מקרר Electra ELR210C קרם** — סופ
+ ר-פארם/מחסני חשמל\, הזמנה 031987080-A\, מעקב DHL 
+ **207005891**\n• **מראת גוף חצי אובלית** — סופר-
+ פארם/קלפאק\, הזמנה 032013342-A\, מעקב **102999873**\n\
+ n⚠️ **חלון של ארבע שעות בבוקר — צריך מיש
+ הו בבית.** אם זה המקרר או הטלוויזיות\, זו 
+ מסירה שדורשת שני אנשים ולא משאירים אותה
+  בחוץ.\n📌 אם זה הטלוויזיות — הן נדרשות מ
+ מילא לפני שקובעים מתקין *(n01)*.\n📌 אם זה ה
+ מקרר — לוודא מראש איפה הוא עומד ושיש\n\nht
+ tps://yaelavgil.github.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:משלוח מתואם — חמישי 8.10\, 09:00–13:00 [ש
+ נינו]
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:משלוח מתואם — חמישי 8.10\, 09:00–13:00 [ש
+ נינו]
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:o01@avgil-board
+DTSTAMP:20261007T101514Z
+DTSTART:20261008T090000
+DTEND:20261008T091500
+SUMMARY:להזמין אונליין — מיקרוגל\, טוחן\, פח\
+ , 2 טלוויזיות [שנינו]
+DESCRIPTION:חמישה פריטים שאפשר לסגור בערב אחד
+ .\n⚠️ מיקרוגל: לוודא מידות נישה מול המטב
+ ח שמורכב ב-7.10. דובר על העברה מעל התנור לת
+ וך קלפה.\n⚠️ טוחן: מתחת לכיור כבר מתוכננ
+ ים טוחן + תמי 4 + פח — לוודא שיש מקום לכול
+ ם.\n⚠️ טלוויזיה לפינת משפחה: תקרה משופע
+ ת — למדוד גובה וזווית לפני.\n\nhttps://yaelavgil.g
+ ithub.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:להזמין אונליין — מיקרוגל\, טוחן\, 
+ פח\, 2 טלוויזיות [שנינו]
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:להזמין אונליין — מיקרוגל\, טוחן\, 
+ פח\, 2 טלוויזיות [שנינו]
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:o02@avgil-board
+DTSTAMP:20261007T101514Z
+DTSTART:20261015T090000
+DTEND:20261015T091500
+SUMMARY:שטיחים — למדוד ואז להזמין [שנינו]
+DESCRIPTION:להתחיל מהסלון ומפינת המשפחה בלבד 
+ — שני החדרים שכבר מרוהטים.\n📌 עם סשה בב
+ ית — לשאול על עמידות וניקוי.\n\nhttps://yaelavgil
+ .github.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:שטיחים — למדוד ואז להזמין [שנינו]
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:שטיחים — למדוד ואז להזמין [שנינו]
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:o03@avgil-board
+DTSTAMP:20261007T101514Z
+DTSTART:20261020T090000
+DTEND:20261020T091500
+SUMMARY:פינת ישיבה לפינת משפחה — לשבת לפני 
+ שקונים [שנינו]
+DESCRIPTION:⚠️ תקרה משופעת — ספה עם משענת גב
+ והה תרגיש חונקת.\n📌 בפריסת התאורה מתוכנ
+ נים 2 תלויים מעל הספה והכורסה — מיקום הי
+ שיבה קובע את מיקום התאורה.\n\nhttps://yaelavgil.git
+ hub.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:פינת ישיבה לפינת משפחה — לשבת לפנ
+ י שקונים [שנינו]
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:פינת ישיבה לפינת משפחה — לשבת לפנ
+ י שקונים [שנינו]
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:o04@avgil-board
+DTSTAMP:20261007T101514Z
+DTSTART:20261020T090000
+DTEND:20261020T091500
+SUMMARY:אבטחה חכמה — מנעולים\, מצלמות וזיהו
+ י פנים [שנינו]
+DESCRIPTION:🔴 פרויקט אחד\, לא שלושה. על הפרק מ-
+ 16.3.\n⚠️ נופר 12.7: בדלת היציאה מהמטבח לא פ
+ שוט להתקין מנעול חכם — לברר את האילוץ.\n
+ ⚠️ זיהוי פנים שפותח שער מרחוק הוא הדרי
+ שה שתצמצם הכי הרבה את רשימת הספקים.\n🔗 ת
+ לוי בשער הכניסה (r29) — אם עוד לא יוצר\, אפ
+ שר להכין תשתית.\n🔗 תלוי בהחלטה על גוגל מ
+ ול אמזון (o06).\n\nhttps://yaelavgil.github.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:אבטחה חכמה — מנעולים\, מצלמות וזי
+ הוי פנים [שנינו]
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:אבטחה חכמה — מנעולים\, מצלמות וזי
+ הוי פנים [שנינו]
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:o05@avgil-board
+DTSTAMP:20261007T101514Z
+DTSTART:20261025T090000
+DTEND:20261025T091500
+SUMMARY:עמדת טעינה לרכב חשמלי [שנינו]
+DESCRIPTION:✅ התשתית קיימת — ב-26.6 רועי ביקש מ
+ קרלוס חשמל לשני צדי החניה\, לשער ולעמדה.\
+ n📌 לברר: הספק (7kW חד-פאזי מול 11/22kW תלת-פאז
+ י) · הטבות מחברת החשמל · חיבור ללוח.\n\nhttps
+ ://yaelavgil.github.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:עמדת טעינה לרכב חשמלי [שנינו]
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:עמדת טעינה לרכב חשמלי [שנינו]
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:o06@avgil-board
+DTSTAMP:20261007T101514Z
+DTSTART:20261015T090000
+DTEND:20261015T091500
+SUMMARY:בקר בית חכם — Nest Hub Max ירד מהמדף [שנינ
+ ו]
+DESCRIPTION:🔴 גוגל הפסיקה למכור אותו במאי 2025.
+  מה שנשאר אצל מפיצים הוא מלאי שארית במחי
+ ר מנופח.\n📌 גוגל לא נוטשת את הקו — דור ח
+ דש מבוסס Gemini\, בלי תאריך.\n📌 שלוש אפשרוי
+ ות: לחכות · לקנות מלאי שארית ביודעין · ל
+ עבור ל-Echo Show.\n⚠️ זו החלטה שגוררת גם את ה
+ מנעולים\, המצלמות והתאורה — להכריע לפני
+  o04.\n\nhttps://yaelavgil.github.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:בקר בית חכם — Nest Hub Max ירד מהמדף [שנ
+ ינו]
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:בקר בית חכם — Nest Hub Max ירד מהמדף [שנ
+ ינו]
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:o07@avgil-board
+DTSTAMP:20261007T101514Z
+DTSTART:20261025T090000
+DTEND:20261025T091500
+SUMMARY:פילטר מים לבית [שנינו]
+DESCRIPTION:📌 השאלה הראשונה: מה מסננים — אבנ
+ ית\, כלור\, או טיהור מלא. שלושה פתרונות שו
+ נים לגמרי.\n⚠️ פילטר לכל הבית מותקן על ה
+ כניסה הראשית — לברר גישה לצנרת אחרי יצי
+ קת הבטון.\n\nhttps://yaelavgil.github.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:פילטר מים לבית [שנינו]
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:פילטר מים לבית [שנינו]
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:p02@avgil-board
+DTSTAMP:20261007T101514Z
+DTSTART:20261012T090000
+DTEND:20261012T091500
+SUMMARY:מתקין פורמג׳ו לסיום העבודה — אחרי ה
+ חלטת הגוון
+DESCRIPTION:⛔ **ממתין להחלטה:** צביעה חוזרת בגו
+ ון חדש *(p01)*\, או להישאר עם האינדיגו הנוכח
+ י.\n📌 אין טעם לקבוע מתקין לפני — אם מחלי
+ טים לצבוע מחדש\, הוא יחזור פעמיים.\n☎️ פ
+ ורמג׳ו 04-9922552 · רעות.\n\nhttps://yaelavgil.github.io/avgi
+ l-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:מתקין פורמג׳ו לסיום העבודה — אחר
+ י החלטת הגוון
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:מתקין פורמג׳ו לסיום העבודה — אחר
+ י החלטת הגוון
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:p03@avgil-board
+DTSTAMP:20261007T101514Z
+DTSTART:20261008T090000
+DTEND:20261008T091500
+SUMMARY:רועי — לוודא מול ברק לוח זמנים לסיו
+ ם
+DESCRIPTION:מה נשאר לו\, ומתי הוא מסיים.\n🔗 קשו
+ ר ישירות לפער הכספי — הוא אומר ~400\,000 ₪ ו
+ הספרים אומרים ~310\,000 *(f01)*.\n📌 לשאול באותה
+  שיחה: תאריך סיום משוער\, מה נשאר בסקופ\, 
+ ומתי הוא פנוי לפקח של טופס 4 *(f04)*.\n\nhttps://ya
+ elavgil.github.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:רועי — לוודא מול ברק לוח זמנים לס
+ יום
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:רועי — לוודא מול ברק לוח זמנים לס
+ יום
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:p04@avgil-board
+DTSTAMP:20261007T101514Z
+DTSTART:20261008T090000
+DTEND:20261008T091500
+SUMMARY:לוודא מול אבישב את המזגן במטבח — לפ
+ י הודעת נופר [שנינו]
+DESCRIPTION:❓ **נופר העלתה את זה ב-6.10 ואין לי א
+ ת ההודעה** — הייצוא שלי מסתיים ב-30.9.\nתגי
+ די לי מה היא כתבה ואמלא כאן את הפרטים.\n\n
+ 📌 מה שידוע מהעבר על המזגן במטבח: פתח שי
+ רות מהקלאפה\, גובה 35 ס״מ ליחידה\, וחירוץ 
+ אופקי מחולק לשלושה מקטעים. ברק ורעות שנ
+ יהם היו מעורבים.\n☎️ אבישב — סיים והותק
+ ן ב-5.10\, שולמו 32\,550 ₪ *(r19)*.\n\nhttps://yaelavgil.github
+ .io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:לוודא מול אבישב את המזגן במטבח — 
+ לפי הודעת נופר [שנינו]
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:לוודא מול אבישב את המזגן במטבח — 
+ לפי הודעת נופר [שנינו]
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:p05@avgil-board
+DTSTAMP:20261007T101514Z
+DTSTART:20261008T090000
+DTEND:20261008T091500
+SUMMARY:לקבוע עם עומרי התקנת תאורה וטלוויזי
+ ות [שנינו]
+DESCRIPTION:📌 התאורה כבר בבית — 22 גופים מעיד
+ ה וכל ההזמנה ממחסני תאורה.\n⚠️ **הטלוויז
+ יות עדיין לא הגיעו** — יש משלוח מתואם לח
+ מישי 8.10 ב-09:00–13:00 *(k03)*\, ייתכן שזה הן. לא ל
+ קבוע התקנה לפני שהן בבית.\n⚠️ פינת המשפ
+ חה בתקרה משופעת — לוודא שהוא יודע לפני 
+ שהוא מגיע.\n📌 עלי אקספרס עוד לא הוזמן *(r3
+ 5)* — יהיה סבב התקנה שני.\n\nhttps://yaelavgil.github.i
+ o/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:לקבוע עם עומרי התקנת תאורה וטלווי
+ זיות [שנינו]
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:לקבוע עם עומרי התקנת תאורה וטלווי
+ זיות [שנינו]
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:r15@avgil-board
+DTSTAMP:20261007T101514Z
+DTSTART:20261012T090000
+DTEND:20261012T091500
+SUMMARY:מחסן נמוך למכונות במרפסת — עמית נתן
+  את המידה המותרת [שנינו]
+DESCRIPTION:✅ **4.10 — עמית המהנדס הכריע את זה.** 
+ לקראת הפקח לטופס 4:\n**מחסן בגודל המכונות 
+ עצמן\, נמוך מספיק שאדם לא יכול לעמוד בתו
+ כו — עובר אצל הפקח.**\nכל דבר אחר צריך פיר
+ וק לפני ביקור הפקח.\n\n🎯 **זה סוגר את הווי
+ כוח:** נופר רצתה ארון סגור\, רועי רצה גגון
+ . **הארון הסגור הוא התשובה** — הוא גם מגן 
+ וגם מסתיר\, והוא היחיד שעובר.\n\n⛔ **מה שיצ
+ א מהמשחק:** הגגון של רועי — ״אלומיניום ק
+ בוע\, לרוחב המרפסת\, בעומק ~2 מ׳״ — חורג מ
+ טביעת הרגל של המכונות ויצטרך פירוק. גם פ
+ רגולה וגם כל מבנה על רגליים.\n\n📏 **המפרט 
+ לקנייה או לייצור:**\n• רוחב ועומק — טביע
+ ת הרגל של מכונת הכביסה + המייבש\, לא יותר\
+ n• גובה — נמוך מספיק שאי אפשר לעמוד בפנ
+ ים\n• פתחים בגב למים\, ניקוז וחשמל\n• עמי
+ ד בשמש וגשם — זו מרפסת פתוחה\n\n💡 הפתרון
+  של ace.co.il/6001065 שי\n\nhttps://yaelavgil.github.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:מחסן נמוך למכונות במרפסת — עמית נ
+ תן את המידה המותרת [שנינו]
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:מחסן נמוך למכונות במרפסת — עמית נ
+ תן את המידה המותרת [שנינו]
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:r40@avgil-board
+DTSTAMP:20261007T101514Z
+DTSTART:20261006T090000
+DTEND:20261006T091500
+SUMMARY:אבישב — שלטים למזגנים הגדולים (מטבח
+  וכניסה) [שנינו]
+DESCRIPTION:📞 לשאול אותו מחר\, בשיחה אחת.\n\n**1. 
+ שלטים למזגנים הגדולים — מטבח וכניסה.**\n
+ האם אפשר לקבל שלטים\, האם זו תוספת תשלום\
+ , וכמה.\n📌 במערכות VRF השליטה היא לרוב דרך
+  בקר קיר ולא שלט אינפרא-אדום\, ולפעמים של
+ ט הוא אביזר נפרד בתשלום — אז שווה לשאול 
+ במפורש ולא להניח.\n📌 אם אין שלט ייעודי 
+ — לשאול אם יש אפליקציה או מודול WiFi\, במי
+ וחד לנוכח הבית החכם שמתוכנן *(o04\, o06)*.\n\n**2
+ . בהזדמנות הזאת\, לפני שהוא יורד מהפרויק
+ ט:**\n• תעודת אחריות בכתב ופרטי שירות\n• 
+ מי הגורם לקריאת תקלה\, ומה נכלל באחריות\n
+ • הסבר קצר על ההפעלה והתחזוקה — ניקוי מ
+ סננים וכדומה\n\n⏰ זה היום שבו מרכיבים את 
+ המטבח *(k02)* — אם המזגן של המטבח נמצא באזו
+ ר העבודה\, שווה לתאם.\n💰 סה״כ שולם לו 32\,55
+ 0 ₪\, האחרון 6\,000 ב-5.10 *(r19)*.\n\nhttps://yaelavgil.github
+ .io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:אבישב — שלטים למזגנים הגדולים (מט
+ בח וכניסה) [שנינו]
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:אבישב — שלטים למזגנים הגדולים (מט
+ בח וכניסה) [שנינו]
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:t3@avgil-board
+DTSTAMP:20261007T101514Z
+DTSTART:20261005T090000
+DTEND:20261005T091500
+SUMMARY:ארנונה — רועי מתקשר לסדר את החוב
+DESCRIPTION:👤 רועי · יום שני 14/9 — להתקשר ולסד
+ ר את החוב. כולל העברה על שמכם בבית שלנו ו
+ הורדת השם מהבית הקודם בבקעות. מוקד תושב 
+ מועצת עמק חפר: hefer.org.il/toshav-center/ · טופס החל
+ פת משלמים: hefer.org.il/החלפת-משלמים-בנכס/\n\nhtt
+ ps://yaelavgil.github.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:ארנונה — רועי מתקשר לסדר את החוב
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:ארנונה — רועי מתקשר לסדר את החוב
+END:VALARM
+END:VEVENT
+END:VCALENDAR
