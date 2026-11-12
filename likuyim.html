@@ -1,0 +1,655 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ליקויים — הבית שלנו</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Karantina:wght@400;700&family=Assistant:wght@400;600;700;800&display=swap">
+<style>
+:root{
+  --paper:#FBFAF5; --card:#fff; --ink:#2C2A26; --muted:#7D7A70;
+  --line:#E6E3D7; --line2:#D5D1C0;
+  --olive:#6C7A44; --olive-ink:#4E5A2E; --olive-soft:#EFF1E2;
+  --red:#C0452F; --red-soft:#FBEDEA;
+  --amber:#B4832B; --amber-soft:#FBF2DF;
+  --r:14px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#1A1917; --card:#232220; --ink:#ECE9E0; --muted:#9B968A;
+  --line:#333230; --line2:#444240;
+  --olive:#9DAE6E; --olive-ink:#B6C586; --olive-soft:#2A2E22;
+  --red:#E07A63; --red-soft:#33211D; --amber:#D7A64A; --amber-soft:#2F2819;
+}}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);
+  font:16px/1.55 Assistant,-apple-system,"system-ui","Segoe UI",Arial,sans-serif;
+  padding:0 15px calc(44px + env(safe-area-inset-bottom));-webkit-text-size-adjust:100%}
+.wrap{max-width:820px;margin:0 auto}
+header{padding:20px 0 8px}
+h1{font-family:Karantina,Assistant,sans-serif;font-weight:700;font-size:36px;line-height:1;margin:0 0 5px}
+.lede{color:var(--muted);font-size:14.5px;margin:0}
+.pill{display:inline-block;background:var(--card);border:1px solid var(--line);border-radius:999px;
+  padding:5px 12px;font-size:13px;font-weight:600;margin:0 0 0 6px}
+.pill.ok{background:var(--olive-soft);border-color:var(--olive);color:var(--olive-ink)}
+.pill.hot{background:var(--red-soft);border-color:var(--red);color:var(--red)}
+
+/* ===== מסך ההעלאה — זה מה שרועי רואה ראשון ===== */
+.drop{display:block;border:2.5px dashed var(--olive);border-radius:20px;background:var(--olive-soft);
+  color:var(--olive-ink);text-align:center;padding:44px 18px;cursor:pointer;margin:18px 0 10px;
+  font-weight:800;font-size:20px;transition:transform .12s}
+.drop:active{transform:scale(.99)}
+.drop small{display:block;font-weight:600;font-size:13.5px;color:var(--muted);margin-top:8px}
+.drop input{display:none}
+.bar{height:7px;border-radius:99px;background:var(--line);overflow:hidden;margin:12px 0}
+.bar i{display:block;height:100%;background:var(--olive);width:0;transition:width .25s}
+.qline{font-size:13.5px;color:var(--muted);margin:6px 0 0;min-height:19px}
+
+/* ===== מסך המעבר תמונה-תמונה ===== */
+.step{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin:14px 0}
+.stephd{display:flex;align-items:center;gap:10px;margin:0 0 10px}
+.stephd .cnt{font-weight:800;font-size:15px}
+.stephd .rest{color:var(--muted);font-size:13px;margin-right:auto}
+.shot{width:100%;max-height:44vh;object-fit:contain;background:var(--line);border-radius:12px;
+  border:1px solid var(--line);display:block;cursor:zoom-in}
+.fld{margin:13px 0 0}
+.fld label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin:0 0 5px}
+.fld input,.fld textarea{width:100%;border:1px solid var(--line);background:var(--paper);color:var(--ink);
+  border-radius:10px;padding:10px 11px;font:inherit;font-size:16px}
+.fld textarea{min-height:76px;resize:vertical}
+.fld input:focus,.fld textarea:focus{outline:none;border-color:var(--olive)}
+
+/* בוחר המיקום — נקישה ולא הקלדה. ההקלדה רק מסננת. */
+.locnow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 8px}
+.locnow b{background:var(--olive);color:#fff;border-radius:999px;padding:7px 14px;font-size:15px}
+.locnow button{border:none;background:transparent;color:var(--muted);font:inherit;font-size:13px;
+  text-decoration:underline;cursor:pointer;padding:4px}
+.chips{display:flex;gap:7px;flex-wrap:wrap;max-height:188px;overflow:auto;
+  -webkit-overflow-scrolling:touch;padding:2px 0 4px}
+.chips button{border:1px solid var(--line2);background:var(--card);color:var(--ink);border-radius:999px;
+  padding:9px 13px;font:inherit;font-size:14.5px;font-weight:600;cursor:pointer;text-align:right}
+.chips button:active{transform:scale(.98)}
+.chips button.on{background:var(--olive);color:#fff;border-color:var(--olive)}
+.chips button.new{border-style:dashed;border-color:var(--olive);color:var(--olive-ink);font-weight:800}
+.locsearch{margin:0 0 8px}
+
+.go{display:block;width:100%;border:none;border-radius:13px;background:var(--olive);color:#fff;
+  padding:15px;font:inherit;font-weight:800;font-size:17px;cursor:pointer;margin:14px 0 0}
+.go[disabled]{opacity:.5}
+.ghost{background:transparent;border:1.5px solid var(--line2);color:var(--ink)}
+.row2{display:flex;gap:9px;margin-top:10px}
+.row2 .go{margin-top:0}
+.empty-state{text-align:center;color:var(--muted);padding:34px 10px;font-size:15px}
+
+/* ===== המסמך ===== */
+.doc h2{font-size:21px;margin:26px 0 4px;padding-bottom:5px;border-bottom:2px solid var(--olive);
+  color:var(--olive-ink);font-family:Karantina,Assistant,sans-serif;letter-spacing:.01em}
+.doc h3{font-size:16px;margin:16px 0 8px;color:var(--ink);background:var(--olive-soft);
+  padding:6px 11px;border-radius:9px}
+.lk{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px;
+  margin:0 0 11px;display:flex;gap:12px;align-items:flex-start;break-inside:avoid}
+.lk .n{flex:0 0 auto;width:25px;height:25px;border-radius:50%;background:var(--ink);color:var(--paper);
+  display:grid;place-items:center;font-weight:800;font-size:12.5px}
+.lk .ph{flex:0 0 auto;width:150px}
+.lk .ph img{width:150px;height:150px;object-fit:cover;border-radius:10px;border:1px solid var(--line);
+  background:var(--line);display:block;cursor:zoom-in}
+.lk .ph .nofile{width:150px;height:150px;border-radius:10px;border:1px dashed var(--line2);
+  display:grid;place-items:center;color:var(--muted);font-size:12px}
+.lk .body{flex:1;min-width:0}
+.lk .where{font-weight:800;font-size:15px;margin:0 0 3px}
+.lk .where span{color:var(--olive-ink)}
+.lk .what{font-size:15px;margin:0}
+.lk.fixed{opacity:.5}
+.lk .mini{font-size:12.5px;color:var(--muted);margin-top:5px}
+
+.tabs{display:flex;gap:6px;margin:14px 0 4px;flex-wrap:wrap}
+.tabs a{border:1px solid var(--line);background:var(--card);color:var(--ink);text-decoration:none;
+  border-radius:999px;padding:7px 14px;font-size:14px;font-weight:700}
+.tabs a.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.note{background:var(--amber-soft);border:1px solid var(--amber);border-radius:11px;padding:10px 12px;
+  font-size:13.5px;color:var(--ink);margin:12px 0}
+.toast{position:fixed;inset-inline:0;bottom:calc(18px + env(safe-area-inset-bottom));margin-inline:auto;
+  width:max-content;max-width:90%;background:var(--ink);color:var(--paper);padding:11px 19px;
+  border-radius:999px;font-weight:700;font-size:14.5px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:60}
+.toast.on{opacity:1}
+.lb{position:fixed;inset:0;background:rgba(0,0,0,.9);display:none;place-items:center;z-index:80;padding:12px}
+.lb.on{display:grid}
+.lb img{max-width:100%;max-height:92vh;border-radius:10px}
+@media print{
+  body{background:#fff;padding:0;color:#000}
+  .tabs,.drop,.go,.row2,.noprint,.note{display:none!important}
+  .lk{break-inside:avoid;border-color:#bbb;background:#fff}
+  .doc h2{color:#000;border-bottom-color:#666}
+  .doc h3{background:#eee;color:#000}
+  .lk .ph,.lk .ph img{width:210px;height:auto}
+  .lk .ph img{max-height:260px;object-fit:contain;background:#fff}
+}
+@media (max-width:560px){
+  .lk{flex-wrap:wrap}
+  .lk .ph,.lk .ph img,.lk .ph .nofile{width:100%;height:auto}
+  .lk .ph img{height:auto;max-height:300px;object-fit:contain;background:var(--paper)}
+  .chips{max-height:220px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1 id="h1">ליקויים</h1>
+    <p class="lede" id="lede">הבית שלנו</p>
+  </header>
+  <div id="app"></div>
+</div>
+<div class="toast" id="toast"></div>
+<div class="lb" id="lb"><img id="lbimg" alt=""></div>
+
+<script>
+/* ===== אחסון =====
+   אותו Firebase שהלוח עובד מולו. Storage לא מופעל בפרויקט (Spark), ולכן
+   התמונה נשמרת כ-dataURL מוקטן. שלושה צמתים, לפי מה שנטען מתי:
+     board/files/<fid>    — התמונה המלאה 1600px. נטענת רק בלחיצה ובהדפסה.
+     board/thumbs/<fid>   — 240px ~15KB. זה מה שהמסמך מציג על המסך.
+     board/filemeta/...   — מטא-דאטה בלבד, בלי שום תמונה. נטען במלואו
+                            בכל טעינה של הלוח, ולכן כל בייט בו יקר.
+   הליקוי עצמו הוא פריט ב-items של המשימה, ולא רשומה נפרדת — כך הוא חי
+   בתוך סדר היום מול ברק, והלוח מציג אותו בלי שינוי בקוד שלו. */
+const DB='https://home-picks-47450-default-rtdb.europe-west1.firebasedatabase.app';
+const TASK='ong-barak';
+const TNODE=DB+'/board/tasks/'+TASK;
+const FMETA=DB+'/board/filemeta', FDATA=DB+'/board/files', FTHUMB=DB+'/board/thumbs';
+const LOCS=DB+'/board/locs';
+const MAXB=700*1024;
+
+/* רשימת ברירת המחדל כפי שיעל כתבה אותה. מיקום שרועי מוסיף נשמר
+   ב-board/locs ומוצע לו שוב בפעם הבאה. */
+const LOC0=['קומה עליונה - חדר הורים','קומה עליונה - חדר רחצה','קומה עליונה - פינת עבודה',
+  'קומה עליונה - פינת משפחה','קומה עליונה - מרפסת','מדרגות','קומה תחתונה - סלון',
+  'קומה תחתונה - כניסה','קומה תחתונה - ממ״ד','קומה תחתונה - חדר אורחים',
+  'קומה תחתונה - חדר רחצה אורחים','קומה תחתונה - חדר רחצה כללי','קומה תחתונה - מטבח',
+  'קומה תחתונה מתחת למדרגות','קומה תחתונה - מזדרון','קומה תחתונה - חדר ילדים',
+  'חצר - צד מזרחי','צד מערבי','צד צפוני (גינה אחורית)','צד דרומי (גינה קדמית)','חנייה'];
+
+const qs=new URLSearchParams(location.search);
+const VIEW=qs.get('v')||'';
+
+const $=s=>document.querySelector(s);
+const el=h=>{const d=document.createElement('div');d.innerHTML=h.trim();return d.firstElementChild;};
+const esc=s=>(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let tt;
+function toast(m,ms){const t=$('#toast');t.textContent=m;t.classList.add('on');
+  clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),ms||2200);}
+
+/* רשת נופלת מדי פעם, ולכן כל כתיבה מנסה שוב ולא נעלמת בשקט */
+async function put(url,body,method){
+  for(let a=0;a<4;a++){
+    try{
+      const r=await fetch(url,{method:method||'PUT',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(body)});
+      if(r.ok)return true;
+    }catch(e){}
+    await new Promise(r=>setTimeout(r,900*(a+1)));
+  }
+  return false;
+}
+async function getJSON(url){
+  try{const r=await fetch(url+'?t='+Date.now(),{cache:'no-store'});return r.ok?await r.json():null;}
+  catch(e){return null;}
+}
+
+/* תמונה מהנייד היא 4–12 מגה. בלי הקטנה היא לא נכנסת ל-Realtime DB. */
+function shrink(file){
+  return new Promise(res=>{
+    if(!/^image\//.test(file.type)||/svg/.test(file.type))return res(null);
+    const img=new Image(),url=URL.createObjectURL(file);
+    img.onload=()=>{const max=1600,sc=Math.min(1,max/Math.max(img.width,img.height));
+      const c=document.createElement('canvas');
+      c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      URL.revokeObjectURL(url);res(c.toDataURL('image/jpeg',0.72));};
+    img.onerror=()=>{URL.revokeObjectURL(url);res(null);};
+    img.src=url;
+  });
+}
+/* הממוזערת היא מה שמחזיק את מכסת ההורדה בשליטה: 240px במקום 1600px,
+   כלומר ~15KB במקום ~350KB לכל ליקוי שנפתח במסמך */
+function thumbOf(dataUrl){
+  return new Promise(res=>{
+    const img=new Image();
+    img.onload=()=>{const max=240,sc=Math.min(1,max/Math.max(img.width,img.height));
+      const c=document.createElement('canvas');
+      c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      res(c.toDataURL('image/jpeg',0.6));};
+    img.onerror=()=>res(null);
+    img.src=dataUrl;
+  });
+}
+const readURL=f=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(f);});
+const kb=n=>n>1048576?(n/1048576).toFixed(1)+' MB':Math.round(n/1024)+' KB';
+
+/* ===== מצב ===== */
+let TASKOBJ=null;        /* המשימה החיה */
+let LOCLIST=LOC0.slice(); /* ברירות מחדל + מה שרועי הוסיף */
+let QUEUE=[];            /* התמונות שהועלו וממתינות לפרטים */
+let QI=0;                /* איפה אנחנו בתור */
+let lastLoc='';          /* המיקום האחרון — ברוב הסיור הוא לא משתנה */
+
+async function loadTask(){ TASKOBJ=await getJSON(TNODE+'.json'); return TASKOBJ; }
+async function loadLocs(){
+  const j=await getJSON(LOCS+'.json');
+  const extra=Array.isArray(j)?j:(j&&typeof j==='object'?Object.values(j):[]);
+  const seen={};
+  LOCLIST=LOC0.concat(extra.filter(Boolean)).filter(x=>{
+    const k=String(x).trim(); if(!k||seen[k])return false; seen[k]=1; return true;});
+}
+async function rememberLoc(name){
+  const n=String(name||'').trim(); if(!n||LOC0.indexOf(n)>=0)return;
+  const j=await getJSON(LOCS+'.json');
+  const cur=Array.isArray(j)?j:(j&&typeof j==='object'?Object.values(j):[]);
+  if(cur.indexOf(n)>=0)return;
+  cur.push(n);
+  await put(LOCS+'.json',cur);
+  if(LOCLIST.indexOf(n)<0)LOCLIST.push(n);
+}
+
+/* ===== כתיבה בטוחה אל items =====
+   ל-ong-barak יש 47 פריטים חיים שיעל ורועי מסמנים תוך כדי. PUT של
+   המשימה כולה היה דורס סימון שנעשה בשנייה שלפני. לכן: למשוך את המערך
+   החי ברגע השמירה, לצרף רק את מה שחדש לפי k, ולכתוב רק את items. */
+async function appendItem(item){
+  const live=await getJSON(TNODE+'/items.json');
+  /* Firebase מחזיר מערך צפוף כמערך, ומערך עם חורים כאובייקט ממופתח.
+     שתי הצורות חייבות להתקבל — אחרת קריאה תקינה בצורה השנייה היתה
+     נראית כמו ״אין פריטים״, והכתיבה שאחריה היתה מוחקת את כולם. */
+  let base=null;
+  if(Array.isArray(live))base=live.filter(x=>x);
+  else if(live&&typeof live==='object')base=Object.keys(live)
+    .sort((a,z)=>(+a)-(+z)).map(k=>live[k]).filter(x=>x);
+  /* קריאה שנכשלה מחזירה null. במצב הזה אסור לכתוב: מערך חדש עם פריט
+     אחד היה מוחק 47 פריטים חיים. עדיף להיכשל גלוי ושהוא ינסה שוב. */
+  if(!base){ toast('אין חיבור — הפרטים לא נשמרו, נסה שוב'); return false; }
+  if(base.some(x=>x&&x.k===item.k))return true;
+  const arr=base.concat([item]);
+  if(arr.length<=base.length)return false;
+  const ok=await put(TNODE+'/items.json',arr);
+  if(ok){ await put(TNODE+'/updatedAt.json',Date.now()); TASKOBJ&&(TASKOBJ.items=arr); }
+  return ok;
+}
+
+/* ===== העלאה ===== */
+async function addFiles(files,onProg){
+  const arr=[...files]; const out=[]; let fail=0;
+  for(let i=0;i<arr.length;i++){
+    const f=arr[i];
+    onProg(i,arr.length,f.name);
+    let data=await shrink(f), isImg=!!data;
+    if(!data){
+      try{ data=await readURL(f); }catch(e){ fail++; continue; }
+    }
+    if(data.length>MAXB*1.4){ fail++; continue; }
+    const fid='f'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+    if(!await put(FDATA+'/'+fid+'.json',{data})){ fail++; continue; }
+    let th=null;
+    if(isImg){ th=await thumbOf(data); if(th)await put(FTHUMB+'/'+fid+'.json',{data:th}); }
+    out.push({fid,name:f.name||'',type:isImg?'image/jpeg':(f.type||'application/octet-stream'),
+              size:data.length,thumb:th,loc:'',loc2:'',note:''});
+  }
+  return {out,fail};
+}
+
+function mkDrop(after){
+  const d=el(`<label class="drop">📷 צילום או בחירת תמונות
+    <small>אפשר לבחור כמה ביחד · אחרי זה נעבור עליהן אחת-אחת</small>
+    <input type="file" multiple accept="image/*,application/pdf,.pdf,.heic,.heif"></label>`);
+  const bar=el('<div class="bar"><i></i></div>'); bar.style.display='none';
+  const q=el('<p class="qline"></p>');
+  const wrap=el('<div></div>'); wrap.appendChild(d); wrap.appendChild(bar); wrap.appendChild(q);
+  const run=async fs=>{
+    if(!fs||!fs.length)return;
+    bar.style.display='block';
+    const res=await addFiles(fs,(i,n,nm)=>{
+      bar.querySelector('i').style.width=Math.round(i/n*100)+'%';
+      q.textContent=`מעלה ${i+1} מתוך ${n} — ${nm}`;
+    });
+    bar.style.display='none'; q.textContent='';
+    if(res.fail)toast(`${res.out.length} עלו · ${res.fail} נכשלו`);
+    else toast(`${res.out.length} תמונות עלו ✓`);
+    if(res.out.length){ QUEUE=res.out; QI=0; }
+    if(after)after();
+  };
+  d.querySelector('input').onchange=e=>{ const fs=e.target.files; e.target.value=''; run(fs); };
+  ['dragover','dragenter'].forEach(ev=>d.addEventListener(ev,x=>{x.preventDefault();d.style.transform='scale(1.01)';}));
+  ['dragleave','drop'].forEach(ev=>d.addEventListener(ev,x=>{x.preventDefault();d.style.transform='';}));
+  d.addEventListener('drop',x=>{ run(x.dataTransfer&&x.dataTransfer.files); });
+  return wrap;
+}
+
+/* ===== בוחר המיקום =====
+   רועי ממלא את זה בשטח, בטלפון, ביד אחת. לכן המיקום נבחר בנקישה;
+   ההקלדה רק מסננת, ומה שלא קיים אפשר להוסיף מאותו שדה. */
+function locPicker(cur,onPick){
+  const box=el('<div></div>');
+  const now=el('<div class="locnow"></div>');
+  const search=el('<div class="fld locsearch"><input placeholder="סינון, או מיקום חדש…" autocomplete="off"></div>');
+  const chips=el('<div class="chips"></div>');
+  const inp=search.querySelector('input');
+  let picked=cur||'';
+
+  const paintNow=()=>{
+    now.innerHTML='';
+    if(picked){
+      now.appendChild(el(`<b>${esc(picked)}</b>`));
+      const ch=el('<button type="button">שינוי</button>');
+      ch.onclick=()=>{ picked=''; onPick(''); paint(); };
+      now.appendChild(ch);
+    }
+  };
+  const paintChips=()=>{
+    const q=inp.value.trim();
+    chips.innerHTML='';
+    const list=LOCLIST.filter(l=>!q||l.indexOf(q)>=0);
+    list.forEach(l=>{
+      const b=el(`<button type="button" class="${l===picked?'on':''}">${esc(l)}</button>`);
+      b.onclick=()=>{ picked=l; onPick(l); inp.value=''; paint(); };
+      chips.appendChild(b);
+    });
+    if(q&&LOCLIST.indexOf(q)<0){
+      const b=el(`<button type="button" class="new">➕ ${esc(q)}</button>`);
+      b.onclick=async()=>{ picked=q; onPick(q); await rememberLoc(q); inp.value=''; paint();
+        toast('המיקום נשמר ויוצע בפעם הבאה'); };
+      chips.appendChild(b);
+    }
+    if(!list.length&&!q)chips.appendChild(el('<div class="empty-state">אין מיקומים</div>'));
+  };
+  const paint=()=>{ paintNow(); paintChips();
+    search.style.display=picked?'none':'block';
+    chips.style.display=picked?'none':'flex'; };
+  inp.addEventListener('input',paintChips);
+  box.appendChild(now); box.appendChild(search); box.appendChild(chips);
+  paint();
+  return box;
+}
+
+/* ===== המסך המרכזי: תמונה אחרי תמונה ===== */
+function renderWizard(app){
+  const it=QUEUE[QI];
+  if(!it)return renderDone(app);
+  $('#h1').textContent='פרטי הליקוי';
+  $('#lede').innerHTML=`תמונה <b>${QI+1}</b> מתוך <b>${QUEUE.length}</b> · הבית שלנו`;
+
+  const card=el('<div class="step"></div>');
+  /* ״1 / 2״ נשבר ב-RTL: הלוכסן ניטרלי והספרות מתהפכות. מילים בעברית
+     ביניהן מעגנות את הסדר בלי סימני כיוון נסתרים. */
+  const rest=QUEUE.length-QI-1;
+  card.appendChild(el(`<div class="stephd">
+    <span class="cnt">תמונה ${QI+1} מתוך ${QUEUE.length}</span>
+    <span class="rest">${rest?`עוד ${rest} אחריה`:'האחרונה'}</span></div>`));
+
+  if(it.thumb){
+    const im=el(`<img class="shot" alt="">`); im.src=it.thumb;
+    im.onclick=async()=>{ const j=await getJSON(FDATA+'/'+it.fid+'.json');
+      const d=j&&(j.data||j); if(typeof d==='string'){$('#lbimg').src=d;$('#lb').classList.add('on');} };
+    card.appendChild(im);
+  } else card.appendChild(el(`<div class="empty-state">${esc(it.name||'קובץ')} — ${kb(it.size)}</div>`));
+
+  /* מיקום */
+  const f1=el('<div class="fld"><label>מיקום</label></div>');
+  f1.appendChild(locPicker(it.loc||lastLoc,v=>{ it.loc=v; upd(); }));
+  if(!it.loc&&lastLoc)it.loc=lastLoc;
+  card.appendChild(f1);
+
+  /* מיקום מדויק */
+  const f2=el(`<div class="fld"><label>מיקום מדויק — איפה בדיוק בחדר</label>
+    <input placeholder="למשל: מתחת למזגן" autocomplete="off"></div>`);
+  const i2=f2.querySelector('input'); i2.value=it.loc2||'';
+  i2.addEventListener('input',()=>{ it.loc2=i2.value; });
+  card.appendChild(f2);
+
+  /* ההסבר */
+  const f3=el(`<div class="fld"><label>מה הליקוי</label>
+    <textarea placeholder="מה רואים בתמונה ומה צריך לתקן"></textarea></div>`);
+  const i3=f3.querySelector('textarea'); i3.value=it.note||'';
+  i3.addEventListener('input',()=>{ it.note=i3.value; upd(); });
+  card.appendChild(f3);
+
+  const next=el('<button class="go">שמירה והבא ←</button>');
+  const skip=el('<button class="go ghost">דילוג</button>');
+  function upd(){ next.disabled=!(it.loc&&(it.note||'').trim()); }
+  upd();
+  next.onclick=async()=>{
+    next.disabled=true; next.textContent='שומר…';
+    const ok=await commitOne(it);
+    next.textContent='שמירה והבא ←';
+    if(!ok){ toast('השמירה נכשלה — נסה שוב'); upd(); return; }
+    lastLoc=it.loc;
+    QI++; render();
+  };
+  skip.onclick=()=>{ QI++; render(); };
+  const r=el('<div class="row2"></div>'); r.appendChild(next); r.appendChild(skip);
+  card.appendChild(r);
+  app.appendChild(card);
+  app.appendChild(el('<p class="lede" style="margin-top:10px">התמונה כבר נשמרה. הפרטים נשמרים בלחיצה על ״הבא״.</p>'));
+}
+
+/* ליקוי אחד → פריט ב-items + מטא-דאטה שמקשרת אליו את התמונה.
+   המטא נכתבת תחת <task>__<k> כי זה המפתח שהלוח כבר מחפש לפי נושא,
+   ולכן הנושא מקבל 📎 והתמונה נפתחת בלוח בלי שינוי בקוד שלו. */
+async function commitOne(it){
+  const k='lk'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+  const where=it.loc2?`${it.loc} · ${it.loc2}`:it.loc;
+  const item={k,lv:1,done:false,ans:'',
+    t:`📍 ${it.loc} · **${(it.note||'').trim()}**${it.loc2?` *(${it.loc2})*`:''}`,
+    fid:it.fid,loc:it.loc,loc2:it.loc2||'',at:Date.now(),by:'רועי'};
+  const meta={fid:it.fid,task:TASK+'__'+k,name:it.name||where,type:it.type,size:it.size,
+    at:new Date().toISOString(),by:'רועי'};
+  const a=await put(`${FMETA}/${encodeURIComponent(TASK+'__'+k)}/${it.fid}.json`,meta);
+  const b=await appendItem(item);
+  return a&&b;
+}
+
+function renderDone(app){
+  $('#h1').textContent='סיימנו';
+  $('#lede').textContent='כל הליקויים נשמרו בסדר היום מול ברק';
+  const n=QUEUE.length;
+  app.appendChild(el(`<div class="step"><div class="empty-state">
+    ✓ ${n} תמונות עברו למשימה.<br>אפשר לצלם עוד, או לפתוח את המסמך.</div></div>`));
+  const more=el('<button class="go">📷 עוד תמונות</button>');
+  more.onclick=()=>{ QUEUE=[]; QI=0; render(); };
+  app.appendChild(more);
+  const doc=el(`<a class="go ghost" style="text-align:center;text-decoration:none" href="?v=doc">📄 המסמך</a>`);
+  app.appendChild(doc);
+}
+
+/* ===== מסך הפתיחה ===== */
+function renderStart(app){
+  $('#h1').textContent='ליקויים';
+  $('#lede').innerHTML='הבית שלנו · הליקויים נכנסים ל<b>סדר היום מול ברק</b>';
+  app.appendChild(el(`<div class="tabs noprint">
+    <a href="?" class="on">צילום</a><a href="?v=doc">המסמך</a><a href="./">↩ ללוח</a></div>`));
+  const open=(TASKOBJ&&(TASKOBJ.items||[]).filter(i=>i&&i.fid&&!i.done).length)||0;
+  const all=(TASKOBJ&&(TASKOBJ.items||[]).filter(i=>i&&i.fid).length)||0;
+  app.appendChild(el(`<p class="lede"><span class="pill ${open?'hot':'ok'}">${open} ליקויים פתוחים</span>
+    <span class="pill">${all} סה״כ</span></p>`));
+  app.appendChild(mkDrop(()=>render()));
+  app.appendChild(el(`<p class="lede">צלם כמה שצריך בבת אחת, ואז נעבור עליהן אחת-אחת
+    ונמלא מיקום והסבר. המיקום נבחר בנקישה.</p>`));
+}
+
+/* ===== המסמך =====
+   מחולק לפי אזור ואז לפי חדר, כך שאפשר לעבור איתו בבית מלמטה למעלה. */
+function zoneOf(loc){
+  if(/^קומה עליונה/.test(loc))return 'קומה עליונה';
+  if(/^קומה תחתונה/.test(loc))return 'קומה תחתונה';
+  if(/^חצר|^צד |^חנייה/.test(loc))return 'חוץ וחצר';
+  return 'כללי';
+}
+const ZORD=['קומה תחתונה','קומה עליונה','חוץ וחצר','כללי'];
+function roomOf(loc){
+  return String(loc||'').replace(/^(קומה עליונה|קומה תחתונה|חצר)\s*[-–]\s*/,'').trim()||loc||'בלי מיקום';
+}
+function defects(){
+  return ((TASKOBJ&&TASKOBJ.items)||[]).filter(i=>i&&i.fid);
+}
+function grouped(withDone){
+  const list=defects().filter(i=>withDone||!i.done);
+  const zones={};
+  list.forEach(i=>{
+    const z=zoneOf(i.loc||''), r=roomOf(i.loc||'');
+    (zones[z]=zones[z]||{})[r]=(zones[z][r]||[]).concat([i]);
+  });
+  return ZORD.filter(z=>zones[z]).map(z=>({zone:z,
+    rooms:Object.keys(zones[z]).map(r=>({room:r,rows:zones[z][r]}))}));
+}
+/* רק הממוזערות נטענות לתצוגה. המלאות נטענות רק לפני הדפסה. */
+async function fillThumb(img,fid){
+  const j=await getJSON(FTHUMB+'/'+fid+'.json');
+  const d=j&&(j.data||j);
+  if(typeof d==='string'){ img.src=d; img.dataset.thumb='1'; }
+  else { const f=await getJSON(FDATA+'/'+fid+'.json'); const fd=f&&(f.data||f);
+    if(typeof fd==='string')img.src=fd; }
+  img.onclick=async()=>{ const f=await getJSON(FDATA+'/'+fid+'.json'); const fd=f&&(f.data||f);
+    if(typeof fd==='string'){ $('#lbimg').src=fd; $('#lb').classList.add('on'); } };
+}
+function renderDoc(app){
+  $('#h1').textContent='רשימת ליקויים';
+  const today=new Date().toLocaleDateString('he-IL',{day:'numeric',month:'long',year:'numeric'});
+  $('#lede').innerHTML=`הבית שלנו · ${today}`;
+  app.classList.add('doc');
+  app.appendChild(el(`<div class="tabs noprint">
+    <a href="?">צילום</a><a href="?v=doc" class="on">המסמך</a><a href="./">↩ ללוח</a></div>`));
+
+  const secs=grouped(false);
+  const n=secs.reduce((a,z)=>a+z.rooms.reduce((b,r)=>b+r.rows.length,0),0);
+  app.appendChild(el(`<p class="lede noprint"><span class="pill hot">${n} ליקויים לטיפול</span></p>`));
+  if(!n){ app.appendChild(el('<div class="empty-state">אין ליקויים פתוחים ברשימה.</div>')); return; }
+
+  let num=0;
+  secs.forEach(z=>{
+    app.appendChild(el(`<h2>${esc(z.zone)}</h2>`));
+    z.rooms.forEach(r=>{
+      app.appendChild(el(`<h3>${esc(r.room)}</h3>`));
+      r.rows.forEach(it=>{
+        num++;
+        const c=el(`<div class="lk"><span class="n">${num}</span>
+          <div class="ph"></div><div class="body"></div></div>`);
+        const ph=c.querySelector('.ph'), body=c.querySelector('.body');
+        const im=el('<img alt="" loading="lazy">'); ph.appendChild(im); fillThumb(im,it.fid);
+        im.dataset.fid=it.fid;
+        /* הכותרת שמעל כבר אומרת באיזה חדר אנחנו, ולכן כאן רק המיקום
+           המדויק. חזרה על שם החדר בכל שורה מרעישה מסמך מודפס. */
+        if(it.loc2)body.appendChild(el(`<p class="where"><span>${esc(it.loc2)}</span></p>`));
+        body.appendChild(el(`<p class="what">${esc(noteOf(it))}</p>`));
+        app.appendChild(c);
+      });
+    });
+  });
+
+  const pr=el('<button class="go noprint">🖨 הדפסה או שמירה כ-PDF</button>');
+  pr.onclick=()=>printFull(app,pr);
+  app.appendChild(pr);
+  const gd=el('<button class="go ghost noprint">📝 העתקה להדבקה בגוגל דוקס</button>');
+  gd.onclick=copyRich;
+  app.appendChild(gd);
+  const wa=el('<button class="go ghost noprint">💬 וואטסאפ</button>');
+  wa.onclick=async()=>{ const t=waText();
+    try{ await navigator.clipboard.writeText(t); }catch(e){}
+    if(t.length<1500)window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank','noopener');
+    else toast('הרשימה ארוכה — הועתקה, אפשר להדביק'); };
+  app.appendChild(wa);
+  app.appendChild(el(`<div class="note noprint">
+    <b>גוגל דוקס:</b> הכפתור מעתיק את המסמך ללוח, ואז מדביקים אותו במסמך גוגל פתוח.
+    זו הדבקה ולא שמירה ישירה לדרייב — שמירה ישירה דורשת חיבור חשבון גוגל, שאין ללוח.
+    <b>התמונות לא עוברות בהדבקה</b>, ולכן לשליחה לקבלן עדיף PDF.</div>`));
+}
+/* ההסבר נשמר גם כשדה וגם בתוך t. כשיש שדה — הוא המקור. */
+function noteOf(it){
+  if(it.note)return it.note;
+  const m=String(it.t||'').match(/\*\*(.+?)\*\*/);
+  return m?m[1]:String(it.t||'').replace(/^📍[^·]*·\s*/,'').replace(/\*/g,'');
+}
+/* הדפסה לוקחת את התמונות המלאות — ממוזערת של 240px נראית רכה על נייר */
+async function printFull(app,btn){
+  const imgs=[...app.querySelectorAll('.lk img[data-thumb="1"]')];
+  if(imgs.length){
+    btn.disabled=true;
+    for(let i=0;i<imgs.length;i++){
+      btn.textContent=`טוען תמונות לאיכות הדפסה ${i+1}/${imgs.length}…`;
+      const j=await getJSON(FDATA+'/'+imgs[i].dataset.fid+'.json');
+      const d=j&&(j.data||j);
+      if(typeof d==='string'){ imgs[i].src=d; delete imgs[i].dataset.thumb; }
+    }
+    btn.textContent='🖨 הדפסה או שמירה כ-PDF'; btn.disabled=false;
+  }
+  window.print();
+}
+function waText(){
+  const R='‏', today=new Date().toLocaleDateString('he-IL',{day:'numeric',month:'numeric'});
+  let s=`${R}*רשימת ליקויים — הבית שלנו*\n${R}_${today}_\n`;
+  let num=0;
+  grouped(false).forEach(z=>{
+    s+=`\n${R}*${z.zone}*\n`;
+    z.rooms.forEach(r=>{
+      s+=`${R}_${r.room}_\n`;
+      r.rows.forEach(it=>{ num++;
+        s+=`${R}${num}. ${noteOf(it)}${it.loc2?` (${it.loc2})`:''}\n`; });
+    });
+  });
+  s+=`\n${R}סה״כ ${num} ליקויים. נשמח לדעת מה מתוקן ועד מתי 🙏`;
+  return s;
+}
+/* גוגל דוקס ווורד אינם יורשים כיוון מ-CSS בלבד — צריך dir על כל
+   אלמנט שיוצר פסקה, אחרת המספרים קופצים לצד הלא נכון. */
+function docHtml(){
+  const today=new Date().toLocaleDateString('he-IL',{day:'numeric',month:'long',year:'numeric'});
+  let b=`<h1 dir="rtl" style="font-size:19pt;margin:0 0 2pt">רשימת ליקויים</h1>
+    <p dir="rtl" style="color:#777;font-size:10pt;margin:0 0 14pt">הבית שלנו · יעל ורועי אבגיל · ${today}</p>`;
+  let num=0;
+  grouped(false).forEach(z=>{
+    b+=`<h2 dir="rtl" style="font-size:14pt;margin:16pt 0 4pt;border-bottom:1.5pt solid #6C7A44;color:#4E5A2E">${esc(z.zone)}</h2>`;
+    z.rooms.forEach(r=>{
+      b+=`<h3 dir="rtl" style="font-size:12pt;background:#EEEAE3;padding:4pt 7pt;margin:10pt 0 5pt">${esc(r.room)}</h3>`;
+      r.rows.forEach(it=>{ num++;
+        b+=`<p dir="rtl" style="font-size:11.5pt;margin:0 0 3pt"><b>${num}.</b> ${esc(noteOf(it))}`+
+           (it.loc2?` <span style="color:#888;font-size:9.5pt">· ${esc(it.loc2)}</span>`:'')+`</p>`;
+      });
+    });
+  });
+  b+=`<p dir="rtl" style="margin-top:20pt;font-size:9.5pt;color:#777;border-top:1px solid #ccc;padding-top:8pt">
+    נחתם בתאריך ___________ &nbsp; שם ___________________ &nbsp; חתימה ___________________<br>
+    מועד משוער לסיום ההשלמות: ___________________</p>`;
+  return `<html lang="he" dir="rtl"><head><meta charset="utf-8"></head>`+
+         `<body dir="rtl" style="font-family:Arial,sans-serif;direction:rtl;text-align:right">${b}</body></html>`;
+}
+async function copyRich(){
+  /* את שני הפורמטים בונים לפני ה-await — ספארי מבטל כתיבה ללוח
+     שלא יצאה מתוך אותו אירוע לחיצה */
+  const html=docHtml(), text=waText();
+  try{
+    await navigator.clipboard.write([new ClipboardItem({
+      'text/html':new Blob([html],{type:'text/html'}),
+      'text/plain':new Blob([text],{type:'text/plain'})
+    })]);
+    toast('הועתק — להדביק בגוגל דוקס. התמונות לא עוברות בהדבקה.',3200);
+  }catch(e){
+    try{ await navigator.clipboard.writeText(text); toast('הועתק כטקסט'); }
+    catch(e2){ toast('ההעתקה נכשלה'); }
+  }
+}
+
+/* ===== ניתוב ===== */
+function render(){
+  const app=$('#app'); app.innerHTML=''; app.className='';
+  if(VIEW==='doc')return renderDoc(app);
+  if(QUEUE.length&&QI<QUEUE.length)return renderWizard(app);
+  if(QUEUE.length&&QI>=QUEUE.length)return renderDone(app);
+  renderStart(app);
+}
+$('#lb').onclick=()=>$('#lb').classList.remove('on');
+Promise.all([loadTask(),loadLocs()]).then(render);
+</script>
+</body>
+</html>

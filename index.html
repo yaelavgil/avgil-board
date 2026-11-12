@@ -208,6 +208,10 @@ h1{font-family:'Karantina','Assistant',sans-serif; font-weight:700; font-size:26
 .linkbtn{width:100%; margin-top:12px; border:1.5px dashed var(--line); background:transparent; color:var(--olive-ink);
   border-radius:12px; padding:11px; font:inherit; font-weight:800; font-size:14px; cursor:pointer}
 .linkbtn:hover{border-color:var(--olive); background:var(--olive-soft)}
+.likbtn{display:block; width:100%; margin:10px 0 2px; border:none; background:var(--olive); color:#fff;
+  border-radius:12px; padding:13px; font:inherit; font-weight:800; font-size:15px; cursor:pointer;
+  text-align:center; text-decoration:none}
+.likbtn small{display:block; font-weight:600; font-size:12.5px; opacity:.85; margin-top:2px}
 .picksearch{width:100%; border:1.5px solid var(--line); background:var(--bg); color:var(--ink);
   border-radius:11px; padding:10px 12px; font:inherit; font-size:15px; outline:none; margin-bottom:10px}
 .picksearch:focus{border-color:var(--olive)}
@@ -1889,6 +1893,14 @@ function paintTask(box,t){
   const id=t.id;
   sheetTop(box,'',null);
   box.appendChild(el(`<h3>${esc(t.title)}</h3>`));
+  /* ליקויים מצולמים נכנסים לכאן כנושאים. הצילום עצמו נעשה בדף נפרד
+     כי רועי ממלא אותו בשטח בטלפון, ומסך הלוח גדול מדי בשביל זה. */
+  if(id==='ong-barak'){
+    box.appendChild(el(`<a class="likbtn" href="likuyim.html">📷 צילום ליקויים
+      <small>אצווה אחת, ואז מיקום והסבר לכל תמונה</small></a>`));
+    box.appendChild(el(`<a class="linkbtn" style="display:block;text-align:center;text-decoration:none"
+      href="likuyim.html?v=doc">📄 מסמך הליקויים — להדפסה ולשליחה לברק</a>`));
+  }
   const chk=checklistEl(id,()=>openDetail(id));
   if(chk)box.appendChild(chk);
   const lk=linksEl(t); if(lk)box.appendChild(lk);
