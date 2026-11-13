@@ -116,6 +116,10 @@ h1{font-family:Karantina,Assistant,sans-serif;font-weight:700;font-size:36px;lin
   width:max-content;max-width:90%;background:var(--ink);color:var(--paper);padding:11px 19px;
   border-radius:999px;font-weight:700;font-size:14.5px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:60}
 .toast.on{opacity:1}
+/* טוסט שמפרט מה נכשל הוא כמה שורות ולא מילה. גלולה צרה היתה הופכת אותו
+   לבלתי קריא, ולכן רשימה מקבלת צורה של פתק. */
+.toast.multi{border-radius:14px;white-space:pre-line;text-align:right;
+  font-weight:600;line-height:1.55;font-size:14px;max-width:min(94%,420px)}
 .lb{position:fixed;inset:0;background:rgba(0,0,0,.9);display:none;place-items:center;z-index:80;padding:12px}
 .lb.on{display:grid}
 .lb img{max-width:100%;max-height:92vh;border-radius:10px}
@@ -180,7 +184,8 @@ const $=s=>document.querySelector(s);
 const el=h=>{const d=document.createElement('div');d.innerHTML=h.trim();return d.firstElementChild;};
 const esc=s=>(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let tt;
-function toast(m,ms){const t=$('#toast');t.textContent=m;t.classList.add('on');
+function toast(m,ms){const t=$('#toast');t.textContent=m;
+  t.classList.toggle('multi',/\n/.test(m));t.classList.add('on');
   clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),ms||2200);}
 
 /* רשת נופלת מדי פעם, ולכן כל כתיבה מנסה שוב ולא נעלמת בשקט */
@@ -200,17 +205,30 @@ async function getJSON(url){
   catch(e){return null;}
 }
 
-/* תמונה מהנייד היא 4–12 מגה. בלי הקטנה היא לא נכנסת ל-Realtime DB. */
+/* תמונה מהנייד היא 4–12 מגה. בלי הקטנה היא לא נכנסת ל-Realtime DB.
+
+   השחרור המפורש בסוף אינו ניקיון יופי: ספארי באייפון מחזיק את התמונה
+   המפוענחת (12MP ≈ 48MB לא דחוסים) ואת ה-canvas עד שהאוסף רץ, ולולאה
+   של עשרות תמונות חוצה את תקרת הזיכרון של הטאב — והטאב נהרג בשקט,
+   בלי שגיאה ובלי הודעה. אפס לרוחב ולגובה מחזיר את ה-canvas מיד. */
 function shrink(file){
   return new Promise(res=>{
     if(!/^image\//.test(file.type)||/svg/.test(file.type))return res(null);
     const img=new Image(),url=URL.createObjectURL(file);
+    const done=(c,val)=>{
+      if(c){c.width=c.height=0;}
+      img.onload=img.onerror=null; img.removeAttribute('src');
+      URL.revokeObjectURL(url); res(val);
+    };
     img.onload=()=>{const max=1600,sc=Math.min(1,max/Math.max(img.width,img.height));
       const c=document.createElement('canvas');
       c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);
-      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
-      URL.revokeObjectURL(url);res(c.toDataURL('image/jpeg',0.72));};
-    img.onerror=()=>{URL.revokeObjectURL(url);res(null);};
+      /* toDataURL נופל כשהזיכרון נגמר. בלי try השגיאה היתה בורחת מה-Promise
+         והלולאה כולה היתה נתקעת בלי להיפתר ובלי להיכשל. */
+      try{ c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+           done(c,c.toDataURL('image/jpeg',0.72)); }
+      catch(e){ done(c,null); }};
+    img.onerror=()=>done(null,null);
     img.src=url;
   });
 }
@@ -219,12 +237,15 @@ function shrink(file){
 function thumbOf(dataUrl){
   return new Promise(res=>{
     const img=new Image();
+    const done=(c,val)=>{ if(c){c.width=c.height=0;}
+      img.onload=img.onerror=null; img.removeAttribute('src'); res(val); };
     img.onload=()=>{const max=240,sc=Math.min(1,max/Math.max(img.width,img.height));
       const c=document.createElement('canvas');
       c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);
-      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
-      res(c.toDataURL('image/jpeg',0.6));};
-    img.onerror=()=>res(null);
+      try{ c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+           done(c,c.toDataURL('image/jpeg',0.6)); }
+      catch(e){ done(c,null); }};
+    img.onerror=()=>done(null,null);
     img.src=dataUrl;
   });
 }
@@ -237,6 +258,38 @@ let LOCLIST=LOC0.slice(); /* ברירות מחדל + מה שרועי הוסיף 
 let QUEUE=[];            /* התמונות שהועלו וממתינות לפרטים */
 let QI=0;                /* איפה אנחנו בתור */
 let lastLoc='';          /* המיקום האחרון — ברוב הסיור הוא לא משתנה */
+
+/* ===== התור שורד רענון =====
+   התמונה כבר יושבת ב-Firebase ברגע שהפס הגיע לסוף, אבל הקישור בינה לבין
+   הליקוי נוצר רק בלחיצה על ״הבא״. אם הטאב נהרג באמצע — ובאייפון עם עשרות
+   תמונות ורשת סלולרית זה קורה — התור נעלם והתמונות נשארות יתומות במסד
+   בלי שאיש יודע עליהן. לכן התור נשמר מקומית אחרי כל צעד.
+   נשמרים רק המפתחות: הממוזערת נמשכת בחזרה מהמסד לפי הצורך, וכך תור של
+   70 תמונות תופס עשרות בתים לפריט במקום להתנגש בתקרת האחסון של הדפדפן. */
+const QKEY='lik_queue_v1';
+function saveQueue(){
+  try{
+    if(!QUEUE.length)return localStorage.removeItem(QKEY);
+    const slim=QUEUE.map(x=>({fid:x.fid,name:x.name,type:x.type,size:x.size,
+      loc:x.loc||'',loc2:x.loc2||'',note:x.note||''}));
+    localStorage.setItem(QKEY,JSON.stringify({q:slim,i:QI,at:Date.now()}));
+  }catch(e){}
+}
+function loadQueue(){
+  try{
+    const j=JSON.parse(localStorage.getItem(QKEY)||'null');
+    if(!j||!Array.isArray(j.q)||!j.q.length)return false;
+    /* תור בן יומיים הוא שאריות, לא עבודה באמצע. מספיק רחב לסיור שנמשך
+       מערב לבוקר, וצר מספיק כדי לא לקפוץ בהפתעה שבוע אחרי. */
+    if(Date.now()-(j.at||0)>2*864e5){ localStorage.removeItem(QKEY); return false; }
+    QUEUE=j.q; QI=Math.min(j.i||0,QUEUE.length);
+    /* תור שכולו מולא כבר אינו עבודה פתוחה. בלי זה, פתיחה למחרת היתה
+       נוחתת על מסך ״סיימנו״ במקום על המצלמה. */
+    if(QI>=QUEUE.length){ clearQueue(); return false; }
+    return true;
+  }catch(e){ return false; }
+}
+function clearQueue(){ QUEUE=[]; QI=0; try{localStorage.removeItem(QKEY);}catch(e){} }
 
 async function loadTask(){ TASKOBJ=await getJSON(TNODE+'.json'); return TASKOBJ; }
 async function loadLocs(){
@@ -281,24 +334,34 @@ async function appendItem(item){
 }
 
 /* ===== העלאה ===== */
-async function addFiles(files,onProg){
-  const arr=[...files]; const out=[]; let fail=0;
+async function addFiles(files,onProg,onOne){
+  const arr=[...files]; let ok=0; const bad=[];
+  const nameOf=f=>f.name||'קובץ';
   for(let i=0;i<arr.length;i++){
     const f=arr[i];
     onProg(i,arr.length,f.name);
     let data=await shrink(f), isImg=!!data;
     if(!data){
-      try{ data=await readURL(f); }catch(e){ fail++; continue; }
+      /* ההקטנה נכשלה: או שזה לא תמונה (PDF), או שזה פורמט שהדפדפן לא
+         מפענח — באייפון זה כמעט תמיד HEIC. קריאת המקור המלא לזיכרון
+         משתלמת רק אם יש לו סיכוי להיכנס; אחרת זה 4MB של base64 בדרך
+         לדחייה ודאית, על חשבון הזיכרון של התמונות שאחריו. */
+      if(f.size>MAXB){ bad.push({n:nameOf(f),w:'פורמט שלא נפתח (כנראה HEIC) והקובץ גדול מדי'}); continue; }
+      try{ data=await readURL(f); }catch(e){ bad.push({n:nameOf(f),w:'הקריאה מהמכשיר נכשלה'}); continue; }
     }
-    if(data.length>MAXB*1.4){ fail++; continue; }
+    if(data.length>MAXB*1.4){ bad.push({n:nameOf(f),w:'גדול מדי גם אחרי הקטנה'}); continue; }
     const fid='f'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
-    if(!await put(FDATA+'/'+fid+'.json',{data})){ fail++; continue; }
+    if(!await put(FDATA+'/'+fid+'.json',{data})){ bad.push({n:nameOf(f),w:'הרשת נפלה באמצע ההעלאה'}); continue; }
     let th=null;
     if(isImg){ th=await thumbOf(data); if(th)await put(FTHUMB+'/'+fid+'.json',{data:th}); }
-    out.push({fid,name:f.name||'',type:isImg?'image/jpeg':(f.type||'application/octet-stream'),
-              size:data.length,thumb:th,loc:'',loc2:'',note:''});
+    const sz=data.length; data=null;
+    ok++;
+    /* נרשם מיד ולא בסוף: אם הטאב ייפול בתמונה 40, ה-39 שלפניה כבר
+       בתור השמור וההמשך ימשיך מהן במקום להתחיל מאפס. */
+    onOne({fid,name:f.name||'',type:isImg?'image/jpeg':(f.type||'application/octet-stream'),
+           size:sz,thumb:th,loc:'',loc2:'',note:''});
   }
-  return {out,fail};
+  return {ok,bad};
 }
 
 function mkDrop(after){
@@ -311,17 +374,28 @@ function mkDrop(after){
   const run=async fs=>{
     if(!fs||!fs.length)return;
     bar.style.display='block';
+    QUEUE=[]; QI=0;
     const res=await addFiles(fs,(i,n,nm)=>{
       bar.querySelector('i').style.width=Math.round(i/n*100)+'%';
       q.textContent=`מעלה ${i+1} מתוך ${n} — ${nm}`;
-    });
+    },it=>{ QUEUE.push(it); saveQueue(); });
     bar.style.display='none'; q.textContent='';
-    if(res.fail)toast(`${res.out.length} עלו · ${res.fail} נכשלו`);
-    else toast(`${res.out.length} תמונות עלו ✓`);
-    if(res.out.length){ QUEUE=res.out; QI=0; }
+    if(res.bad.length){
+      /* ״3 נכשלו״ בלי סיבה שולח אותו לנסות שוב את אותו הדבר בדיוק.
+         שם הקובץ והסיבה אומרים לו אם זה משהו שאפשר לתקן. */
+      const lines=res.bad.slice(0,4).map(b=>`• ${b.n} — ${b.w}`);
+      if(res.bad.length>4)lines.push(`• ועוד ${res.bad.length-4}`);
+      toast(`${res.ok} עלו · ${res.bad.length} לא:\n`+lines.join('\n'),9000);
+    }
+    else toast(`${res.ok} תמונות עלו ✓`);
     if(after)after();
   };
-  d.querySelector('input').onchange=e=>{ const fs=e.target.files; e.target.value=''; run(fs); };
+  /* e.target.files הוא רפרנס חי ל-FileList של ה-input, ואיפוס value
+     מרוקן אותו. בכרום הרפרנס הישן שורד, ובספארי באייפון הוא מתאפס
+     לאורך 0 — ואז run יוצא מיד, בלי פס ובלי טוסט. בדיוק מה שקרה לרועי
+     עם 69 תמונות: הוא לחץ ✓ ולא קרה כלום. ההעתקה למערך מנתקת אותנו
+     מה-input לפני האיפוס. */
+  d.querySelector('input').onchange=e=>{ const fs=[...e.target.files]; e.target.value=''; run(fs); };
   ['dragover','dragenter'].forEach(ev=>d.addEventListener(ev,x=>{x.preventDefault();d.style.transform='scale(1.01)';}));
   ['dragleave','drop'].forEach(ev=>d.addEventListener(ev,x=>{x.preventDefault();d.style.transform='';}));
   d.addEventListener('drop',x=>{ run(x.dataTransfer&&x.dataTransfer.files); });
@@ -389,8 +463,13 @@ function renderWizard(app){
     <span class="cnt">תמונה ${QI+1} מתוך ${QUEUE.length}</span>
     <span class="rest">${rest?`עוד ${rest} אחריה`:'האחרונה'}</span></div>`));
 
-  if(it.thumb){
-    const im=el(`<img class="shot" alt="">`); im.src=it.thumb;
+  if(it.thumb||(it.fid&&it.type&&/^image\//.test(it.type))){
+    const im=el(`<img class="shot" alt="">`);
+    if(it.thumb)im.src=it.thumb;
+    /* אחרי רענון התור חוזר בלי הממוזערות — הן לא נשמרות מקומית בכוונה.
+       נמשכת רק זו שעל המסך, כלומר קריאה אחת קטנה ולא שבעים. */
+    else getJSON(FTHUMB+'/'+it.fid+'.json').then(j=>{
+      const d=j&&(j.data||j); if(typeof d==='string'){ it.thumb=d; im.src=d; } });
     im.onclick=async()=>{ const j=await getJSON(FDATA+'/'+it.fid+'.json');
       const d=j&&(j.data||j); if(typeof d==='string'){$('#lbimg').src=d;$('#lb').classList.add('on');} };
     card.appendChild(im);
@@ -398,7 +477,7 @@ function renderWizard(app){
 
   /* מיקום */
   const f1=el('<div class="fld"><label>מיקום</label></div>');
-  f1.appendChild(locPicker(it.loc||lastLoc,v=>{ it.loc=v; upd(); }));
+  f1.appendChild(locPicker(it.loc||lastLoc,v=>{ it.loc=v; upd(); saveQueue(); }));
   if(!it.loc&&lastLoc)it.loc=lastLoc;
   card.appendChild(f1);
 
@@ -406,14 +485,14 @@ function renderWizard(app){
   const f2=el(`<div class="fld"><label>מיקום מדויק — איפה בדיוק בחדר</label>
     <input placeholder="למשל: מתחת למזגן" autocomplete="off"></div>`);
   const i2=f2.querySelector('input'); i2.value=it.loc2||'';
-  i2.addEventListener('input',()=>{ it.loc2=i2.value; });
+  i2.addEventListener('input',()=>{ it.loc2=i2.value; saveQueue(); });
   card.appendChild(f2);
 
   /* ההסבר */
   const f3=el(`<div class="fld"><label>מה הליקוי</label>
     <textarea placeholder="מה רואים בתמונה ומה צריך לתקן"></textarea></div>`);
   const i3=f3.querySelector('textarea'); i3.value=it.note||'';
-  i3.addEventListener('input',()=>{ it.note=i3.value; upd(); });
+  i3.addEventListener('input',()=>{ it.note=i3.value; upd(); saveQueue(); });
   card.appendChild(f3);
 
   const next=el('<button class="go">שמירה והבא ←</button>');
@@ -426,9 +505,9 @@ function renderWizard(app){
     next.textContent='שמירה והבא ←';
     if(!ok){ toast('השמירה נכשלה — נסה שוב'); upd(); return; }
     lastLoc=it.loc;
-    QI++; render();
+    QI++; saveQueue(); render();
   };
-  skip.onclick=()=>{ QI++; render(); };
+  skip.onclick=()=>{ QI++; saveQueue(); render(); };
   const r=el('<div class="row2"></div>'); r.appendChild(next); r.appendChild(skip);
   card.appendChild(r);
   app.appendChild(card);
@@ -458,7 +537,7 @@ function renderDone(app){
   app.appendChild(el(`<div class="step"><div class="empty-state">
     ✓ ${n} תמונות עברו למשימה.<br>אפשר לצלם עוד, או לפתוח את המסמך.</div></div>`));
   const more=el('<button class="go">📷 עוד תמונות</button>');
-  more.onclick=()=>{ QUEUE=[]; QI=0; render(); };
+  more.onclick=()=>{ clearQueue(); render(); };
   app.appendChild(more);
   const doc=el(`<a class="go ghost" style="text-align:center;text-decoration:none" href="?v=doc">📄 המסמך</a>`);
   app.appendChild(doc);
@@ -477,6 +556,10 @@ function renderStart(app){
   app.appendChild(mkDrop(()=>render()));
   app.appendChild(el(`<p class="lede">צלם כמה שצריך בבת אחת, ואז נעבור עליהן אחת-אחת
     ונמלא מיקום והסבר. המיקום נבחר בנקישה.</p>`));
+  /* עצה ולא מגבלה: הטלפון מפענח כל תמונה בנפרד, ואצווה ענקית מעמיסה
+     עליו. מי שבכל זאת יבחר שבעים — זה יעבוד, רק לאט יותר. */
+  app.appendChild(el(`<p class="lede" style="opacity:.75">עדיף אצוות של עד 15 תמונות —
+    מהיר יותר בטלפון. אפשר לחזור ולהוסיף עוד כמה פעמים שצריך, והתור נשמר גם אם הדף נסגר.</p>`));
 }
 
 /* ===== המסמך =====
@@ -649,7 +732,13 @@ function render(){
   renderStart(app);
 }
 $('#lb').onclick=()=>$('#lb').classList.remove('on');
-Promise.all([loadTask(),loadLocs()]).then(render);
+Promise.all([loadTask(),loadLocs()]).then(()=>{
+  /* תור ששרד רענון מחזיר אותו בדיוק למקום שבו נעצר. בלי הודעה זה נראה
+     כאילו הדף נפתח במקום מוזר, ולכן אומרים לו מה קרה. */
+  if(VIEW!=='doc'&&loadQueue())
+    toast(`חזרנו לאן שהפסקת — ${QUEUE.length-QI} תמונות עוד מחכות לפרטים`,4000);
+  render();
+});
 </script>
 </body>
 </html>
