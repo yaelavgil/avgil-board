@@ -116,6 +116,28 @@ h1{font-family:Karantina,Assistant,sans-serif;font-weight:700;font-size:36px;lin
   width:max-content;max-width:90%;background:var(--ink);color:var(--paper);padding:11px 19px;
   border-radius:999px;font-weight:700;font-size:14.5px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:60}
 .toast.on{opacity:1}
+/* ===== עריכה בתוך המסמך =====
+   הטקסט הוא הכפתור. נגיעה בו פותחת עורך במקום, ו-✓ / ✕ סוגרים אותו.
+   כך אין שדות טופס שמתחרים בתצוגה, והמסך נקרא כמו המסמך הסופי. */
+.lk.card{align-items:flex-start;background:var(--card);border:1px solid var(--line);
+  border-radius:14px;padding:12px;margin:10px 0}
+.tapedit{display:block;width:100%;text-align:right;font:inherit;font-weight:inherit;
+  color:inherit;background:transparent;border:none;border-radius:8px;padding:5px 7px;
+  margin:-5px -7px;cursor:pointer;line-height:1.5}
+.tapedit:hover{background:var(--olive-soft)}
+.tapedit.ghosttxt{color:var(--muted);font-weight:600;border:1px dashed var(--line2);
+  margin:0;padding:7px 9px}
+.lk .ed{margin:6px 0 2px}
+.okrow{display:flex;gap:7px;margin-top:8px}
+.mini{font:inherit;font-size:13px;font-weight:700;padding:7px 13px;border-radius:9px;
+  border:1px solid var(--line);background:var(--card);color:var(--muted);cursor:pointer}
+.mini:hover{border-color:var(--olive);color:var(--olive-ink)}
+.mini.go2{background:var(--olive);color:#fff;border-color:var(--olive)}
+.lk .st{display:flex;align-items:center;gap:8px;margin-top:9px;flex-wrap:wrap}
+/* הודעת כשל שנשארת עד שמסירים אותה במפורש */
+.fails{border:1px solid #c6836b;background:#fbf0ec;border-radius:12px;padding:11px 13px;margin:10px 0}
+.fails .hd{margin:0 0 6px;font-weight:800;color:#8d4428}
+.fails .ln{margin:0 0 4px;font-size:13.5px;color:#6b3a26}
 /* טוסט שמפרט מה נכשל הוא כמה שורות ולא מילה. גלולה צרה היתה הופכת אותו
    לבלתי קריא, ולכן רשימה מקבלת צורה של פתק. */
 .toast.multi{border-radius:14px;white-space:pre-line;text-align:right;
@@ -211,68 +233,111 @@ async function getJSON(url){
    המפוענחת (12MP ≈ 48MB לא דחוסים) ואת ה-canvas עד שהאוסף רץ, ולולאה
    של עשרות תמונות חוצה את תקרת הזיכרון של הטאב — והטאב נהרג בשקט,
    בלי שגיאה ובלי הודעה. אפס לרוחב ולגובה מחזיר את ה-canvas מיד. */
+/* פענוח אחד, שני גדלים.
+
+   קודם זה היה פענוח כפול: הקטנה ל-1600, ואז פענוח מחדש של התוצאה כדי
+   להכין ממוזערת. הפענוח השני הוא שנפל — 15 מתוך 23 תמונות שרועי העלה
+   הגיעו למסד בלי ממוזערת, ואז נשאר ריבוע ריק במקום תמונה. הפענוח הוא
+   גם החלק היקר, ולכן ציור שני גדלים מאותה תמונה מפוענחת מהיר יותר
+   וגם עמיד יותר. */
 function shrink(file){
   return new Promise(res=>{
-    if(!/^image\//.test(file.type)||/svg/.test(file.type))return res(null);
+    /* פעם התנאי היה ש-type חייב להתחיל ב-image/. זה נראה הגיוני והוא
+       הגורם ל״תמונה גדולה מדי שלא עלתה״: iOS מוסר קבצים עם type ריק או
+       application/octet-stream, ואז לא ניסינו לפענח בכלל, נפלנו לקידוד
+       הקובץ הגולמי ל-base64, והוא נדחה על הגודל. עכשיו פשוט מנסים —
+       הדפדפן הוא זה שיודע אם זו תמונה, לא התווית שהגיעה איתה. */
+    if(/pdf|svg/i.test(file.type)||/\.(pdf|svg)$/i.test(file.name||''))return res(null);
     const img=new Image(),url=URL.createObjectURL(file);
-    const done=(c,val)=>{
-      if(c){c.width=c.height=0;}
+    /* ספארי באייפון מחזיק את התמונה המפוענחת (12MP ≈ 48MB לא דחוסים)
+       ואת ה-canvas עד שהאוסף רץ, ולולאה של עשרות תמונות חוצה את תקרת
+       הזיכרון של הטאב — והטאב נהרג בשקט. אפס לרוחב ולגובה מחזיר מיד. */
+    const done=(cs,val)=>{
+      cs.forEach(c=>{ if(c)c.width=c.height=0; });
       img.onload=img.onerror=null; img.removeAttribute('src');
       URL.revokeObjectURL(url); res(val);
     };
-    img.onload=()=>{const max=1600,sc=Math.min(1,max/Math.max(img.width,img.height));
-      const c=document.createElement('canvas');
-      c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);
-      /* toDataURL נופל כשהזיכרון נגמר. בלי try השגיאה היתה בורחת מה-Promise
-         והלולאה כולה היתה נתקעת בלי להיפתר ובלי להיכשל. */
-      try{ c.getContext('2d').drawImage(img,0,0,c.width,c.height);
-           done(c,c.toDataURL('image/jpeg',0.72)); }
-      catch(e){ done(c,null); }};
-    img.onerror=()=>done(null,null);
+    img.onload=()=>{
+      const draw=max=>{
+        const sc=Math.min(1,max/Math.max(img.width,img.height));
+        const c=document.createElement('canvas');
+        c.width=Math.round(img.width*sc); c.height=Math.round(img.height*sc);
+        c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+        return c;
+      };
+      let cf=null,ct=null;
+      /* toDataURL נופל כשהזיכרון נגמר. בלי try השגיאה היתה בורחת
+         מה-Promise והלולאה כולה היתה נתקעת בלי להיפתר ובלי להיכשל. */
+      try{
+        cf=draw(1600); const full=cf.toDataURL('image/jpeg',0.72);
+        /* כישלון של הממוזערת לבדה אינו סיבה לאבד את התמונה: היא רק
+           חוסכת מכסת הורדה, והתצוגה יודעת ליפול חזרה למלאה. */
+        let thumb=null;
+        try{ ct=draw(240); thumb=ct.toDataURL('image/jpeg',0.6); }catch(e){}
+        done([cf,ct],{full,thumb});
+      }catch(e){ done([cf,ct],null); }
+    };
+    img.onerror=()=>done([],null);
     img.src=url;
   });
 }
-/* הממוזערת היא מה שמחזיק את מכסת ההורדה בשליטה: 240px במקום 1600px,
-   כלומר ~15KB במקום ~350KB לכל ליקוי שנפתח במסמך */
-function thumbOf(dataUrl){
-  return new Promise(res=>{
-    const img=new Image();
-    const done=(c,val)=>{ if(c){c.width=c.height=0;}
-      img.onload=img.onerror=null; img.removeAttribute('src'); res(val); };
-    img.onload=()=>{const max=240,sc=Math.min(1,max/Math.max(img.width,img.height));
-      const c=document.createElement('canvas');
-      c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);
-      try{ c.getContext('2d').drawImage(img,0,0,c.width,c.height);
-           done(c,c.toDataURL('image/jpeg',0.6)); }
-      catch(e){ done(c,null); }};
-    img.onerror=()=>done(null,null);
-    img.src=dataUrl;
-  });
+/* ===== HEIC =====
+   זה פורמט ברירת המחדל של האייפון, ושום דפדפן מלבד ספארי לא מפענח אותו.
+   בדקתי: גם <img> וגם createImageBitmap נכשלים בכרום על HEIC אמיתי,
+   ולכן נדרשת ספרייה. היא יושבת בריפו ולא ב-CDN — בשטח, ברשת סלולרית
+   חלשה, תלות בשרת זר היא עוד נקודת כשל — ונטענת רק כשבאמת נתקלים
+   ב-HEIC, כך שצילום רגיל לא משלם עליה כלום. */
+let HEICLIB=null, HEICFAIL=false;
+const looksHeic=f=>/hei[cf]/i.test(f.type||'')||/\.(heic|heif)$/i.test(f.name||'');
+const heicNote=f=>looksHeic(f)?'קובץ HEIC שההמרה שלו נכשלה — שמרי אותו כ-JPEG ונסי שוב':'';
+async function loadHeic(){
+  if(HEICLIB)return HEICLIB;
+  if(HEICFAIL)return null;
+  if(window.heic2any)return (HEICLIB=window.heic2any);
+  try{
+    await new Promise((res,rej)=>{ const s=document.createElement('script');
+      s.src='vendor/heic2any.min.js'; s.onload=res;
+      s.onerror=()=>rej(new Error('load')); document.head.appendChild(s); });
+    HEICLIB=window.heic2any||null;
+  }catch(e){ HEICLIB=null; }
+  if(!HEICLIB)HEICFAIL=true;
+  return HEICLIB;
 }
+async function heicToJpeg(file){
+  try{
+    const lib=await loadHeic(); if(!lib)return null;
+    const out=await lib({blob:file,toType:'image/jpeg',quality:0.92});
+    const b=Array.isArray(out)?out[0]:out;
+    if(!b)return null;
+    return new File([b],(file.name||'photo').replace(/\.(heic|heif)$/i,'')+'.jpg',{type:'image/jpeg'});
+  }catch(e){ return null; }
+}
+
 const readURL=f=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(f);});
 const kb=n=>n>1048576?(n/1048576).toFixed(1)+' MB':Math.round(n/1024)+' KB';
 
 /* ===== מצב ===== */
 let TASKOBJ=null;        /* המשימה החיה */
 let LOCLIST=LOC0.slice(); /* ברירות מחדל + מה שרועי הוסיף */
-let QUEUE=[];            /* התמונות שהועלו וממתינות לפרטים */
-let QI=0;                /* איפה אנחנו בתור */
+let QUEUE=[];            /* התמונות שהועלו — עם פרטים או בלי */
 let lastLoc='';          /* המיקום האחרון — ברוב הסיור הוא לא משתנה */
+let FAILED=[];           /* קבצים שלא עלו, נשארים על המסך עד שמסירים */
 
 /* ===== התור שורד רענון =====
    התמונה כבר יושבת ב-Firebase ברגע שהפס הגיע לסוף, אבל הקישור בינה לבין
-   הליקוי נוצר רק בלחיצה על ״הבא״. אם הטאב נהרג באמצע — ובאייפון עם עשרות
-   תמונות ורשת סלולרית זה קורה — התור נעלם והתמונות נשארות יתומות במסד
-   בלי שאיש יודע עליהן. לכן התור נשמר מקומית אחרי כל צעד.
+   הליקוי נוצר רק כשממלאים מיקום והסבר. אם הטאב נהרג באמצע — ובאייפון עם
+   עשרות תמונות ורשת סלולרית זה קורה — התור נעלם והתמונות נשארות יתומות
+   במסד בלי שאיש יודע עליהן. לכן התור נשמר מקומית אחרי כל צעד, וזה גם מה
+   שמאפשר לחזור לשלב האחרון אחרי יציאה ללוח ובחזרה.
    נשמרים רק המפתחות: הממוזערת נמשכת בחזרה מהמסד לפי הצורך, וכך תור של
    70 תמונות תופס עשרות בתים לפריט במקום להתנגש בתקרת האחסון של הדפדפן. */
-const QKEY='lik_queue_v1';
+const QKEY='lik_queue_v2';
 function saveQueue(){
   try{
     if(!QUEUE.length)return localStorage.removeItem(QKEY);
     const slim=QUEUE.map(x=>({fid:x.fid,name:x.name,type:x.type,size:x.size,
-      loc:x.loc||'',loc2:x.loc2||'',note:x.note||''}));
-    localStorage.setItem(QKEY,JSON.stringify({q:slim,i:QI,at:Date.now()}));
+      loc:x.loc||'',loc2:x.loc2||'',note:x.note||'',k:x.k||null,at:x.at||0}));
+    localStorage.setItem(QKEY,JSON.stringify({q:slim,at:Date.now()}));
   }catch(e){}
 }
 function loadQueue(){
@@ -282,14 +347,11 @@ function loadQueue(){
     /* תור בן יומיים הוא שאריות, לא עבודה באמצע. מספיק רחב לסיור שנמשך
        מערב לבוקר, וצר מספיק כדי לא לקפוץ בהפתעה שבוע אחרי. */
     if(Date.now()-(j.at||0)>2*864e5){ localStorage.removeItem(QKEY); return false; }
-    QUEUE=j.q; QI=Math.min(j.i||0,QUEUE.length);
-    /* תור שכולו מולא כבר אינו עבודה פתוחה. בלי זה, פתיחה למחרת היתה
-       נוחתת על מסך ״סיימנו״ במקום על המצלמה. */
-    if(QI>=QUEUE.length){ clearQueue(); return false; }
+    QUEUE=j.q;
     return true;
   }catch(e){ return false; }
 }
-function clearQueue(){ QUEUE=[]; QI=0; try{localStorage.removeItem(QKEY);}catch(e){} }
+function clearQueue(){ QUEUE=[]; FAILED=[]; try{localStorage.removeItem(QKEY);}catch(e){} }
 
 async function loadTask(){ TASKOBJ=await getJSON(TNODE+'.json'); return TASKOBJ; }
 async function loadLocs(){
@@ -312,8 +374,11 @@ async function rememberLoc(name){
 /* ===== כתיבה בטוחה אל items =====
    ל-ong-barak יש 47 פריטים חיים שיעל ורועי מסמנים תוך כדי. PUT של
    המשימה כולה היה דורס סימון שנעשה בשנייה שלפני. לכן: למשוך את המערך
-   החי ברגע השמירה, לצרף רק את מה שחדש לפי k, ולכתוב רק את items. */
-async function appendItem(item){
+   החי ברגע השמירה, לצרף רק את מה שחדש לפי k, ולכתוב רק את items.
+
+   עריכה חוזרת של אותו ליקוי מעדכנת את הפריט הקיים לפי k ולא מוסיפה
+   כפילות — בלי זה, כל תיקון של ניסוח היה יוצר סעיף חדש בלוח. */
+async function upsertItem(item){
   const live=await getJSON(TNODE+'/items.json');
   /* Firebase מחזיר מערך צפוף כמערך, ומערך עם חורים כאובייקט ממופתח.
      שתי הצורות חייבות להתקבל — אחרת קריאה תקינה בצורה השנייה היתה
@@ -325,9 +390,18 @@ async function appendItem(item){
   /* קריאה שנכשלה מחזירה null. במצב הזה אסור לכתוב: מערך חדש עם פריט
      אחד היה מוחק 47 פריטים חיים. עדיף להיכשל גלוי ושהוא ינסה שוב. */
   if(!base){ toast('אין חיבור — הפרטים לא נשמרו, נסה שוב'); return false; }
-  if(base.some(x=>x&&x.k===item.k))return true;
-  const arr=base.concat([item]);
-  if(arr.length<=base.length)return false;
+  const at=base.findIndex(x=>x&&x.k===item.k);
+  let arr;
+  if(at>=0){
+    /* קיים — מחליפים במקום, ושומרים על done ו-ans שנקבעו בלוח עצמו
+       כדי שעריכת ניסוח לא תפתח מחדש סעיף שכבר נסגר. */
+    arr=base.slice();
+    arr[at]=Object.assign({},base[at],item,
+      {done:base[at].done,ans:base[at].ans});
+  } else {
+    arr=base.concat([item]);
+    if(arr.length<=base.length)return false;
+  }
   const ok=await put(TNODE+'/items.json',arr);
   if(ok){ await put(TNODE+'/updatedAt.json',Date.now()); TASKOBJ&&(TASKOBJ.items=arr); }
   return ok;
@@ -340,20 +414,27 @@ async function addFiles(files,onProg,onOne){
   for(let i=0;i<arr.length;i++){
     const f=arr[i];
     onProg(i,arr.length,f.name);
-    let data=await shrink(f), isImg=!!data;
-    if(!data){
-      /* ההקטנה נכשלה: או שזה לא תמונה (PDF), או שזה פורמט שהדפדפן לא
-         מפענח — באייפון זה כמעט תמיד HEIC. קריאת המקור המלא לזיכרון
-         משתלמת רק אם יש לו סיכוי להיכנס; אחרת זה 4MB של base64 בדרך
-         לדחייה ודאית, על חשבון הזיכרון של התמונות שאחריו. */
-      if(f.size>MAXB){ bad.push({n:nameOf(f),w:'פורמט שלא נפתח (כנראה HEIC) והקובץ גדול מדי'}); continue; }
-      try{ data=await readURL(f); }catch(e){ bad.push({n:nameOf(f),w:'הקריאה מהמכשיר נכשלה'}); continue; }
+    let shrunk=await shrink(f);
+    /* פורמט שהדפדפן לא פענח לבדו — באייפון ובמק זה HEIC. המפענח נטען
+       רק עכשיו, כלומר רק למי שבאמת נתקל בו, ולא לכל צילום רגיל. */
+    if(!shrunk&&looksHeic(f)){
+      onProg(i,arr.length,(f.name||'')+' — ממיר HEIC…');
+      const jpg=await heicToJpeg(f);
+      if(jpg)shrunk=await shrink(jpg);
     }
-    if(data.length>MAXB*1.4){ bad.push({n:nameOf(f),w:'גדול מדי גם אחרי הקטנה'}); continue; }
+    let data=shrunk?shrunk.full:null, th=shrunk?shrunk.thumb:null;
+    const isImg=!!shrunk;
+    if(!data){
+      /* לא נפתח כתמונה. קריאת המקור הגולמי משתלמת רק ל-PDF קטן; אחרת
+         זה מגהבייטים של base64 בדרך לדחייה ודאית, על חשבון הזיכרון של
+         התמונות שאחריו בתור. */
+      if(f.size>MAXB){ bad.push({n:nameOf(f),w:heicNote(f)||'לא נפתח כתמונה, והקובץ גדול מכדי להישמר כמו שהוא'}); continue; }
+      try{ data=await readURL(f); }catch(e){ bad.push({n:nameOf(f),w:'הקריאה מהמכשיר נכשלה'}); continue; }
+      if(data.length>MAXB*1.4){ bad.push({n:nameOf(f),w:heicNote(f)||'לא נפתח כתמונה, והקובץ גדול מדי'}); continue; }
+    }
     const fid='f'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
     if(!await put(FDATA+'/'+fid+'.json',{data})){ bad.push({n:nameOf(f),w:'הרשת נפלה באמצע ההעלאה'}); continue; }
-    let th=null;
-    if(isImg){ th=await thumbOf(data); if(th)await put(FTHUMB+'/'+fid+'.json',{data:th}); }
+    if(th&&!await put(FTHUMB+'/'+fid+'.json',{data:th}))th=null;
     const sz=data.length; data=null;
     ok++;
     /* נרשם מיד ולא בסוף: אם הטאב ייפול בתמונה 40, ה-39 שלפניה כבר
@@ -366,7 +447,7 @@ async function addFiles(files,onProg,onOne){
 
 function mkDrop(after){
   const d=el(`<label class="drop">📷 צילום או בחירת תמונות
-    <small>אפשר לבחור כמה ביחד · אחרי זה נעבור עליהן אחת-אחת</small>
+    <small>אפשר לבחור כמה ביחד · אחר כך רואים את כולן יחד וממלאים פרטים</small>
     <input type="file" multiple accept="image/*,application/pdf,.pdf,.heic,.heif"></label>`);
   const bar=el('<div class="bar"><i></i></div>'); bar.style.display='none';
   const q=el('<p class="qline"></p>');
@@ -374,20 +455,17 @@ function mkDrop(after){
   const run=async fs=>{
     if(!fs||!fs.length)return;
     bar.style.display='block';
-    QUEUE=[]; QI=0;
     const res=await addFiles(fs,(i,n,nm)=>{
       bar.querySelector('i').style.width=Math.round(i/n*100)+'%';
       q.textContent=`מעלה ${i+1} מתוך ${n} — ${nm}`;
+    /* נדחף לתור הקיים ולא מאפס אותו: אצווה שנייה מצטרפת לראשונה
+       במקום למחוק אותה ולהשאיר את הקבצים שלה יתומים במסד. */
     },it=>{ QUEUE.push(it); saveQueue(); });
     bar.style.display='none'; q.textContent='';
-    if(res.bad.length){
-      /* ״3 נכשלו״ בלי סיבה שולח אותו לנסות שוב את אותו הדבר בדיוק.
-         שם הקובץ והסיבה אומרים לו אם זה משהו שאפשר לתקן. */
-      const lines=res.bad.slice(0,4).map(b=>`• ${b.n} — ${b.w}`);
-      if(res.bad.length>4)lines.push(`• ועוד ${res.bad.length-4}`);
-      toast(`${res.ok} עלו · ${res.bad.length} לא:\n`+lines.join('\n'),9000);
-    }
-    else toast(`${res.ok} תמונות עלו ✓`);
+    /* הכשלים עוברים למצב ומוצגים במסך עצמו. טוסט שנעלם פירושו שפורמט
+       שלם יכול להיכשל בלי שאיש ישים לב — וזה בדיוק מה שקרה עם HEIC. */
+    if(res.bad.length)FAILED=FAILED.concat(res.bad);
+    if(res.ok)toast(`${res.ok} תמונות עלו ✓`);
     if(after)after();
   };
   /* e.target.files הוא רפרנס חי ל-FileList של ה-input, ואיפוס value
@@ -448,99 +526,173 @@ function locPicker(cur,onPick){
   return box;
 }
 
-/* ===== המסך המרכזי: תמונה אחרי תמונה ===== */
-function renderWizard(app){
-  const it=QUEUE[QI];
-  if(!it)return renderDone(app);
-  $('#h1').textContent='פרטי הליקוי';
-  $('#lede').innerHTML=`תמונה <b>${QI+1}</b> מתוך <b>${QUEUE.length}</b> · הבית שלנו`;
+/* ===== המסך המרכזי: כל התמונות יחד, כמו במסמך =====
+   קודם זה היה אשף של תמונה-אחרי-תמונה. הוא הסתיר את מה שהכי חשוב לדעת
+   אחרי העלאה — אילו תמונות בכלל עלו — והציג ״עוד 1 אחריה״ שלא אומר כלום
+   ולא ניתן ללחיצה. כאן רואים את הכול בבת אחת, בצורה של המסמך הסופי,
+   ועורכים כל שדה בנגיעה בטקסט עצמו. */
+function renderReview(app){
+  $('#h1').textContent='התמונות שהעליתי';
+  const done=QUEUE.filter(x=>x.k).length;
+  $('#lede').innerHTML=`${QUEUE.length} תמונות · <b>${done}</b> כבר בסדר היום`;
+  app.classList.add('doc');
 
-  const card=el('<div class="step"></div>');
-  /* ״1 / 2״ נשבר ב-RTL: הלוכסן ניטרלי והספרות מתהפכות. מילים בעברית
-     ביניהן מעגנות את הסדר בלי סימני כיוון נסתרים. */
-  const rest=QUEUE.length-QI-1;
-  card.appendChild(el(`<div class="stephd">
-    <span class="cnt">תמונה ${QI+1} מתוך ${QUEUE.length}</span>
-    <span class="rest">${rest?`עוד ${rest} אחריה`:'האחרונה'}</span></div>`));
+  app.appendChild(el(`<div class="tabs noprint">
+    <a href="?" class="on">התמונות</a><a href="?v=doc">המסמך</a><a href="./">↩ ללוח</a></div>`));
 
-  if(it.thumb||(it.fid&&it.type&&/^image\//.test(it.type))){
-    const im=el(`<img class="shot" alt="">`);
-    if(it.thumb)im.src=it.thumb;
-    /* אחרי רענון התור חוזר בלי הממוזערות — הן לא נשמרות מקומית בכוונה.
-       נמשכת רק זו שעל המסך, כלומר קריאה אחת קטנה ולא שבעים. */
-    else getJSON(FTHUMB+'/'+it.fid+'.json').then(j=>{
-      const d=j&&(j.data||j); if(typeof d==='string'){ it.thumb=d; im.src=d; } });
-    im.onclick=async()=>{ const j=await getJSON(FDATA+'/'+it.fid+'.json');
-      const d=j&&(j.data||j); if(typeof d==='string'){$('#lbimg').src=d;$('#lb').classList.add('on');} };
-    card.appendChild(im);
-  } else card.appendChild(el(`<div class="empty-state">${esc(it.name||'קובץ')} — ${kb(it.size)}</div>`));
+  /* כשלים נשארים על המסך ולא נעלמים כמו טוסט. בטלפון, טוסט של תשע
+     שניות פירושו שפורמט שלם יכול להיכשל בלי שאיש ישים לב. */
+  if(FAILED.length){
+    const w=el(`<div class="fails"><p class="hd">${FAILED.length} קבצים לא עלו</p></div>`);
+    FAILED.forEach(b=>w.appendChild(el(`<p class="ln">${esc(b.n)} — ${esc(b.w)}</p>`)));
+    const x=el('<button class="mini">הבנתי, להסיר את ההודעה</button>');
+    x.onclick=()=>{ FAILED=[]; render(); };
+    w.appendChild(x);
+    app.appendChild(w);
+  }
 
-  /* מיקום */
-  const f1=el('<div class="fld"><label>מיקום</label></div>');
-  f1.appendChild(locPicker(it.loc||lastLoc,v=>{ it.loc=v; upd(); saveQueue(); }));
-  if(!it.loc&&lastLoc)it.loc=lastLoc;
-  card.appendChild(f1);
+  if(!QUEUE.length){
+    app.appendChild(el('<div class="empty-state">אין תמונות שממתינות לפרטים.</div>'));
+  }
 
-  /* מיקום מדויק */
-  const f2=el(`<div class="fld"><label>מיקום מדויק — איפה בדיוק בחדר</label>
-    <input placeholder="למשל: מתחת למזגן" autocomplete="off"></div>`);
-  const i2=f2.querySelector('input'); i2.value=it.loc2||'';
-  i2.addEventListener('input',()=>{ it.loc2=i2.value; saveQueue(); });
-  card.appendChild(f2);
+  QUEUE.forEach((it,i)=>{
+    const c=el(`<div class="lk card"><span class="n">${i+1}</span>
+      <div class="ph"></div><div class="body"></div></div>`);
+    const ph=c.querySelector('.ph'), body=c.querySelector('.body');
 
-  /* ההסבר */
-  const f3=el(`<div class="fld"><label>מה הליקוי</label>
-    <textarea placeholder="מה רואים בתמונה ומה צריך לתקן"></textarea></div>`);
-  const i3=f3.querySelector('textarea'); i3.value=it.note||'';
-  i3.addEventListener('input',()=>{ it.note=i3.value; upd(); saveQueue(); });
-  card.appendChild(f3);
+    const im=el('<img alt="" loading="lazy">');
+    ph.appendChild(im);
+    /* הממוזערת לא נשמרת מקומית בכוונה, ולפעמים גם לא נוצרה בכלל כשהזיכרון
+       בטלפון נגמר. fillThumb נופל חזרה לתמונה המלאה, ולכן תמיד רואים
+       משהו — זה מה שהיה חסר כשנשאר ריבוע ריק. */
+    if(it.thumb){ im.src=it.thumb;
+      im.onclick=async()=>{ const j=await getJSON(FDATA+'/'+it.fid+'.json');
+        const d=j&&(j.data||j);
+        if(typeof d==='string'){ $('#lbimg').src=d; $('#lb').classList.add('on'); } };
+    } else fillThumb(im,it.fid);
 
-  const next=el('<button class="go">שמירה והבא ←</button>');
-  const skip=el('<button class="go ghost">דילוג</button>');
-  function upd(){ next.disabled=!(it.loc&&(it.note||'').trim()); }
-  upd();
-  next.onclick=async()=>{
-    next.disabled=true; next.textContent='שומר…';
-    const ok=await commitOne(it);
-    next.textContent='שמירה והבא ←';
-    if(!ok){ toast('השמירה נכשלה — נסה שוב'); upd(); return; }
-    lastLoc=it.loc;
-    QI++; saveQueue(); render();
-  };
-  skip.onclick=()=>{ QI++; saveQueue(); render(); };
-  const r=el('<div class="row2"></div>'); r.appendChild(next); r.appendChild(skip);
-  card.appendChild(r);
-  app.appendChild(card);
-  app.appendChild(el('<p class="lede" style="margin-top:10px">התמונה כבר נשמרה. הפרטים נשמרים בלחיצה על ״הבא״.</p>'));
+    /* מיקום */
+    const locLine=el('<p class="where"></p>');
+    body.appendChild(locLine);
+    const paintLoc=()=>{
+      locLine.innerHTML='';
+      const txt=it.loc?(it.loc2?`${esc(it.loc)} · ${esc(it.loc2)}`:esc(it.loc)):'';
+      const b=el(`<button class="tapedit ${it.loc?'':'ghosttxt'}">${txt||'בחירת מיקום'}</button>`);
+      b.onclick=()=>editLoc();
+      locLine.appendChild(b);
+    };
+    const editLoc=()=>{
+      locLine.innerHTML='';
+      const box=el('<div class="ed"></div>');
+      let nl=it.loc||lastLoc||'', nl2=it.loc2||'';
+      box.appendChild(locPicker(nl,v=>{ nl=v; }));
+      const f2=el(`<div class="fld"><label>איפה בדיוק בחדר</label>
+        <input placeholder="למשל: מתחת למזגן" autocomplete="off"></div>`);
+      f2.querySelector('input').value=nl2;
+      f2.querySelector('input').addEventListener('input',e=>{ nl2=e.target.value; });
+      box.appendChild(f2);
+      box.appendChild(okCancel(
+        async()=>{ it.loc=nl; it.loc2=nl2; if(nl)lastLoc=nl; saveQueue(); paintLoc(); await sync(it,c); },
+        ()=>paintLoc()));
+      locLine.appendChild(box);
+    };
+
+    /* ההסבר */
+    const noteLine=el('<p class="what"></p>');
+    body.appendChild(noteLine);
+    const paintNote=()=>{
+      noteLine.innerHTML='';
+      const b=el(`<button class="tapedit ${it.note?'':'ghosttxt'}">${it.note?esc(it.note):'מה הליקוי — נגיעה לכתיבה'}</button>`);
+      b.onclick=()=>editNote();
+      noteLine.appendChild(b);
+    };
+    const editNote=()=>{
+      noteLine.innerHTML='';
+      const box=el('<div class="ed"></div>');
+      const f=el(`<div class="fld"><textarea placeholder="מה רואים בתמונה ומה צריך לתקן"></textarea></div>`);
+      const ta=f.querySelector('textarea'); ta.value=it.note||'';
+      box.appendChild(f);
+      box.appendChild(okCancel(
+        async()=>{ it.note=ta.value; saveQueue(); paintNote(); await sync(it,c); },
+        ()=>paintNote()));
+      noteLine.appendChild(box);
+      ta.focus();
+    };
+
+    const st=el('<div class="st"></div>');
+    body.appendChild(st);
+    c.paintSt=()=>{
+      st.innerHTML='';
+      /* ״חסר מיקום או הסבר״ לא אומר מה חסר כאן ועכשיו. הודעה שאומרת
+         בדיוק מה נשאר חוסכת ניחוש מול כל תמונה. */
+      const noLoc=!it.loc, noNote=!(it.note||'').trim();
+      if(it.k)st.appendChild(el('<span class="pill ok">✓ בסדר היום</span>'));
+      else if(!noLoc&&!noNote)st.appendChild(el('<span class="pill">שומר…</span>'));
+      else st.appendChild(el(`<span class="pill hot">${
+        noLoc&&noNote?'חסרים מיקום והסבר':noLoc?'חסר מיקום':'חסר הסבר'}</span>`));
+      const rm=el('<button class="mini">הסרה</button>');
+      rm.onclick=()=>removeOne(i);
+      st.appendChild(rm);
+    };
+
+    paintLoc(); paintNote(); c.paintSt();
+    app.appendChild(c);
+  });
+
+  const more=el('<button class="go noprint">📷 עוד תמונות</button>');
+  more.onclick=()=>{ clearQueue(); render(); };
+  app.appendChild(more);
+  app.appendChild(el(`<a class="go ghost noprint" style="text-align:center;text-decoration:none" href="?v=doc">📄 המסמך</a>`));
+  app.appendChild(el(`<a class="go ghost noprint" style="text-align:center;text-decoration:none" href="./">↩ חזרה לסדר היום מול ברק</a>`));
+}
+
+/* ✓ ו-✕ ליד כל עריכה. בלי זה אין דרך לבטל נגיעה בטעות. */
+function okCancel(onOk,onCancel){
+  const r=el('<div class="okrow"></div>');
+  const ok=el('<button class="mini go2">✓ אישור</button>');
+  const no=el('<button class="mini">✕ ביטול</button>');
+  ok.onclick=async()=>{ ok.disabled=true; ok.textContent='שומר…'; await onOk(); };
+  no.onclick=onCancel;
+  r.appendChild(ok); r.appendChild(no);
+  return r;
+}
+
+function removeOne(i){
+  /* רק מהתור. הקובץ עצמו נשאר במסד — מחיקה שם היא פעולה הרסנית
+     שאסור לתלות בנגיעה אחת על מסך קטן. */
+  QUEUE.splice(i,1); saveQueue(); render();
+}
+
+/* ברגע שיש מיקום והסבר, הליקוי נכנס לסדר היום — או מתעדכן שם אם הוא
+   כבר נכנס. בלי כפתור ״שמירה״ נפרד שאי אפשר להבין למה הוא אפור. */
+async function sync(it,card){
+  if(!(it.loc&&(it.note||'').trim())){ card.paintSt&&card.paintSt(); return; }
+  card.paintSt&&card.paintSt();
+  const ok=await commitOne(it);
+  if(!ok)toast('השמירה נכשלה — אין חיבור. הפרטים נשמרו במכשיר, נסו שוב');
+  saveQueue();
+  card.paintSt&&card.paintSt();
+  const d=QUEUE.filter(x=>x.k).length;
+  $('#lede').innerHTML=`${QUEUE.length} תמונות · <b>${d}</b> כבר בסדר היום`;
 }
 
 /* ליקוי אחד → פריט ב-items + מטא-דאטה שמקשרת אליו את התמונה.
    המטא נכתבת תחת <task>__<k> כי זה המפתח שהלוח כבר מחפש לפי נושא,
    ולכן הנושא מקבל 📎 והתמונה נפתחת בלוח בלי שינוי בקוד שלו. */
 async function commitOne(it){
-  const k='lk'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+  const isNew=!it.k;
+  const k=it.k||('lk'+Date.now().toString(36)+Math.random().toString(36).slice(2,5));
   const where=it.loc2?`${it.loc} · ${it.loc2}`:it.loc;
   const item={k,lv:1,done:false,ans:'',
     t:`📍 ${it.loc} · **${(it.note||'').trim()}**${it.loc2?` *(${it.loc2})*`:''}`,
-    fid:it.fid,loc:it.loc,loc2:it.loc2||'',at:Date.now(),by:'רועי'};
+    fid:it.fid,loc:it.loc,loc2:it.loc2||'',at:it.at||Date.now(),by:'רועי'};
   const meta={fid:it.fid,task:TASK+'__'+k,name:it.name||where,type:it.type,size:it.size,
     at:new Date().toISOString(),by:'רועי'};
   const a=await put(`${FMETA}/${encodeURIComponent(TASK+'__'+k)}/${it.fid}.json`,meta);
-  const b=await appendItem(item);
+  const b=await upsertItem(item);
+  if(a&&b){ it.k=k; it.at=item.at; }
+  else if(isNew)it.k=null;
   return a&&b;
-}
-
-function renderDone(app){
-  $('#h1').textContent='סיימנו';
-  $('#lede').textContent='כל הליקויים נשמרו בסדר היום מול ברק';
-  const n=QUEUE.length;
-  app.appendChild(el(`<div class="step"><div class="empty-state">
-    ✓ ${n} תמונות עברו למשימה.<br>אפשר לצלם עוד, או לפתוח את המסמך.</div></div>`));
-  const more=el('<button class="go">📷 עוד תמונות</button>');
-  more.onclick=()=>{ clearQueue(); render(); };
-  app.appendChild(more);
-  const doc=el(`<a class="go ghost" style="text-align:center;text-decoration:none" href="?v=doc">📄 המסמך</a>`);
-  app.appendChild(doc);
 }
 
 /* ===== מסך הפתיחה ===== */
@@ -554,8 +706,8 @@ function renderStart(app){
   app.appendChild(el(`<p class="lede"><span class="pill ${open?'hot':'ok'}">${open} ליקויים פתוחים</span>
     <span class="pill">${all} סה״כ</span></p>`));
   app.appendChild(mkDrop(()=>render()));
-  app.appendChild(el(`<p class="lede">צלם כמה שצריך בבת אחת, ואז נעבור עליהן אחת-אחת
-    ונמלא מיקום והסבר. המיקום נבחר בנקישה.</p>`));
+  app.appendChild(el(`<p class="lede">צלם כמה שצריך בבת אחת. אחר כך רואים את כולן יחד,
+    ובנגיעה בטקסט שליד כל תמונה ממלאים מיקום והסבר. המיקום נבחר בנקישה.</p>`));
   /* עצה ולא מגבלה: הטלפון מפענח כל תמונה בנפרד, ואצווה ענקית מעמיסה
      עליו. מי שבכל זאת יבחר שבעים — זה יעבוד, רק לאט יותר. */
   app.appendChild(el(`<p class="lede" style="opacity:.75">עדיף אצוות של עד 15 תמונות —
@@ -727,8 +879,7 @@ async function copyRich(){
 function render(){
   const app=$('#app'); app.innerHTML=''; app.className='';
   if(VIEW==='doc')return renderDoc(app);
-  if(QUEUE.length&&QI<QUEUE.length)return renderWizard(app);
-  if(QUEUE.length&&QI>=QUEUE.length)return renderDone(app);
+  if(QUEUE.length||FAILED.length)return renderReview(app);
   renderStart(app);
 }
 $('#lb').onclick=()=>$('#lb').classList.remove('on');
@@ -736,7 +887,7 @@ Promise.all([loadTask(),loadLocs()]).then(()=>{
   /* תור ששרד רענון מחזיר אותו בדיוק למקום שבו נעצר. בלי הודעה זה נראה
      כאילו הדף נפתח במקום מוזר, ולכן אומרים לו מה קרה. */
   if(VIEW!=='doc'&&loadQueue())
-    toast(`חזרנו לאן שהפסקת — ${QUEUE.length-QI} תמונות עוד מחכות לפרטים`,4000);
+    toast(`חזרנו לאן שהפסקת — ${QUEUE.filter(x=>!x.k).length} מתוך ${QUEUE.length} עוד מחכות לפרטים`,4000);
   render();
 });
 </script>
