@@ -342,7 +342,20 @@ function saveQueue(){
 }
 function loadQueue(){
   try{
-    const j=JSON.parse(localStorage.getItem(QKEY)||'null');
+    let j=JSON.parse(localStorage.getItem(QKEY)||'null');
+    /* התור של הגרסה הקודמת. לרועי יש בטלפון תור כזה עם תמונות שכבר
+       עלו למסד ועוד לא קושרו לליקוי — התעלמות ממנו היתה הופכת אותן
+       ליתומות לצמיתות. ה-i הישן היה סמן מיקום באשף ואין לו מקום כאן. */
+    if(!j){
+      const old=JSON.parse(localStorage.getItem('lik_queue_v1')||'null');
+      if(old&&Array.isArray(old.q)&&old.q.length){
+        j={q:old.q.map(x=>Object.assign({k:null,at:0},x)),at:old.at||Date.now()};
+        /* נכתב מיד ורק אז נמחק הישן. הפוך, סגירת הטאב בין השניים היתה
+           מוחקת את התור הישן בלי שהחדש נכתב אי פעם. */
+        try{ localStorage.setItem(QKEY,JSON.stringify(j));
+             localStorage.removeItem('lik_queue_v1'); }catch(e){}
+      }
+    }
     if(!j||!Array.isArray(j.q)||!j.q.length)return false;
     /* תור בן יומיים הוא שאריות, לא עבודה באמצע. מספיק רחב לסיור שנמשך
        מערב לבוקר, וצר מספיק כדי לא לקפוץ בהפתעה שבוע אחרי. */
@@ -526,6 +539,19 @@ function locPicker(cur,onPick){
   return box;
 }
 
+/* ===== שורת הניווט =====
+   היא אחת לכל המסכים, כי שלוש גרסאות שונות של אותן לשוניות הן בדיוק
+   איך שהדרך חזרה אל התמונות קיבלה את השם ״צילום״ ולא נראתה כמו הדרך
+   חזרה. כשיש תמונות פתוחות הלשונית אומרת כמה, כדי שמי שנמצא במסמך
+   יראה שיש לאן לחזור. */
+function tabsEl(active){
+  const n=QUEUE.length;
+  const first=n?`התמונות <b>${n}</b>`:'צילום';
+  const mk=(href,label,key)=>`<a href="${href}"${active===key?' class="on"':''}>${label}</a>`;
+  return el(`<div class="tabs noprint">${
+    mk('?',first,'shots')}${mk('?v=doc','המסמך','doc')}${mk('./','↩ ללוח','board')}</div>`);
+}
+
 /* ===== המסך המרכזי: כל התמונות יחד, כמו במסמך =====
    קודם זה היה אשף של תמונה-אחרי-תמונה. הוא הסתיר את מה שהכי חשוב לדעת
    אחרי העלאה — אילו תמונות בכלל עלו — והציג ״עוד 1 אחריה״ שלא אומר כלום
@@ -537,8 +563,7 @@ function renderReview(app){
   $('#lede').innerHTML=`${QUEUE.length} תמונות · <b>${done}</b> כבר בסדר היום`;
   app.classList.add('doc');
 
-  app.appendChild(el(`<div class="tabs noprint">
-    <a href="?" class="on">התמונות</a><a href="?v=doc">המסמך</a><a href="./">↩ ללוח</a></div>`));
+  app.appendChild(tabsEl('shots'));
 
   /* כשלים נשארים על המסך ולא נעלמים כמו טוסט. בטלפון, טוסט של תשע
      שניות פירושו שפורמט שלם יכול להיכשל בלי שאיש ישים לב. */
@@ -699,8 +724,7 @@ async function commitOne(it){
 function renderStart(app){
   $('#h1').textContent='ליקויים';
   $('#lede').innerHTML='הבית שלנו · הליקויים נכנסים ל<b>סדר היום מול ברק</b>';
-  app.appendChild(el(`<div class="tabs noprint">
-    <a href="?" class="on">צילום</a><a href="?v=doc">המסמך</a><a href="./">↩ ללוח</a></div>`));
+  app.appendChild(tabsEl('shots'));
   const open=(TASKOBJ&&(TASKOBJ.items||[]).filter(i=>i&&i.fid&&!i.done).length)||0;
   const all=(TASKOBJ&&(TASKOBJ.items||[]).filter(i=>i&&i.fid).length)||0;
   app.appendChild(el(`<p class="lede"><span class="pill ${open?'hot':'ok'}">${open} ליקויים פתוחים</span>
@@ -754,8 +778,7 @@ function renderDoc(app){
   const today=new Date().toLocaleDateString('he-IL',{day:'numeric',month:'long',year:'numeric'});
   $('#lede').innerHTML=`הבית שלנו · ${today}`;
   app.classList.add('doc');
-  app.appendChild(el(`<div class="tabs noprint">
-    <a href="?">צילום</a><a href="?v=doc" class="on">המסמך</a><a href="./">↩ ללוח</a></div>`));
+  app.appendChild(tabsEl('doc'));
 
   const secs=grouped(false);
   const n=secs.reduce((a,z)=>a+z.rooms.reduce((b,r)=>b+r.rows.length,0),0);
@@ -886,7 +909,10 @@ $('#lb').onclick=()=>$('#lb').classList.remove('on');
 Promise.all([loadTask(),loadLocs()]).then(()=>{
   /* תור ששרד רענון מחזיר אותו בדיוק למקום שבו נעצר. בלי הודעה זה נראה
      כאילו הדף נפתח במקום מוזר, ולכן אומרים לו מה קרה. */
-  if(VIEW!=='doc'&&loadQueue())
+  /* נטען גם בתצוגת המסמך — אחרת המסמך לא יודע שיש תמונות פתוחות
+     ולא יכול להציע את הדרך חזרה אליהן. ההודעה עצמה רק במסך התמונות. */
+  const resumed=loadQueue();
+  if(VIEW!=='doc'&&resumed)
     toast(`חזרנו לאן שהפסקת — ${QUEUE.filter(x=>!x.k).length} מתוך ${QUEUE.length} עוד מחכות לפרטים`,4000);
   render();
 });
