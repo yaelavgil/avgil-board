@@ -135,6 +135,14 @@ h1{font-family:Karantina,Assistant,sans-serif;font-weight:700;font-size:36px;lin
 .mini.go2{background:var(--olive);color:#fff;border-color:var(--olive)}
 .lk .st{display:flex;align-items:center;gap:8px;margin-top:9px;flex-wrap:wrap}
 /* הודעת כשל שנשארת עד שמסירים אותה במפורש */
+.gaprow{border:1px solid var(--line);background:var(--card);border-radius:12px;
+  padding:11px 13px;margin:8px 0}
+.gaprow .txt{margin:0 0 9px;font-size:14.5px;font-weight:600;line-height:1.5}
+.gaprow .ln{margin:7px 0 0;font-size:13px;color:#8d4428}
+.addph{display:inline-block;border:1px dashed var(--line2);border-radius:9px;padding:7px 13px;
+  font-size:13px;font-weight:700;color:var(--muted);cursor:pointer}
+.addph:hover{border-color:var(--olive);color:var(--olive-ink);background:var(--olive-soft)}
+.addph input{display:none}
 .fails{border:1px solid #c6836b;background:#fbf0ec;border-radius:12px;padding:11px 13px;margin:10px 0}
 .fails .hd{margin:0 0 6px;font-weight:800;color:#8d4428}
 .fails .ln{margin:0 0 4px;font-size:13.5px;color:#6b3a26}
@@ -547,9 +555,105 @@ function locPicker(cur,onPick){
 function tabsEl(active){
   const n=QUEUE.length;
   const first=n?`התמונות <b>${n}</b>`:'צילום';
+  const g=gapCount();
   const mk=(href,label,key)=>`<a href="${href}"${active===key?' class="on"':''}>${label}</a>`;
   return el(`<div class="tabs noprint">${
-    mk('?',first,'shots')}${mk('?v=doc','המסמך','doc')}${mk('./','↩ ללוח','board')}</div>`);
+    mk('?',first,'shots')}${
+    mk('?v=gaps',g?`חסרים <b>${g}</b>`:'חסרים','gaps')}${
+    mk('?v=doc','המסמך','doc')}${
+    mk('./','↩ ללוח','board')}</div>`);
+}
+/* שני סוגי חוסר, ושניהם מונעים מהמסמך להיות שלם: תמונה שהועלתה ואין לה
+   עדיין מיקום והסבר, וסעיף פתוח בסדר היום שמתאר ליקוי בלי שיש לו תמונה. */
+const gapShots=()=>QUEUE.filter(x=>!x.k);
+const gapItems=()=>((TASKOBJ&&TASKOBJ.items)||[])
+  .filter(i=>i&&!i.fid&&!i.done&&i.lv);
+const gapCount=()=>gapShots().length+gapItems().length;
+
+/* כרטיס תמונה אחד — אותו כרטיס משמש גם במסך ״התמונות״ וגם במסך
+   ״חסרים״, כדי שהעריכה תתנהג זהה בשניהם. */
+function shotCard(it,num){
+  const c=el(`<div class="lk card"><span class="n">${num}</span>
+    <div class="ph"></div><div class="body"></div></div>`);
+  const ph=c.querySelector('.ph'), body=c.querySelector('.body');
+
+  const im=el('<img alt="" loading="lazy">');
+  ph.appendChild(im);
+  /* הממוזערת לא נשמרת מקומית בכוונה, ולפעמים גם לא נוצרה בכלל כשהזיכרון
+     בטלפון נגמר. fillThumb נופל חזרה לתמונה המלאה, ולכן תמיד רואים
+     משהו — זה מה שהיה חסר כשנשאר ריבוע ריק. */
+  if(it.thumb){ im.src=it.thumb;
+    im.onclick=async()=>{ const j=await getJSON(FDATA+'/'+it.fid+'.json');
+      const d=j&&(j.data||j);
+      if(typeof d==='string'){ $('#lbimg').src=d; $('#lb').classList.add('on'); } };
+  } else fillThumb(im,it.fid);
+
+  /* מיקום */
+  const locLine=el('<p class="where"></p>');
+  body.appendChild(locLine);
+  const paintLoc=()=>{
+    locLine.innerHTML='';
+    const txt=it.loc?(it.loc2?`${esc(it.loc)} · ${esc(it.loc2)}`:esc(it.loc)):'';
+    const b=el(`<button class="tapedit ${it.loc?'':'ghosttxt'}">${txt||'בחירת מיקום'}</button>`);
+    b.onclick=()=>editLoc();
+    locLine.appendChild(b);
+  };
+  const editLoc=()=>{
+    locLine.innerHTML='';
+    const box=el('<div class="ed"></div>');
+    let nl=it.loc||lastLoc||'', nl2=it.loc2||'';
+    box.appendChild(locPicker(nl,v=>{ nl=v; }));
+    const f2=el(`<div class="fld"><label>איפה בדיוק בחדר</label>
+      <input placeholder="למשל: מתחת למזגן" autocomplete="off"></div>`);
+    f2.querySelector('input').value=nl2;
+    f2.querySelector('input').addEventListener('input',e=>{ nl2=e.target.value; });
+    box.appendChild(f2);
+    box.appendChild(okCancel(
+      async()=>{ it.loc=nl; it.loc2=nl2; if(nl)lastLoc=nl; saveQueue(); paintLoc(); await sync(it,c); },
+      ()=>paintLoc()));
+    locLine.appendChild(box);
+  };
+
+  /* ההסבר */
+  const noteLine=el('<p class="what"></p>');
+  body.appendChild(noteLine);
+  const paintNote=()=>{
+    noteLine.innerHTML='';
+    const b=el(`<button class="tapedit ${it.note?'':'ghosttxt'}">${it.note?esc(it.note):'מה הליקוי — נגיעה לכתיבה'}</button>`);
+    b.onclick=()=>editNote();
+    noteLine.appendChild(b);
+  };
+  const editNote=()=>{
+    noteLine.innerHTML='';
+    const box=el('<div class="ed"></div>');
+    const f=el(`<div class="fld"><textarea placeholder="מה רואים בתמונה ומה צריך לתקן"></textarea></div>`);
+    const ta=f.querySelector('textarea'); ta.value=it.note||'';
+    box.appendChild(f);
+    box.appendChild(okCancel(
+      async()=>{ it.note=ta.value; saveQueue(); paintNote(); await sync(it,c); },
+      ()=>paintNote()));
+    noteLine.appendChild(box);
+    ta.focus();
+  };
+
+  const st=el('<div class="st"></div>');
+  body.appendChild(st);
+  c.paintSt=()=>{
+    st.innerHTML='';
+    /* ״חסר מיקום או הסבר״ לא אומר מה חסר כאן ועכשיו. הודעה שאומרת
+       בדיוק מה נשאר חוסכת ניחוש מול כל תמונה. */
+    const noLoc=!it.loc, noNote=!(it.note||'').trim();
+    if(it.k)st.appendChild(el('<span class="pill ok">✓ בסדר היום</span>'));
+    else if(!noLoc&&!noNote)st.appendChild(el(`<span class="pill">${it.saving?'שומר…':'ממתין לשמירה'}</span>`));
+    else st.appendChild(el(`<span class="pill hot">${
+      noLoc&&noNote?'חסרים מיקום והסבר':noLoc?'חסר מיקום':'חסר הסבר'}</span>`));
+    const rm=el('<button class="mini">הסרה</button>');
+    rm.onclick=()=>removeOne(QUEUE.indexOf(it));
+    st.appendChild(rm);
+  };
+
+  paintLoc(); paintNote(); c.paintSt();
+  return c;
 }
 
 /* ===== המסך המרכזי: כל התמונות יחד, כמו במסמך =====
@@ -580,89 +684,7 @@ function renderReview(app){
     app.appendChild(el('<div class="empty-state">אין תמונות שממתינות לפרטים.</div>'));
   }
 
-  QUEUE.forEach((it,i)=>{
-    const c=el(`<div class="lk card"><span class="n">${i+1}</span>
-      <div class="ph"></div><div class="body"></div></div>`);
-    const ph=c.querySelector('.ph'), body=c.querySelector('.body');
-
-    const im=el('<img alt="" loading="lazy">');
-    ph.appendChild(im);
-    /* הממוזערת לא נשמרת מקומית בכוונה, ולפעמים גם לא נוצרה בכלל כשהזיכרון
-       בטלפון נגמר. fillThumb נופל חזרה לתמונה המלאה, ולכן תמיד רואים
-       משהו — זה מה שהיה חסר כשנשאר ריבוע ריק. */
-    if(it.thumb){ im.src=it.thumb;
-      im.onclick=async()=>{ const j=await getJSON(FDATA+'/'+it.fid+'.json');
-        const d=j&&(j.data||j);
-        if(typeof d==='string'){ $('#lbimg').src=d; $('#lb').classList.add('on'); } };
-    } else fillThumb(im,it.fid);
-
-    /* מיקום */
-    const locLine=el('<p class="where"></p>');
-    body.appendChild(locLine);
-    const paintLoc=()=>{
-      locLine.innerHTML='';
-      const txt=it.loc?(it.loc2?`${esc(it.loc)} · ${esc(it.loc2)}`:esc(it.loc)):'';
-      const b=el(`<button class="tapedit ${it.loc?'':'ghosttxt'}">${txt||'בחירת מיקום'}</button>`);
-      b.onclick=()=>editLoc();
-      locLine.appendChild(b);
-    };
-    const editLoc=()=>{
-      locLine.innerHTML='';
-      const box=el('<div class="ed"></div>');
-      let nl=it.loc||lastLoc||'', nl2=it.loc2||'';
-      box.appendChild(locPicker(nl,v=>{ nl=v; }));
-      const f2=el(`<div class="fld"><label>איפה בדיוק בחדר</label>
-        <input placeholder="למשל: מתחת למזגן" autocomplete="off"></div>`);
-      f2.querySelector('input').value=nl2;
-      f2.querySelector('input').addEventListener('input',e=>{ nl2=e.target.value; });
-      box.appendChild(f2);
-      box.appendChild(okCancel(
-        async()=>{ it.loc=nl; it.loc2=nl2; if(nl)lastLoc=nl; saveQueue(); paintLoc(); await sync(it,c); },
-        ()=>paintLoc()));
-      locLine.appendChild(box);
-    };
-
-    /* ההסבר */
-    const noteLine=el('<p class="what"></p>');
-    body.appendChild(noteLine);
-    const paintNote=()=>{
-      noteLine.innerHTML='';
-      const b=el(`<button class="tapedit ${it.note?'':'ghosttxt'}">${it.note?esc(it.note):'מה הליקוי — נגיעה לכתיבה'}</button>`);
-      b.onclick=()=>editNote();
-      noteLine.appendChild(b);
-    };
-    const editNote=()=>{
-      noteLine.innerHTML='';
-      const box=el('<div class="ed"></div>');
-      const f=el(`<div class="fld"><textarea placeholder="מה רואים בתמונה ומה צריך לתקן"></textarea></div>`);
-      const ta=f.querySelector('textarea'); ta.value=it.note||'';
-      box.appendChild(f);
-      box.appendChild(okCancel(
-        async()=>{ it.note=ta.value; saveQueue(); paintNote(); await sync(it,c); },
-        ()=>paintNote()));
-      noteLine.appendChild(box);
-      ta.focus();
-    };
-
-    const st=el('<div class="st"></div>');
-    body.appendChild(st);
-    c.paintSt=()=>{
-      st.innerHTML='';
-      /* ״חסר מיקום או הסבר״ לא אומר מה חסר כאן ועכשיו. הודעה שאומרת
-         בדיוק מה נשאר חוסכת ניחוש מול כל תמונה. */
-      const noLoc=!it.loc, noNote=!(it.note||'').trim();
-      if(it.k)st.appendChild(el('<span class="pill ok">✓ בסדר היום</span>'));
-      else if(!noLoc&&!noNote)st.appendChild(el('<span class="pill">שומר…</span>'));
-      else st.appendChild(el(`<span class="pill hot">${
-        noLoc&&noNote?'חסרים מיקום והסבר':noLoc?'חסר מיקום':'חסר הסבר'}</span>`));
-      const rm=el('<button class="mini">הסרה</button>');
-      rm.onclick=()=>removeOne(i);
-      st.appendChild(rm);
-    };
-
-    paintLoc(); paintNote(); c.paintSt();
-    app.appendChild(c);
-  });
+  QUEUE.forEach((it,i)=>{ app.appendChild(shotCard(it,i+1)); });
 
   const more=el('<button class="go noprint">📷 עוד תמונות</button>');
   more.onclick=()=>{ clearQueue(); render(); };
@@ -692,8 +714,9 @@ function removeOne(i){
    כבר נכנס. בלי כפתור ״שמירה״ נפרד שאי אפשר להבין למה הוא אפור. */
 async function sync(it,card){
   if(!(it.loc&&(it.note||'').trim())){ card.paintSt&&card.paintSt(); return; }
-  card.paintSt&&card.paintSt();
+  it.saving=true; card.paintSt&&card.paintSt();
   const ok=await commitOne(it);
+  it.saving=false;
   if(!ok)toast('השמירה נכשלה — אין חיבור. הפרטים נשמרו במכשיר, נסו שוב');
   saveQueue();
   card.paintSt&&card.paintSt();
@@ -736,6 +759,72 @@ function renderStart(app){
      עליו. מי שבכל זאת יבחר שבעים — זה יעבוד, רק לאט יותר. */
   app.appendChild(el(`<p class="lede" style="opacity:.75">עדיף אצוות של עד 15 תמונות —
     מהיר יותר בטלפון. אפשר לחזור ולהוסיף עוד כמה פעמים שצריך, והתור נשמר גם אם הדף נסגר.</p>`));
+}
+
+/* ===== מה חסר כדי שהמסמך יהיה שלם =====
+   שני סוגי חוסר, ולכל אחד הפעולה שסוגרת אותו במקום: תמונה שהועלתה וחסרים
+   לה מיקום והסבר נערכת כאן באותו כרטיס בדיוק כמו במסך התמונות, וסעיף
+   פתוח בסדר היום שאין לו תמונה מקבל כפתור שמצרף לו אחת. */
+function renderGaps(app){
+  $('#h1').textContent='מה חסר';
+  app.classList.add('doc');
+  app.appendChild(tabsEl('gaps'));
+
+  const shots=gapShots(), items=gapItems();
+  $('#lede').innerHTML=`<b>${shots.length}</b> תמונות בלי פרטים · <b>${items.length}</b> סעיפים בלי תמונה`;
+
+  if(!shots.length&&!items.length){
+    app.appendChild(el('<div class="empty-state">אין חוסרים. כל התמונות מתויקות וכל סעיף פתוח מצולם.</div>'));
+    app.appendChild(el(`<a class="go ghost noprint" style="text-align:center;text-decoration:none" href="?v=doc">📄 המסמך</a>`));
+    return;
+  }
+
+  if(shots.length){
+    app.appendChild(el('<h2>תמונות שחסרים להן מיקום או הסבר</h2>'));
+    shots.forEach((it,i)=>app.appendChild(shotCard(it,i+1)));
+  }
+
+  if(items.length){
+    app.appendChild(el('<h2>סעיפים פתוחים בלי תמונה</h2>'));
+    app.appendChild(el(`<p class="lede noprint">אלה סעיפים שכבר רשומים בסדר היום מול ברק.
+      תמונה שמצורפת לסעיף מופיעה גם בלוח וגם במסמך.</p>`));
+    items.forEach(it=>app.appendChild(gapItemRow(it)));
+  }
+
+  app.appendChild(el(`<a class="go ghost noprint" style="text-align:center;text-decoration:none" href="?v=doc">📄 המסמך</a>`));
+  app.appendChild(el(`<a class="go ghost noprint" style="text-align:center;text-decoration:none" href="./">↩ חזרה לסדר היום מול ברק</a>`));
+}
+
+function gapItemRow(it){
+  const row=el(`<div class="gaprow"><p class="txt">${esc(noteOf(it))}</p></div>`);
+  const bar=el('<div class="bar"><i></i></div>'); bar.style.display='none';
+  const lab=el(`<label class="addph">➕ תמונה לסעיף הזה
+    <input type="file" accept="image/*,.heic,.heif"></label>`);
+  const inp=lab.querySelector('input');
+  inp.onchange=async e=>{
+    const fs=[...e.target.files]; e.target.value='';
+    if(!fs.length)return;
+    lab.style.display='none'; bar.style.display='block';
+    let got=null;
+    const res=await addFiles(fs.slice(0,1),()=>{},one=>{ got=one; });
+    bar.style.display='none';
+    if(!got){
+      lab.style.display='';
+      const why=(res.bad[0]&&res.bad[0].w)||'ההעלאה נכשלה';
+      row.appendChild(el(`<p class="ln">${esc(why)}</p>`));
+      return;
+    }
+    /* הסעיף כבר קיים בלוח עם ה-k שלו, ולכן זו הצמדה ולא יצירה: המטא
+       נכתבת תחת אותו k, והפריט מתעדכן במקום. */
+    const meta={fid:got.fid,task:TASK+'__'+it.k,name:got.name||noteOf(it),type:got.type,
+      size:got.size,at:new Date().toISOString(),by:'רועי'};
+    const a=await put(`${FMETA}/${encodeURIComponent(TASK+'__'+it.k)}/${got.fid}.json`,meta);
+    const b=await upsertItem(Object.assign({},it,{fid:got.fid}));
+    if(a&&b){ it.fid=got.fid; toast('התמונה צורפה לסעיף ✓'); render(); }
+    else { lab.style.display=''; toast('הצירוף נכשל — נסו שוב'); }
+  };
+  row.appendChild(bar); row.appendChild(lab);
+  return row;
 }
 
 /* ===== המסמך =====
@@ -898,10 +987,28 @@ async function copyRich(){
   }
 }
 
+/* שמירה שנכשלה בשטח — רשת שנפלה באמצע — משאירה פריט עם מיקום והסבר
+   אבל בלי k, כלומר תמונה שהמשתמש כבר טיפל בה ושלא הגיעה ללוח. ניסיון
+   חוזר בטעינה סוגר את זה בלי שיצטרך לגעת בכל כרטיס שוב. */
+async function retryPending(){
+  const pend=QUEUE.filter(it=>!it.k&&it.loc&&(it.note||'').trim());
+  if(!pend.length)return;
+  let changed=false;
+  for(const it of pend){
+    /* רק אם התמונה באמת שם. תור מקומי יכול להצביע על העלאה שנכשלה,
+       וסעיף בלוח עם אטב שלא נפתח גרוע מסעיף חסר. */
+    const has=await getJSON(FTHUMB+'/'+it.fid+'.json')||await getJSON(FDATA+'/'+it.fid+'.json');
+    if(!has)continue;
+    if(await commitOne(it))changed=true;
+  }
+  if(changed){ saveQueue(); render(); }
+}
+
 /* ===== ניתוב ===== */
 function render(){
   const app=$('#app'); app.innerHTML=''; app.className='';
   if(VIEW==='doc')return renderDoc(app);
+  if(VIEW==='gaps')return renderGaps(app);
   if(QUEUE.length||FAILED.length)return renderReview(app);
   renderStart(app);
 }
@@ -915,6 +1022,7 @@ Promise.all([loadTask(),loadLocs()]).then(()=>{
   if(VIEW!=='doc'&&resumed)
     toast(`חזרנו לאן שהפסקת — ${QUEUE.filter(x=>!x.k).length} מתוך ${QUEUE.length} עוד מחכות לפרטים`,4000);
   render();
+  retryPending();
 });
 </script>
 </body>
