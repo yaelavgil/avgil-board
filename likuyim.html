@@ -48,6 +48,8 @@ h1{font-family:Karantina,Assistant,sans-serif;font-weight:700;font-size:36px;lin
 .bar{height:7px;border-radius:99px;background:var(--line);overflow:hidden;margin:12px 0}
 .bar i{display:block;height:100%;background:var(--olive);width:0;transition:width .25s}
 .qline{font-size:13.5px;color:var(--muted);margin:6px 0 0;min-height:19px}
+.qline.warn{color:#8d4428;background:#fbf0ec;border:1px solid #c6836b;
+  border-radius:10px;padding:9px 11px;line-height:1.5}
 
 /* ===== מסך המעבר תמונה-תמונה ===== */
 .step{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin:14px 0}
@@ -127,6 +129,20 @@ h1{font-family:Karantina,Assistant,sans-serif;font-weight:700;font-size:36px;lin
 .tapedit:hover{background:var(--olive-soft)}
 .tapedit.ghosttxt{color:var(--muted);font-weight:600;border:1px dashed var(--line2);
   margin:0;padding:7px 9px}
+/* ״מוצע״ חייב להיראות אחרת ממה שאושר, אחרת רועי לא יוכל לדעת מה הוא
+   אישר ומה הדף ניחש בשמו. ענבר רך, ולא אדום: זו הצעה ולא בעיה. */
+.sugtag{font-size:11px;font-weight:800;background:var(--amber-soft);color:var(--amber);
+  border:1px solid var(--amber);border-radius:999px;padding:1px 7px;margin-inline-start:6px;
+  vertical-align:middle;white-space:nowrap}
+.pill.sug{background:var(--amber-soft);border-color:var(--amber);color:var(--amber)}
+.lk .lnk{margin:5px 0 0;font-size:14px}
+.tapedit.match{font-weight:700;color:var(--olive-ink);background:var(--olive-soft);
+  border:1px solid var(--line2);margin:0;padding:7px 9px}
+.tapedit.sublnk{font-size:13px;color:var(--muted);font-weight:600}
+.tapedit.sublnk u{color:var(--olive-ink)}
+.sughd{margin:0 0 6px;font-size:12.5px;font-weight:800;color:var(--muted)}
+.tapedit.needloc{color:var(--red);font-weight:800;border:1px dashed var(--red);
+  background:var(--red-soft);margin:0;padding:7px 9px}
 .lk .ed{margin:6px 0 2px}
 .okrow{display:flex;gap:7px;margin-top:8px}
 .mini{font:inherit;font-size:13px;font-weight:700;padding:7px 13px;border-radius:9px;
@@ -138,6 +154,9 @@ h1{font-family:Karantina,Assistant,sans-serif;font-weight:700;font-size:36px;lin
 .gaprow{border:1px solid var(--line);background:var(--card);border-radius:12px;
   padding:11px 13px;margin:8px 0}
 .gaprow .txt{margin:0 0 9px;font-size:14.5px;font-weight:600;line-height:1.5}
+.gaprow .miniph{float:inline-start;width:74px;height:74px;margin-inline-end:11px;
+  border-radius:9px;overflow:hidden;background:var(--olive-soft)}
+.gaprow .miniph img{width:100%;height:100%;object-fit:cover;display:block}
 .gaprow .ln{margin:7px 0 0;font-size:13px;color:#8d4428}
 .addph{display:inline-block;border:1px dashed var(--line2);border-radius:9px;padding:7px 13px;
   font-size:13px;font-weight:700;color:var(--muted);cursor:pointer}
@@ -231,7 +250,9 @@ async function put(url,body,method){
   return false;
 }
 async function getJSON(url){
-  try{const r=await fetch(url+'?t='+Date.now(),{cache:'no-store'});return r.ok?await r.json():null;}
+  /* מפריד נכון גם לכתובת שיש בה כבר שאילתה (shallow), אחרת היא נשברת */
+  const sep=url.indexOf('?')>=0?'&':'?';
+  try{const r=await fetch(url+sep+'t='+Date.now(),{cache:'no-store'});return r.ok?await r.json():null;}
   catch(e){return null;}
 }
 
@@ -344,7 +365,8 @@ function saveQueue(){
   try{
     if(!QUEUE.length)return localStorage.removeItem(QKEY);
     const slim=QUEUE.map(x=>({fid:x.fid,name:x.name,type:x.type,size:x.size,
-      loc:x.loc||'',loc2:x.loc2||'',note:x.note||'',k:x.k||null,at:x.at||0}));
+      loc:x.loc||'',loc2:x.loc2||'',note:x.note||'',k:x.k||null,at:x.at||0,
+      back:x.back?1:0,link:x.link||null,okd:x.okd?1:0}));
     localStorage.setItem(QKEY,JSON.stringify({q:slim,at:Date.now()}));
   }catch(e){}
 }
@@ -474,7 +496,19 @@ function mkDrop(after){
   const q=el('<p class="qline"></p>');
   const wrap=el('<div></div>'); wrap.appendChild(d); wrap.appendChild(bar); wrap.appendChild(q);
   const run=async fs=>{
-    if(!fs||!fs.length)return;
+    /* בחירה שלא הגיעה אל כאן חייבת להיראות על המסך. רועי בחר 106 תמונות,
+       לחץ ✓ ולא קרה כלום — ואי אפשר היה לדעת אם הדף עובד, אם הוא תקוע או
+       אם הטלפון בכלל מסר את הקבצים. שורה אחת פה עולה כלום ואומרת מה קרה. */
+    if(!fs||!fs.length){
+      q.innerHTML='<b>הטלפון לא העביר אף תמונה.</b> זה קורה בבחירה גדולה מאוד — '+
+        'נסה שוב עם 10–15 תמונות בכל פעם.';
+      q.className='qline warn';
+      return;
+    }
+    q.className='qline';
+    /* נכתב מיד, לפני הפענוח הראשון: בבחירה של עשרות תמונות אייפון שוהה
+       שניות ארוכות לפני התמונה הראשונה, וללא שורה כזאת המסך דומם. */
+    q.textContent=`התקבלו ${fs.length} תמונות — מתחיל…`;
     bar.style.display='block';
     const res=await addFiles(fs,(i,n,nm)=>{
       bar.querySelector('i').style.width=Math.round(i/n*100)+'%';
@@ -568,7 +602,97 @@ function tabsEl(active){
 const gapShots=()=>QUEUE.filter(x=>!x.k);
 const gapItems=()=>((TASKOBJ&&TASKOBJ.items)||[])
   .filter(i=>i&&!i.fid&&!i.done&&i.lv);
-const gapCount=()=>gapShots().length+gapItems().length;
+/* וסוג שלישי: ליקוי שכבר נשמר עם תמונה, ואין לו מיקום. מותר לשמור כך
+   בשטח, אבל במסמך הוא נופל ל״בלי מיקום״ ואי אפשר למצוא אותו בבית. */
+const gapLoc=()=>((TASKOBJ&&TASKOBJ.items)||[])
+  .filter(i=>i&&i.fid&&!i.done&&!i.loc);
+const gapCount=()=>gapShots().length+gapItems().length+gapLoc().length;
+
+/* ===== התאמה לסעיפים שכבר רשומים =====
+   רוב מה שרועי מצלם בסיור כבר כתוב בסדר היום מול ברק — ״למלא רובה
+   בניקוז״, ״תיקון קירות בחדר הארונות״, ״רעש בצנרת״. תמונה שנכנסת
+   כליקוי חדש יוצרת סעיף שני לאותו דבר, ואז יש בלוח שתי שורות לתיקון
+   אחד. לכן לכל תמונה מוצע הסעיף הקיים שמתאים לה, והוא מה שהיא
+   מצטרפת אליו — ומה שנכתב בסעיף נשאר כפי שהוא.
+
+   אין כאן זיהוי תמונה, ואין בכלל כזה בדף. ההתאמה נשענת על שני דברים
+   שאפשר לדעת בוודאות: המיקום שרועי בחר, וחפיפת מילים בין מה שהקליד
+   לבין נוסח הסעיף. לכן זו הצעה שמסומנת כהצעה ולא קביעה. */
+const STOP={'של':1,'את':1,'עם':1,'על':1,'אל':1,'לא':1,'זה':1,'מה':1,'או':1,'גם':1,
+  'יש':1,'כל':1,'בכל':1,'לפני':1,'אחרי':1,'כדי':1,'אבל':1,'צריך':1,'אפשר':1,'עוד':1};
+/* תחילית ה/ב/ל/מ/ש/כ וסיומת רבים הן הסיבה ש״הרחצה״ ו״רחצה״ לא נחשבו
+   לאותה מילה. השוואה לפי גזע פותרת את זה בלי טבלת מילים. */
+const stem=w=>w.replace(/^(ה|ב|ל|מ|ש|כ|ו)/,'').replace(/(ים|ות|יות)$/,'');
+const hit=(a,b)=>{ const x=stem(a),y=stem(b);
+  return x===y||(x.length>3&&y.indexOf(x)>=0)||(y.length>3&&x.indexOf(y)>=0); };
+function toks(s){
+  return String(s||'')
+    .replace(/[\u{1F000}-\u{1FAFF}\u{2190}-\u{27BF}\u{FE0F}]/gu,' ')
+    .replace(/[*·—–()\[\],.:;״"'?!]/g,' ')
+    .split(/\s+/).filter(w=>w.length>2&&!STOP[w]);
+}
+/* מיקום הוא שם חדר, וסעיף מתאר עבודה. ״חדר רחצה״ לא מופיע בשום סעיף,
+   אבל ״מקלחון״, ״ניקוז״ ו״רובה״ כן — ולכן המיקום מורחב למה שבאמת
+   נכתב בסעיפים על אותו חדר. */
+const SYN=[
+  [/חדר רחצה|מקלחת/,['מקלחת','מקלחון','רחצה','ניקוז','רובה','אינטרפוץ','כיור','אמבטיה','ברזים','צנרת']],
+  [/חדר הורים|הורים/,['הורים','שינה','ארונות','משקוף','קורות']],
+  [/ארונות/,['ארונות','משקוף','קירות']],
+  [/מטבח/,['מטבח','מקרר','כיור','ויטרינה','מדה','שיש','מזגן']],
+  [/ממ.?ד/,['ממד','צבע','משקוף','מפתן','דלת']],
+  [/מדרגות/,['מדרגות','רום','צוקל','שפכטל']],
+  [/סלון|פינת משפחה/,['סלון','קורות','מזגן','גריל','פרקט']],
+  [/חצר|^צד|גינה|פרגולה/,['חוץ','חצר','פרגולה','שליכט','יסודות','מרצפות','בלטה','בטון']],
+  [/חנייה|חניה/,['חניה','חנייה','פרוזקטור','מצלמה']],
+  [/כניסה/,['כניסה','משקוף','מפתן','שליכט']],
+  [/ילדים/,['ילדים','אינטרפוץ','חלון']],
+  [/מרפסת/,['מרפסת','שליכט','תריס']],
+  [/אורחים/,['אורחים','שקע','טלוויזיה','כיור','לחץ']],
+  [/עבודה|מזדרון|מסדרון/,['צבע','קורות','גבס']]
+];
+function locToks(loc){
+  const s=String(loc||'');
+  let out=toks(s.replace(/^(קומה עליונה|קומה תחתונה|חצר)\s*[-–]\s*/,''));
+  SYN.forEach(([re,words])=>{ if(re.test(s))out=out.concat(words); });
+  if(/עליונה/.test(s))out.push('למעלה');
+  return out;
+}
+const itemByK=k=>((TASKOBJ&&TASKOBJ.items)||[]).find(i=>i&&i.k===k)||null;
+const openItems=()=>((TASKOBJ&&TASKOBJ.items)||[]).filter(i=>i&&i.t&&!i.done&&!i.fid);
+function candidates(loc,note,skip){
+  const lt=locToks(loc), nt=toks(note);
+  if(!lt.length&&!nt.length)return [];
+  return openItems().filter(i=>!(skip&&skip[i.k])).map(i=>{
+    const t=toks(i.t); let s=0;
+    /* מה שהוקלד שוקל יותר מהחדר: החדר מצמצם לקבוצה, המילים מזהות סעיף. */
+    lt.forEach(w=>{ if(t.some(x=>hit(x,w)))s+=2; });
+    nt.forEach(w=>{ if(t.some(x=>hit(x,w)))s+=3; });
+    return {i,s};
+  }).filter(x=>x.s>1).sort((a,z)=>z.s-a.s).slice(0,4);
+}
+/* ההצעות נקבעות למערך כולו ולא לכרטיס אחד, משתי סיבות: המיקום נגרר
+   מהתמונה הקודמת (בסיור מצלמים חדר שלם ברצף), וסעיף שהוצע לתמונה אחת
+   לא מוצע שוב לתמונה הבאה — אחרת כל תמונות המקלחת מוצעות לאותה שורה. */
+function propose(){
+  let carry=lastLoc||'';
+  const taken={};
+  QUEUE.forEach(it=>{
+    if(it.k){ if(it.loc)carry=it.loc; if(it.link)taken[it.link]=1; return; }
+    if(it.loc)carry=it.loc; else it.sugLoc=carry||'';
+    if(it.link)taken[it.link]=1;
+  });
+  QUEUE.forEach(it=>{
+    if(it.k||it.link)return;
+    const c=candidates(it.loc||it.sugLoc||'',it.note||'',taken);
+    it.sugList=c.map(x=>x.i);
+    /* רק התאמה טובה ממולאת מראש. בלי הרף הזה, התמונה החמישית באותו חדר
+       היתה מקבלת את מה שנשאר בחדר — ומי שמאשר הכול בלחיצה אחת היה
+       מצרף תמונה לסעיף שאין לו שום קשר אליה. מתחת לרף הסעיפים עדיין
+       מוצעים ברשימה, רק לא נבחרים בשמו. */
+    it.sugK=(c.length&&c[0].s>=6)?c[0].i.k:null;
+    if(it.sugK)taken[it.sugK]=1;
+  });
+}
 
 /* כרטיס תמונה אחד — אותו כרטיס משמש גם במסך ״התמונות״ וגם במסך
    ״חסרים״, כדי שהעריכה תתנהג זהה בשניהם. */
@@ -593,15 +717,19 @@ function shotCard(it,num){
   body.appendChild(locLine);
   const paintLoc=()=>{
     locLine.innerHTML='';
-    const txt=it.loc?(it.loc2?`${esc(it.loc)} · ${esc(it.loc2)}`:esc(it.loc)):'';
-    const b=el(`<button class="tapedit ${it.loc?'':'ghosttxt'}">${txt||'בחירת מיקום'}</button>`);
+    const sug=!it.loc&&it.sugLoc?it.sugLoc:'';
+    const txt=it.loc?(it.loc2?`${esc(it.loc)} · ${esc(it.loc2)}`:esc(it.loc)):esc(sug);
+    /* מיקום חסר הוא הדבר היחיד שמסומן באדום. אפשר לשמור בלעדיו, אבל
+       בלי המיקום הליקוי לא מוצא את מקומו במסמך — ולכן הוא צועק. */
+    const b=el(`<button class="tapedit ${it.loc?'':(sug?'ghosttxt':'needloc')}">${
+      txt||'📍 חסר מיקום — נגיעה לבחירה'}${sug?' <span class="sugtag">מוצע</span>':''}</button>`);
     b.onclick=()=>editLoc();
     locLine.appendChild(b);
   };
   const editLoc=()=>{
     locLine.innerHTML='';
     const box=el('<div class="ed"></div>');
-    let nl=it.loc||lastLoc||'', nl2=it.loc2||'';
+    let nl=it.loc||it.sugLoc||lastLoc||'', nl2=it.loc2||'';
     box.appendChild(locPicker(nl,v=>{ nl=v; }));
     const f2=el(`<div class="fld"><label>איפה בדיוק בחדר</label>
       <input placeholder="למשל: מתחת למזגן" autocomplete="off"></div>`);
@@ -609,16 +737,84 @@ function shotCard(it,num){
     f2.querySelector('input').addEventListener('input',e=>{ nl2=e.target.value; });
     box.appendChild(f2);
     box.appendChild(okCancel(
-      async()=>{ it.loc=nl; it.loc2=nl2; if(nl)lastLoc=nl; saveQueue(); paintLoc(); await sync(it,c); },
+      /* אחרי שהתמונה כבר בסדר היום, עריכה מתעדכנת שם מיד. לפני כן —
+         רק נשמרת במכשיר, כי מה שנכתב ללוח נכתב באישור בלבד. */
+      async()=>{ it.loc=nl; it.loc2=nl2; if(nl)lastLoc=nl;
+        saveQueue(); c.repaint(); if(it.k)await sync(it,c); },
       ()=>paintLoc()));
     locLine.appendChild(box);
   };
 
-  /* ההסבר */
+  /* השיוך לסעיף קיים — הקו המרכזי של המסך. ההצעה מוצגת ממולאת ומסומנת
+     ״מוצע״, ונגיעה בה פותחת את כל האפשרויות. */
+  const linkLine=el('<p class="lnk"></p>');
+  body.appendChild(linkLine);
+  const linkK=()=>it.link&&it.link!=='new'?it.link:null;
+  const paintLink=()=>{
+    linkLine.innerHTML='';
+    if(it.link==='new'){
+      const b=el('<button class="tapedit sublnk">ליקוי חדש — <u>שיוך לסעיף קיים</u></button>');
+      b.onclick=()=>pickLink(); linkLine.appendChild(b); return;
+    }
+    const k=linkK()||it.sugK;
+    if(k&&itemByK(k)){
+      const b=el(`<button class="tapedit match">🔗 ${esc(shortOf(itemByK(k)))}${
+        linkK()?'':' <span class="sugtag">מוצע</span>'}</button>`);
+      b.onclick=()=>pickLink(); linkLine.appendChild(b); return;
+    }
+    const b=el('<button class="tapedit ghosttxt">שיוך לסעיף קיים, או ליקוי חדש</button>');
+    b.onclick=()=>pickLink(); linkLine.appendChild(b);
+  };
+  const pickLink=()=>{
+    linkLine.innerHTML='';
+    const box=el('<div class="ed"></div>');
+    const chips=el('<div class="chips"></div>');
+    const search=el('<div class="fld locsearch"><input placeholder="סינון כל הסעיפים הפתוחים…" autocomplete="off"></div>');
+    const inp=search.querySelector('input');
+    const paintChips=()=>{
+      chips.innerHTML='';
+      const q=inp.value.trim();
+      /* בלי סינון — ההצעות למיקום הזה. עם סינון — כל הסעיפים הפתוחים,
+         כי הסעיף הנכון יכול להיות כזה שההתאמה לא תפסה. */
+      const list=q?openItems().filter(i=>i.t.indexOf(q)>=0)
+        :(it.sugList&&it.sugList.length?it.sugList
+          :candidates(it.loc||it.sugLoc||'',it.note||'',null).map(x=>x.i));
+      list.slice(0,q?12:4).forEach(i=>{
+        const b=el(`<button type="button" class="${it.link===i.k?'on':''}">${esc(shortOf(i))}</button>`);
+        /* בחירה היא בחירה, לא שמירה. שום דבר לא נכתב לסדר היום עד
+           שרועי לוחץ ✓ — על הכרטיס או על ״אישור הכול״ למטה. */
+        b.onclick=async()=>{
+          it.link=i.k;
+          if(!it.loc&&it.sugLoc)it.loc=it.sugLoc;
+          saveQueue(); c.repaint();
+          if(it.k)await sync(it,c);
+        };
+        chips.appendChild(b);
+      });
+      if(!list.length)chips.appendChild(el(`<div class="empty-state">${
+        q?'אין סעיף פתוח שמכיל את זה':'אין סעיף קיים שמתאים למיקום הזה'}</div>`));
+      const nb=el('<button type="button" class="new">➕ ליקוי חדש</button>');
+      nb.onclick=()=>{ it.link='new'; saveQueue(); paintLink(); paintNote(); editNote(); };
+      chips.appendChild(nb);
+    };
+    inp.addEventListener('input',paintChips);
+    box.appendChild(el('<p class="sughd">מה בסדר היום מתאים לתמונה הזאת</p>'));
+    box.appendChild(chips); box.appendChild(search);
+    const no=el('<button class="mini">✕ ביטול</button>');
+    no.onclick=()=>paintLink();
+    box.appendChild(el('<div class="okrow"></div>')).appendChild(no);
+    paintChips();
+    linkLine.appendChild(box);
+  };
+
+  /* ההסבר — רק כשזה ליקוי חדש. כשהתמונה מצטרפת לסעיף קיים, הנוסח שלו
+     הוא ההסבר, ושינוי שלו מכאן היה דורס מה שנכתב בלוח. */
   const noteLine=el('<p class="what"></p>');
   body.appendChild(noteLine);
   const paintNote=()=>{
     noteLine.innerHTML='';
+    if(linkK()){ noteLine.style.display='none'; return; }
+    noteLine.style.display='';
     const b=el(`<button class="tapedit ${it.note?'':'ghosttxt'}">${it.note?esc(it.note):'מה הליקוי — נגיעה לכתיבה'}</button>`);
     b.onclick=()=>editNote();
     noteLine.appendChild(b);
@@ -630,7 +826,11 @@ function shotCard(it,num){
     const ta=f.querySelector('textarea'); ta.value=it.note||'';
     box.appendChild(f);
     box.appendChild(okCancel(
-      async()=>{ it.note=ta.value; saveQueue(); paintNote(); await sync(it,c); },
+      async()=>{ it.note=ta.value;
+        /* מי שטרח להקליד הסבר התכוון לליקוי חדש. בלי הקביעה הזאת
+           ההצעה היתה גוברת על מה שהוא כתב, והטקסט שלו היה נעלם. */
+        if((it.note||'').trim()&&!linkK())it.link='new';
+        saveQueue(); c.repaint(); if(it.k)await sync(it,c); },
       ()=>paintNote()));
     noteLine.appendChild(box);
     ta.focus();
@@ -642,17 +842,35 @@ function shotCard(it,num){
     st.innerHTML='';
     /* ״חסר מיקום או הסבר״ לא אומר מה חסר כאן ועכשיו. הודעה שאומרת
        בדיוק מה נשאר חוסכת ניחוש מול כל תמונה. */
-    const noLoc=!it.loc, noNote=!(it.note||'').trim();
-    if(it.k)st.appendChild(el('<span class="pill ok">✓ בסדר היום</span>'));
-    else if(!noLoc&&!noNote)st.appendChild(el(`<span class="pill">${it.saving?'שומר…':'ממתין לשמירה'}</span>`));
-    else st.appendChild(el(`<span class="pill hot">${
-      noLoc&&noNote?'חסרים מיקום והסבר':noLoc?'חסר מיקום':'חסר הסבר'}</span>`));
+    const noNote=!(it.note||'').trim();
+    if(it.k){
+      st.appendChild(el(`<span class="pill ok">✓ ${
+        it.link&&it.link!=='new'?'צורפה לסעיף':'בסדר היום'}</span>`));
+      /* נשמר, וזה עדיין לא שלם. בלי התזכורת הזאת ״✓״ נראה כמו סוף הסיפור
+         והליקוי היה נשאר לנצח בלי מקום. */
+      if(!it.loc)st.appendChild(el('<span class="pill hot">עדיין חסר מיקום</span>'));
+    }
+    else if(it.saving)st.appendChild(el('<span class="pill">שומר…</span>'));
+    else if(linkK())st.appendChild(el(`<span class="pill">מחכה לאישור${
+      it.loc?'':' · בלי מיקום'}</span>`));
+    else if(it.link==='new')st.appendChild(el(`<span class="pill ${noNote?'hot':''}">${
+      noNote?'חסר הסבר':'מחכה לאישור'+(it.loc?'':' · בלי מיקום')}</span>`));
+    else if(it.sugK)st.appendChild(el('<span class="pill sug">הצעה — מחכה לאישור</span>'));
+    else st.appendChild(el('<span class="pill hot">חסר שיוך או הסבר</span>'));
+    /* אישור של תמונה אחת. ״אישור הכול״ למטה עושה את זה לכולן, וזה
+       הכפתור למי שרוצה לאשר אחת ולהמשיך להסתכל. */
+    if(!it.k&&(linkK()||it.sugK||!noNote)){
+      const ok=el('<button class="mini go2">✓ מאשר</button>');
+      ok.onclick=async()=>{ ok.disabled=true; ok.textContent='שומר…'; await approveOne(it,c); };
+      st.appendChild(ok);
+    }
     const rm=el('<button class="mini">הסרה</button>');
     rm.onclick=()=>removeOne(QUEUE.indexOf(it));
     st.appendChild(rm);
   };
 
-  paintLoc(); paintNote(); c.paintSt();
+  c.repaint=()=>{ paintLoc(); paintLink(); paintNote(); c.paintSt(); };
+  paintLoc(); paintLink(); paintNote(); c.paintSt();
   return c;
 }
 
@@ -684,11 +902,27 @@ function renderReview(app){
     app.appendChild(el('<div class="empty-state">אין תמונות שממתינות לפרטים.</div>'));
   }
 
+  /* ההסבר שלמעלה הוא מה שהופך את ״מוצע״ למובן. בלעדיו נראה שהדף החליט
+     משהו בשם רועי, ולא שהוא מציע לו. */
+  const pend=QUEUE.filter(x=>!x.k);
+  const matched=pend.filter(x=>(x.link&&x.link!=='new')||x.sugK).length;
+  if(pend.length)app.appendChild(el(`<p class="lede noprint">לכל תמונה מוצע המיקום
+    של התמונה שלפניה והסעיף שמתאים לה בסדר היום. ${matched?`<b>${matched}</b> מתוך
+    ${pend.length} קיבלו הצעה.`:''} עברו עליהן, תקנו מה שלא מתאים, ואשרו למטה.</p>`));
+
   QUEUE.forEach((it,i)=>{ app.appendChild(shotCard(it,i+1)); });
 
-  const more=el('<button class="go noprint">📷 עוד תמונות</button>');
-  more.onclick=()=>{ clearQueue(); render(); };
-  app.appendChild(more);
+  if(pend.length){
+    const all=el(`<button class="go noprint">✓ אישור כל ${pend.length} התמונות</button>`);
+    all.onclick=()=>approveAll(all);
+    app.appendChild(all);
+  }
+
+  /* ״עוד תמונות״ היה כפתור שקרא ל-clearQueue, כלומר מחק את התור ואת
+     הזיכרון המקומי שלו. רועי העלה 12 תמונות, ראה אותן, לחץ עליו —
+     והן נעלמו מהמסך בלי דרך חזרה, בזמן שהקבצים עצמם נשארו במסד בלי
+     שיוך. כאן זה הבוחר עצמו, והאצווה החדשה מצטרפת לקיימת. */
+  app.appendChild(mkDrop(()=>render()));
   app.appendChild(el(`<a class="go ghost noprint" style="text-align:center;text-decoration:none" href="?v=doc">📄 המסמך</a>`));
   app.appendChild(el(`<a class="go ghost noprint" style="text-align:center;text-decoration:none" href="./">↩ חזרה לסדר היום מול ברק</a>`));
 }
@@ -710,18 +944,85 @@ function removeOne(i){
   QUEUE.splice(i,1); saveQueue(); render();
 }
 
-/* ברגע שיש מיקום והסבר, הליקוי נכנס לסדר היום — או מתעדכן שם אם הוא
-   כבר נכנס. בלי כפתור ״שמירה״ נפרד שאי אפשר להבין למה הוא אפור. */
+const shortOf=i=>{ const s=noteOf(i).replace(/\s+/g,' ').trim();
+  return s.length>52?s.slice(0,50)+'…':s; };
+function paintLede(){
+  if(VIEW!=='')return;
+  const d=QUEUE.filter(x=>x.k).length;
+  $('#lede').innerHTML=`${QUEUE.length} תמונות · <b>${d}</b> כבר בסדר היום`;
+}
+
+/* שתי דרכים שתמונה נכנסת לסדר היום, ושתיהן נשמרות מעצמן:
+   צירוף לסעיף קיים (הרוב, בסיור מול ברק), או ליקוי חדש. */
 async function sync(it,card){
-  if(!(it.loc&&(it.note||'').trim())){ card.paintSt&&card.paintSt(); return; }
+  const k=it.link&&it.link!=='new'?it.link:null;
+  /* מיקום אינו תנאי לשמירה — ראה commitOne. התנאי היחיד הוא שיהיה ברור
+     לאיזה ליקוי התמונה שייכת: סעיף קיים, או הסבר שרועי כתב. */
+  if(!k&&!(it.note||'').trim()){
+    card.repaint?card.repaint():card.paintSt&&card.paintSt(); return;
+  }
+  it.okd=1;
   it.saving=true; card.paintSt&&card.paintSt();
-  const ok=await commitOne(it);
+  const ok=k?await attachOne(it):await commitOne(it);
   it.saving=false;
   if(!ok)toast('השמירה נכשלה — אין חיבור. הפרטים נשמרו במכשיר, נסו שוב');
   saveQueue();
-  card.paintSt&&card.paintSt();
-  const d=QUEUE.filter(x=>x.k).length;
-  $('#lede').innerHTML=`${QUEUE.length} תמונות · <b>${d}</b> כבר בסדר היום`;
+  card.repaint?card.repaint():card.paintSt&&card.paintSt();
+  paintLede();
+}
+
+/* צירוף לסעיף קיים. הנוסח של הסעיף לא נוגעים בו — הוא נכתב בלוח לפני
+   הסיור, לפעמים בידי יעל, ומה שהתמונה מוסיפה הוא תמונה ומיקום. */
+async function attachOne(it){
+  const live=itemByK(it.link);
+  if(!live){ toast('הסעיף לא נמצא בסדר היום — נסו לרענן'); return false; }
+  const meta={fid:it.fid,task:TASK+'__'+it.link,name:it.name||noteOf(live),
+    type:it.type,size:it.size,at:new Date().toISOString(),by:'roi'};
+  const a=await put(`${FMETA}/${encodeURIComponent(TASK+'__'+it.link)}/${it.fid}.json`,meta);
+  /* תמונה שנייה לאותו סעיף נרשמת במטא (והלוח יראה את שתיהן), אבל fid
+     של הפריט נשאר הראשון — המסמך מציג תמונה אחת לשורה. */
+  const patch={fid:live.fid||it.fid};
+  /* מיקום שרועי בחר גובר על מה שרשום בסעיף: הוא עומד עכשיו במקום
+     ורואה אותו, וזו הסיבה היחידה שהוא טרח לבחור. */
+  if(it.loc){ patch.loc=it.loc; patch.loc2=it.loc2||''; }
+  const b=await upsertItem(Object.assign({},live,patch));
+  if(a&&b)it.k=it.link;
+  return a&&b;
+}
+
+/* אישור של תמונה אחת: מה שמוצע נהפך למה שנשמר. */
+async function approveOne(it,card){
+  if(!it.loc&&it.sugLoc)it.loc=it.sugLoc;
+  if(!it.link&&it.sugK)it.link=it.sugK;
+  if(it.loc)lastLoc=it.loc;
+  saveQueue();
+  await sync(it,card);
+}
+
+/* ===== אישור הכול =====
+   זה הצד השני של ההתאמה: הדף מציע מיקום וסעיף לכל תמונה, רועי עובר על
+   כולן, מתקן את מה שלא מתאים — ואז מאשר הכול בלחיצה אחת. מה שלא ניתן
+   לאישור (אין שיוך ואין הסבר) נשאר על המסך ונאמר בכמה. */
+async function approveAll(btn){
+  const pend=QUEUE.filter(x=>!x.k);
+  if(!pend.length)return;
+  btn.disabled=true;
+  let done=0,left=0;
+  for(let n=0;n<pend.length;n++){
+    const it=pend[n];
+    btn.textContent=`שומר ${n+1} מתוך ${pend.length}…`;
+    if(!it.loc&&it.sugLoc)it.loc=it.sugLoc;
+    if(!it.link&&it.sugK)it.link=it.sugK;
+    const k=it.link&&it.link!=='new'?it.link:null;
+    if(k||(it.note||'').trim())it.okd=1;
+    if(k){ if(await attachOne(it))done++; else left++; }
+    else if((it.note||'').trim()){ if(await commitOne(it))done++; else left++; }
+    else left++;
+    saveQueue();
+  }
+  render();
+  toast(done?`${done} תמונות נכנסו לסדר היום${left?`\n${left} עוד מחכות לפרטים`:''}`
+    :'לא נשמר כלום — לתמונות שנשארו חסר שיוך או הסבר',4500);
 }
 
 /* ליקוי אחד → פריט ב-items + מטא-דאטה שמקשרת אליו את התמונה.
@@ -731,11 +1032,15 @@ async function commitOne(it){
   const isNew=!it.k;
   const k=it.k||('lk'+Date.now().toString(36)+Math.random().toString(36).slice(2,5));
   const where=it.loc2?`${it.loc} · ${it.loc2}`:it.loc;
+  /* מיקום הוא נדרש אבל לא חוסם: ליקוי בלי מיקום נכנס לסדר היום כמו כל
+     אחד אחר, רק בלי השורה של המקום — והוא נשאר ברשימת ״חסרים״ עד
+     שמשלימים אותו. עדיף סעיף בלי מיקום מאשר ליקוי שלא נרשם כי רועי
+     לא זכר באמצע הסיור איך קוראים לחדר. */
   const item={k,lv:1,done:false,ans:'',
-    t:`📍 ${it.loc} · **${(it.note||'').trim()}**${it.loc2?` *(${it.loc2})*`:''}`,
-    fid:it.fid,loc:it.loc,loc2:it.loc2||'',at:it.at||Date.now(),by:'רועי'};
+    t:`${it.loc?`📍 ${it.loc} · `:''}**${(it.note||'').trim()}**${it.loc2?` *(${it.loc2})*`:''}`,
+    fid:it.fid,loc:it.loc,loc2:it.loc2||'',at:it.at||Date.now(),by:'roi'};
   const meta={fid:it.fid,task:TASK+'__'+k,name:it.name||where,type:it.type,size:it.size,
-    at:new Date().toISOString(),by:'רועי'};
+    at:new Date().toISOString(),by:'roi'};
   const a=await put(`${FMETA}/${encodeURIComponent(TASK+'__'+k)}/${it.fid}.json`,meta);
   const b=await upsertItem(item);
   if(a&&b){ it.k=k; it.at=item.at; }
@@ -757,8 +1062,13 @@ function renderStart(app){
     ובנגיעה בטקסט שליד כל תמונה ממלאים מיקום והסבר. המיקום נבחר בנקישה.</p>`));
   /* עצה ולא מגבלה: הטלפון מפענח כל תמונה בנפרד, ואצווה ענקית מעמיסה
      עליו. מי שבכל זאת יבחר שבעים — זה יעבוד, רק לאט יותר. */
-  app.appendChild(el(`<p class="lede" style="opacity:.75">עדיף אצוות של עד 15 תמונות —
-    מהיר יותר בטלפון. אפשר לחזור ולהוסיף עוד כמה פעמים שצריך, והתור נשמר גם אם הדף נסגר.</p>`));
+  /* לא עצה ולא קוסמטיקה: בבחירה של 106 תמונות אייפון לא מסר לדף אף
+     קובץ — הלחיצה על ✓ בגלריה פשוט לא הגיעה לכאן. 10–15 בכל פעם עובד,
+     וההמשך מצטרף לאותה רשימה. */
+  app.appendChild(el(`<p class="lede" style="opacity:.8"><b>10–15 תמונות בכל פעם.</b>
+    בבחירה גדולה מזה הטלפון עלול לא להעביר כלום, ואז נראה שלא קרה דבר.
+    אפשר לחזור ולהוסיף עוד כמה פעמים שצריך — הכול מצטבר לאותה רשימה,
+    וגם אם הדף נסגר הוא חוזר למקום.</p>`));
 }
 
 /* ===== מה חסר כדי שהמסמך יהיה שלם =====
@@ -770,10 +1080,18 @@ function renderGaps(app){
   app.classList.add('doc');
   app.appendChild(tabsEl('gaps'));
 
-  const shots=gapShots(), items=gapItems();
-  $('#lede').innerHTML=`<b>${shots.length}</b> תמונות בלי פרטים · <b>${items.length}</b> סעיפים בלי תמונה`;
+  const shots=gapShots(), items=gapItems(), noloc=gapLoc();
+  $('#lede').innerHTML=`<b>${shots.length}</b> תמונות בלי פרטים · <b>${noloc.length}</b> ליקויים
+    בלי מיקום · <b>${items.length}</b> סעיפים בלי תמונה`;
 
-  if(!shots.length&&!items.length){
+  if(noloc.length){
+    app.appendChild(el('<h2>ליקויים שנשמרו בלי מיקום</h2>'));
+    app.appendChild(el(`<p class="lede noprint">אלה כבר בסדר היום, עם תמונה.
+      בלי מיקום הם מופיעים במסמך תחת ״בלי מיקום״ ואי אפשר למצוא אותם בבית.</p>`));
+    noloc.forEach(i=>app.appendChild(locFixRow(i)));
+  }
+
+  if(!shots.length&&!items.length&&!noloc.length){
     app.appendChild(el('<div class="empty-state">אין חוסרים. כל התמונות מתויקות וכל סעיף פתוח מצולם.</div>'));
     app.appendChild(el(`<a class="go ghost noprint" style="text-align:center;text-decoration:none" href="?v=doc">📄 המסמך</a>`));
     return;
@@ -791,8 +1109,61 @@ function renderGaps(app){
     items.forEach(it=>app.appendChild(gapItemRow(it)));
   }
 
+  /* תמונות שעלו מזמן ואין להן פרטים. הן לא נכנסות לבד למסך — אחרי
+     שבועיים זו כנראה שארית ולא עבודה באמצע — אבל אסור שהן ייעלמו
+     בשקט, כי הקבצים עצמם יושבים במסד. */
+  if(OLDER){
+    const w=el(`<div class="gaprow"><p class="txt">יש עוד <b>${OLDER}</b> תמונות
+      שהועלו לפני יותר משבוע ואין להן מיקום, הסבר או סעיף.</p></div>`);
+    const b=el('<button class="mini">להציג גם אותן</button>');
+    b.onclick=async()=>{ b.disabled=true; b.textContent='טוען…';
+      const o=await adoptOrphans(3650); OLDER=0;
+      if(o.added){ location.href='?'; } else { b.textContent='לא נמצאו'; } };
+    w.appendChild(b);
+    app.appendChild(w);
+  }
+
   app.appendChild(el(`<a class="go ghost noprint" style="text-align:center;text-decoration:none" href="?v=doc">📄 המסמך</a>`));
   app.appendChild(el(`<a class="go ghost noprint" style="text-align:center;text-decoration:none" href="./">↩ חזרה לסדר היום מול ברק</a>`));
+}
+
+/* השלמת מיקום לליקוי שכבר בסדר היום. נוגעים רק בשדות המיקום — הנוסח
+   של הסעיף נשאר, גם כשהוא נכתב בלוח ולא כאן. */
+function locFixRow(it){
+  const row=el(`<div class="gaprow"><p class="txt">${esc(noteOf(it))}</p></div>`);
+  const ph=el('<div class="miniph"></div>');
+  const im=el('<img alt="" loading="lazy">'); ph.appendChild(im); fillThumb(im,it.fid);
+  row.insertBefore(ph,row.firstChild);
+  const line=el('<div></div>');
+  const paint=()=>{
+    line.innerHTML='';
+    const b=el('<button class="tapedit needloc">📍 חסר מיקום — נגיעה לבחירה</button>');
+    b.onclick=()=>edit();
+    line.appendChild(b);
+  };
+  const edit=()=>{
+    line.innerHTML='';
+    const box=el('<div class="ed"></div>');
+    let nl=lastLoc||'', nl2='';
+    box.appendChild(locPicker(nl,v=>{ nl=v; }));
+    const f2=el(`<div class="fld"><label>איפה בדיוק בחדר</label>
+      <input placeholder="למשל: מתחת למזגן" autocomplete="off"></div>`);
+    f2.querySelector('input').addEventListener('input',e=>{ nl2=e.target.value; });
+    box.appendChild(f2);
+    box.appendChild(okCancel(async()=>{
+      if(!nl){ paint(); return; }
+      const patch={loc:nl,loc2:nl2};
+      /* רק סעיף שנוצר כאן בלי מיקום מקבל את השורה ״📍 מקום ·״. לסעיף
+         שנכתב בלוח יש כבר כותרת אזור משלו, ודריסה שלה היתה מוחקת אותה. */
+      if(/^\*\*/.test(it.t||''))patch.t=`📍 ${nl} · ${it.t}`;
+      const ok=await upsertItem(Object.assign({},it,patch));
+      if(ok){ lastLoc=nl; toast('המיקום נשמר ✓'); render(); }
+      else { toast('השמירה נכשלה — נסו שוב'); paint(); }
+    },()=>paint()));
+    line.appendChild(box);
+  };
+  paint(); row.appendChild(line);
+  return row;
 }
 
 function gapItemRow(it){
@@ -817,7 +1188,7 @@ function gapItemRow(it){
     /* הסעיף כבר קיים בלוח עם ה-k שלו, ולכן זו הצמדה ולא יצירה: המטא
        נכתבת תחת אותו k, והפריט מתעדכן במקום. */
     const meta={fid:got.fid,task:TASK+'__'+it.k,name:got.name||noteOf(it),type:got.type,
-      size:got.size,at:new Date().toISOString(),by:'רועי'};
+      size:got.size,at:new Date().toISOString(),by:'roi'};
     const a=await put(`${FMETA}/${encodeURIComponent(TASK+'__'+it.k)}/${got.fid}.json`,meta);
     const b=await upsertItem(Object.assign({},it,{fid:got.fid}));
     if(a&&b){ it.fid=got.fid; toast('התמונה צורפה לסעיף ✓'); render(); }
@@ -991,7 +1362,10 @@ async function copyRich(){
    אבל בלי k, כלומר תמונה שהמשתמש כבר טיפל בה ושלא הגיעה ללוח. ניסיון
    חוזר בטעינה סוגר את זה בלי שיצטרך לגעת בכל כרטיס שוב. */
 async function retryPending(){
-  const pend=QUEUE.filter(it=>!it.k&&it.loc&&(it.note||'').trim());
+  /* רק מה שרועי כבר אישר. לפני התנאי הזה, תמונה שקיבלה הצעה אוטומטית
+     והוא עוד לא הספיק להסתכל עליה היתה נכנסת ללוח לבד בטעינה הבאה. */
+  const pend=QUEUE.filter(it=>!it.k&&it.okd&&
+    ((it.link&&it.link!=='new')||(it.note||'').trim()));
   if(!pend.length)return;
   let changed=false;
   for(const it of pend){
@@ -999,14 +1373,50 @@ async function retryPending(){
        וסעיף בלוח עם אטב שלא נפתח גרוע מסעיף חסר. */
     const has=await getJSON(FTHUMB+'/'+it.fid+'.json')||await getJSON(FDATA+'/'+it.fid+'.json');
     if(!has)continue;
-    if(await commitOne(it))changed=true;
+    const k=it.link&&it.link!=='new'?it.link:null;
+    if(await(k?attachOne(it):commitOne(it)))changed=true;
   }
   if(changed){ saveQueue(); render(); }
+}
+
+/* ===== תמונות שעלו ואין להן פרטים: שחזור מהמסד =====
+   התור המקומי הוא נוחות, לא מקור האמת. הוא נמחק בניקוי הדפדפן, הוא לא
+   קיים במכשיר אחר, ועד הגרסה הזאת הוא נמחק גם בלחיצה על ״עוד תמונות״.
+   מקור האמת הוא המסד: קובץ שאין לו פריט בסדר היום ואין לו מטא-דאטה הוא
+   תמונה שהועלתה ולא נקשרה לשום דבר. השחזור הזה הוא גם הדרך היחידה
+   להחזיר את מה שכבר אבד — 12 התמונות שנעלמו מהמסך ונשארו במסד. */
+const fidAt=f=>{ const n=parseInt(String(f).slice(1,-5),36);
+  return n>16e11&&n<4e12?n:0; };
+let OLDER=0;
+async function adoptOrphans(days){
+  const [th,fl,fm]=await Promise.all([
+    getJSON(FTHUMB+'.json?shallow=true'),
+    getJSON(FDATA+'.json?shallow=true'),
+    getJSON(FMETA+'.json')]);
+  /* בלי המטא ובלי המשימה אין איך להבדיל בין תמונה יתומה לתמונה שמחוברת
+     לסעיף — ואימוץ תמונה מחוברת היה יוצר לה סעיף שני. מוטב לא לעשות כלום. */
+  if(fm===null||!TASKOBJ||(!fl&&!th))return {added:0,older:0};
+  const used={};
+  (TASKOBJ.items||[]).forEach(i=>{ if(i&&i.fid)used[i.fid]=1; });
+  if(typeof fm==='object')Object.keys(fm).forEach(n=>{ const v=fm[n];
+    if(v&&typeof v==='object')Object.keys(v).forEach(f=>{ used[f]=1; }); });
+  QUEUE.forEach(x=>{ if(x&&x.fid)used[x.fid]=1; });
+  const loose=Object.keys(Object.assign({},th||{},fl||{})).filter(f=>!used[f]);
+  const cut=Date.now()-days*864e5;
+  const back=loose.filter(f=>fidAt(f)>=cut).sort((a,z)=>fidAt(a)-fidAt(z));
+  back.forEach(f=>QUEUE.push({fid:f,name:'',type:'image/jpeg',size:0,thumb:null,
+    loc:'',loc2:'',note:'',k:null,at:fidAt(f),back:1}));
+  if(back.length)saveQueue();
+  OLDER=loose.length-back.length;
+  return {added:back.length,older:OLDER};
 }
 
 /* ===== ניתוב ===== */
 function render(){
   const app=$('#app'); app.innerHTML=''; app.className='';
+  /* ההצעות נקבעות לפני הציור, כי כרטיס אחד מציג הצעה שתלויה בכרטיסים
+     שלפניו (המיקום נגרר) ובמה שכבר הוצע לאחרים (סעיף לא מוצע פעמיים). */
+  propose();
   if(VIEW==='doc')return renderDoc(app);
   if(VIEW==='gaps')return renderGaps(app);
   if(QUEUE.length||FAILED.length)return renderReview(app);
@@ -1023,6 +1433,13 @@ Promise.all([loadTask(),loadLocs()]).then(()=>{
     toast(`חזרנו לאן שהפסקת — ${QUEUE.filter(x=>!x.k).length} מתוך ${QUEUE.length} עוד מחכות לפרטים`,4000);
   render();
   retryPending();
+  /* אחרי הציור הראשון ולא לפניו: המסך לא צריך לחכות לשתי קריאות רשת
+     כדי להראות את מה שכבר שמור במכשיר. */
+  adoptOrphans(7).then(o=>{
+    if(o.added){ render();
+      if(VIEW!=='doc')toast(`${o.added} תמונות שעלו ולא נקשרו לשום סעיף הוחזרו למסך`,5000); }
+    else if(o.older&&VIEW==='gaps')render();
+  });
 });
 </script>
 </body>
