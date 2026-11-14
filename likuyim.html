@@ -351,6 +351,7 @@ let LOCLIST=LOC0.slice(); /* ברירות מחדל + מה שרועי הוסיף 
 let QUEUE=[];            /* התמונות שהועלו — עם פרטים או בלי */
 let lastLoc='';          /* המיקום האחרון — ברוב הסיור הוא לא משתנה */
 let FAILED=[];           /* קבצים שלא עלו, נשארים על המסך עד שמסירים */
+let HIDEOK=false;        /* קיפול של מה שכבר אושר */
 
 /* ===== התור שורד רענון =====
    התמונה כבר יושבת ב-Firebase ברגע שהפס הגיע לסוף, אבל הקישור בינה לבין
@@ -910,10 +911,25 @@ function renderReview(app){
     של התמונה שלפניה והסעיף שמתאים לה בסדר היום. ${matched?`<b>${matched}</b> מתוך
     ${pend.length} קיבלו הצעה.`:''} עברו עליהן, תקנו מה שלא מתאים, ואשרו למטה.</p>`));
 
-  QUEUE.forEach((it,i)=>{ app.appendChild(shotCard(it,i+1)); });
+  /* אחרי חצי סיור חצי מהרשימה כבר מאושרת, והיא דוחפת למטה את מה
+     שעוד צריך טיפול. ברירת המחדל היא להראות הכול — ככה רואים את
+     המסמך המצטבר — אבל אפשר לקפל את מה שנסגר. */
+  const okd=QUEUE.filter(x=>x.k);
+  if(okd.length){
+    const t=el(`<button class="mini noprint" style="margin:4px 0 2px">${
+      HIDEOK?`הצגת ${okd.length} שאושרו`:`הסתרת ${okd.length} שאושרו`}</button>`);
+    t.onclick=()=>{ HIDEOK=!HIDEOK; render(); };
+    app.appendChild(t);
+  }
+  QUEUE.forEach((it,i)=>{ if(HIDEOK&&it.k)return; app.appendChild(shotCard(it,i+1)); });
 
-  if(pend.length){
-    const all=el(`<button class="go noprint">✓ אישור כל ${pend.length} התמונות</button>`);
+  /* הכפתור סופר רק את מה שבאמת ניתן לאישור. ״אישור כל 19״ שישמור
+     ארבע הוא הבטחה שלא מתקיימת. */
+  const can=pend.filter(x=>(x.link&&x.link!=='new')||x.sugK||(x.note||'').trim()).length;
+  if(can){
+    const all=el(`<button class="go noprint">✓ אישור ${
+      can===1?(pend.length===1?'התמונה':'התמונה המוכנה')
+      :can===pend.length?`כל ${can} התמונות`:`${can} התמונות המוכנות`}</button>`);
     all.onclick=()=>approveAll(all);
     app.appendChild(all);
   }
