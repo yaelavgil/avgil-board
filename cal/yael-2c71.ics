@@ -7,8 +7,35 @@ X-WR-CALNAME:משימות יעל
 X-PUBLISHED-TTL:PT30M
 REFRESH-INTERVAL;VALUE=DURATION:PT30M
 BEGIN:VEVENT
+UID:adhd-study-1@avgil-board
+DTSTAMP:20261120T165149Z
+DTSTART:20261124T203000
+DTEND:20261124T204500
+SUMMARY:ADHD — מודול ראשון בתוכנית הלמידה
+DESCRIPTION:⏰ **שלישי 24.11 ב-20:30.**\n\nזו התזכורת ה
+ ראשונה מתוך תוכנית של **12 מודולים**. היא ק
+ יימת כי למידה עצמית בלי תאריך בלוח פשוט 
+ לא קורית — לא בגלל חוסר עניין\, אלא בגלל 
+ שאין לה מקום קבוע ביום.\n\n**40 דקות מספיקו
+ ת למודול.** אחרי שתסמני בוצע\, אפתח את הבא
+  בתור ואעדכן את מד ההתקדמות במרכז הסוכנ
+ ים.\n\n📌 אם התאריך לא מתאים — תגידי ואזי
+ ז. עדיף להזיז מאשר לדלג.\n\nhttps://yaelavgil.github.i
+ o/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:ADHD — מודול ראשון בתוכנית הלמידה
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:ADHD — מודול ראשון בתוכנית הלמידה
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
 UID:c-list@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261028T090000
 DTEND:20261028T091500
 SUMMARY:רשימה מעודכנת לקרלוס — לשלוח עד רבי
@@ -46,7 +73,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:c-visit@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261029T090000
 DTEND:20261029T091500
 SUMMARY:קרלוס מגיע — יום חמישי 29.10 [שנינו]
@@ -72,7 +99,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:f09@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261130T090000
 DTEND:20261130T091500
 SUMMARY:נופר — 5\,000 ₪ אחרונים בסיום [שנינו]
@@ -97,7 +124,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:g07@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261028T090000
 DTEND:20261028T091500
 SUMMARY:ידיות לארון הכניסה ולארון מתחת למדר
@@ -134,7 +161,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:gur-classroom-1911@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261120T190000
 DTEND:20261120T191500
 SUMMARY:גור — להיכנס לקלאסרום וללחוץ ״שליח
@@ -167,7 +194,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:gur-english-2311@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261123T090000
 DTEND:20261123T091500
 SUMMARY:🇬🇧 גור — מבחן מיפוי באנגלית\, שני 2
@@ -202,7 +229,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:gur-english-prep@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261121T180000
 DTEND:20261121T181500
 SUMMARY:🇬🇧 לשבת עם גור על המבדק לדוגמה באנ
@@ -237,7 +264,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:gur-madaim-2212@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261222T090000
 DTEND:20261222T091500
 SUMMARY:גור — מבחן מדעים (שלד\, מפרקים\, שריר
@@ -269,7 +296,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:gur-math-0312@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261203T090000
 DTEND:20261203T091500
 SUMMARY:גור — מבחן מסכם מתמטיקה\, חמישי 3.12 [ש
@@ -307,7 +334,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:gur-math-prep@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261129T180000
 DTEND:20261129T181500
 SUMMARY:להתחיל חזרה למתמטיקה — ארבעה ימים ל
@@ -343,7 +370,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:gur-mivdak-1011@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261109T090000
 DTEND:20261109T091500
 SUMMARY:גור — ציוד למבדק השפה (שלישי 10.11\, שע
@@ -374,7 +401,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:h02@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261012T090000
 DTEND:20261012T091500
 SUMMARY:לרכוש וילונות לבית
@@ -400,7 +427,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:h10@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261108T090000
 DTEND:20261108T091500
 SUMMARY:קמין פלט MCZ Decò — ממתינים להצעה ממוק
@@ -437,7 +464,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:h11@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261029T160000
 DTEND:20261029T161500
 SUMMARY:שוק תוצרת בת חפר — חמישי 29.10\, 16:00 [שנ
@@ -467,7 +494,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:h12@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261108T090000
 DTEND:20261108T091500
 SUMMARY:ספת לאונג׳ XL מפנדה — לוודא שהיא נכנ
@@ -505,7 +532,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:h20@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261109T090000
 DTEND:20261109T091500
 SUMMARY:מיטת Roni Plus ללילי — הוזמנה והתקבלה · 
@@ -543,7 +570,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:h21@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261104T165600
 DTEND:20261104T171100
 SUMMARY:חולצת היפ הופ ללילי — אין קבלה ממרכ
@@ -580,7 +607,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:h22@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261103T090000
 DTEND:20261103T091500
 SUMMARY:היום אחה״צ — הום סנטר ואיקאה בנתניה
@@ -612,7 +639,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:h23@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261105T083000
 DTEND:20261105T084500
 SUMMARY:חמישי — לשכת התעסוקה בבוקר\, ואז קרן
@@ -649,7 +676,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:hanukkah-break-2612@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261206T090000
 DTEND:20261206T091500
 SUMMARY:חופש חנוכה 6–11.12 — שישה ימים\, לסדר מ
@@ -682,7 +709,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:k03@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261126T090000
 DTEND:20261126T091500
 SUMMARY:שרשרת המטבח — פורמג׳ו ✅ · עכשיו השי
@@ -720,7 +747,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:k04@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261122T080000
 DTEND:20261122T081500
 SUMMARY:אנשי השיש חוזרים — ראשון 22.11\, 08:00–12:
@@ -758,7 +785,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:n09@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261005T090000
 DTEND:20261005T091500
 SUMMARY:מראות לשלושת חדרי הרחצה — לסגור צור
@@ -796,7 +823,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:o01@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261013T090000
 DTEND:20261013T091500
 SUMMARY:להזמין אונליין — מיקרוגל\, טוחן\, פח 
@@ -826,7 +853,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:o02@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261015T090000
 DTEND:20261015T091500
 SUMMARY:שטיחים — למדוד ואז להזמין [שנינו]
@@ -847,7 +874,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:o03@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261020T090000
 DTEND:20261020T091500
 SUMMARY:פינת ישיבה לפינת משפחה — לשבת לפני 
@@ -872,7 +899,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:o04@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261020T090000
 DTEND:20261020T091500
 SUMMARY:אבטחה חכמה — מנעולים\, מצלמות וזיהו
@@ -900,7 +927,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:o05@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261025T090000
 DTEND:20261025T091500
 SUMMARY:עמדת טעינה לרכב חשמלי [שנינו]
@@ -922,7 +949,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:o06@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261015T090000
 DTEND:20261015T091500
 SUMMARY:בקר בית חכם — Nest Hub Max ירד מהמדף [שנינ
@@ -950,7 +977,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:o07@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261025T090000
 DTEND:20261025T091500
 SUMMARY:פילטר מים לבית [שנינו]
@@ -972,7 +999,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:p01@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261020T090000
 DTEND:20261020T091500
 SUMMARY:פורמג׳ו — לקבל הצעה כתובה לחזיתות ח
@@ -999,7 +1026,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:p04@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261008T090000
 DTEND:20261008T091500
 SUMMARY:לוודא מול אבישב את המזגן במטבח — לפ
@@ -1028,7 +1055,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:p05@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261022T090000
 DTEND:20261022T091500
 SUMMARY:עומרי — לסגור גם את תליית הטלוויזיו
@@ -1066,7 +1093,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:r40@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261006T090000
 DTEND:20261006T091500
 SUMMARY:אבישב — שלטים למזגנים הגדולים (מטבח
@@ -1104,7 +1131,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:r42@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261026T161900
 DTEND:20261026T163400
 SUMMARY:טרלידור — מדידת מעקה המרפסת\, ואז דג
@@ -1141,7 +1168,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:r43@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261103T090000
 DTEND:20261103T091500
 SUMMARY:טרלידור — הזמינו מודד\, אין תאריך. ל
@@ -1179,7 +1206,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:r44@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261031T090000
 DTEND:20261031T091500
 SUMMARY:להתקין את מפזר החום בחדר רחצה ילדים 
@@ -1211,7 +1238,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:t-boots-nofar@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261115T090000
 DTEND:20261115T091500
 SUMMARY:לשלוח לנופר בווטסאפ לינק למגפיים — 
@@ -1239,7 +1266,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:t-kamin-install@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261119T090000
 DTEND:20261119T091500
 SUMMARY:הקמין — לתאם התקנה אחרי קיר הלבנים (
@@ -1269,7 +1296,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:t-shaar-trellidor@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261117T090000
 DTEND:20261117T091500
 SUMMARY:השער מטרלידור — מגיע שלישי 17.11 · יתר
@@ -1306,7 +1333,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:t-thu-1911@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261119T090000
 DTEND:20261119T091500
 SUMMARY:חמישי 19.11 — ארבע עבודות באותו יום. מ
@@ -1343,7 +1370,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:t-tochen@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261126T090000
 DTEND:20261126T091500
 SUMMARY:התקנת טוחן אשפה — חמישי 26.11
@@ -1371,7 +1398,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:t179114456818583@avgil-board
-DTSTAMP:20261120T101014Z
+DTSTAMP:20261120T165149Z
 DTSTART:20261012T090000
 DTEND:20261012T091500
 SUMMARY:להמציא אישורים לתשלום והעברת בעלות 
@@ -1396,6 +1423,138 @@ DESCRIPTION:להמציא אישורים לתשלום והעברת בעל
  ות של חשמל\, ארנונה\, מים\, דואר\, מזכירות 
  היישוב ומה שצריך כדי לבקש את הצ׳קים חזר
  ה
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:today-art@avgil-board
+DTSTAMP:20261120T165149Z
+DTSTART:20261120T213000
+DTEND:20261120T214500
+SUMMARY:יצירות הילדים — מיון לשלושה יעדים [
+ שנינו]
+DESCRIPTION:⏰ **היום ב-21:30**\, או מחר אם הערב נגמ
+ ר.\n\n**שלושה יעדים\, וההחלטה לכל פריט היא 
+ רק ביניהם:**\n\n| | |\n|---|---|\n| 📚 **נשאר בחדר ע
+ בודה** | חומרים שדורשים השגחה\, או יצירות 
+ לשימור |\n| 🧒 **למטה\, נגיש להם** | מה שהם אמ
+ ורים לקחת לבד בלי לבקש |\n| 🌳 **בחוץ** | מה 
+ שעושה בלגן — צבעים\, נצנצים\, דבק |\n\n💡 **
+ הכלל שחוסך את הוויכוח:** אם הילד צריך לבק
+ ש רשות כדי להגיע לזה — זה למעלה. אם לא — 
+ זה למטה. **אין מצב ביניים**\, כי ״למטה אבל 
+ תשאלו קודם״ מתגלגל חזרה לבלגן תוך שבוע.\
+ n\n📌 **יצירות גמורות זה סיפור נפרד מחומר
+ י יצירה.** אל תמיינו אותן באותה ערימה — ל
+ גמורות צריך להחליט מה נשמר ומה מצטלם וה
+ ולך\, וזו החלטה איטית. **היום רק החומרים.**
+ \n\nhttps://yaelavgil.github.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:יצירות הילדים — מיון לשלושה יעדי
+ ם [שנינו]
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:יצירות הילדים — מיון לשלושה יעדי
+ ם [שנינו]
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:today-dinner@avgil-board
+DTSTAMP:20261120T165149Z
+DTSTART:20261120T183000
+DTEND:20261120T184500
+SUMMARY:ארוחת ערב — פסטה בולונז ושניצלים [ש
+ נינו]
+DESCRIPTION:⏰ **היום ב-18:30.**\n\nשני מסלולים במקב
+ יל\, וזה מה שקובע את הסדר: **הבולונז צריך 
+ את הזמן\, השניצלים לא.**\n\n➜ **לשים את הרוט
+ ב על האש קודם**\, ורק אחר כך לטגן. בזמן שהו
+ א מתבשל יש חלון לפנות שניים-שלושה ארונו
+ ת במטבח — זו המשימה הבאה ממילא.\n\n📌 הפס
+ טה אחרונה. היא מוכנה ב-10 דקות ולא שווה לח
+ מם אותה מחדש.\n\nhttps://yaelavgil.github.io/avgil-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:ארוחת ערב — פסטה בולונז ושניצלים 
+ [שנינו]
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:ארוחת ערב — פסטה בולונז ושניצלים 
+ [שנינו]
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:today-kitchen@avgil-board
+DTSTAMP:20261120T165149Z
+DTSTART:20261120T200000
+DTEND:20261120T201500
+SUMMARY:המטבח — 3–4 ארונות אחרונים\, והשיש [ש
+ נינו]
+DESCRIPTION:⏰ **היום ב-20:00**\, אחרי הארוחה.\n\n**זה 
+ הקטע האחרון.** נשארו 3–4 ארונות\, להחזיר ה
+ כול למקום\, ולנקות את השיש.\n\n💡 **על השיש:
+ ** אם נשארו עליו שאריות בנייה — שליכט\, ד
+ בק\, כתמי רובה — **לא לקרצף.** שיש נשרט מחו
+ מר שוחק ומקרצף מתכת\, וזה בלתי הפיך. מה ש
+ לא יורד בעדינות הוא סעיף לקבלן\, לא עבוד
+ ה שלך.\n\n📌 הארונות שנשארו הם כנראה אלה ש
+ אין להם מקום מוגדר. **אם משהו לא מוצא מקו
+ ם — ערימת ״להחליט״ אחת**\, ולא לעצור את כ
+ ל העבודה בשבילו.\n\nhttps://yaelavgil.github.io/avgil-board
+ /
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:המטבח — 3–4 ארונות אחרונים\, והשיש
+  [שנינו]
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:המטבח — 3–4 ארונות אחרונים\, והשיש
+  [שנינו]
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:today-suppliers@avgil-board
+DTSTAMP:20261120T165149Z
+DTSTART:20261120T210000
+DTEND:20261120T211500
+SUMMARY:סיור ליקויים — לוודא שלא חסר כלום ב
+ רשימות [שנינו]
+DESCRIPTION:⏰ **היום ב-21:00.**\n\n🔴 **אל תעברו על 108
+  הסעיפים.** זה מה שכבר רשום: **ברק 43 · קרלו
+ ס 51 · יעקב פרקט 14**. לעבור עליהם אחד-אחד י
+ יקח את כל הערב ולא יוסיף כלום.\n\n✅ **המטר
+ ה היא ההפך: מה שעוד לא רשום.** לעבור בבית 
+ חדר-חדר ולחפש מה שהעין כבר התרגלה אליו.\n
+ \n**והכלי בשביל זה כבר קיים:** דף הליקויים 
+ → טאב **״חסרים״**.\nשם יושבות **20 תמונות בל
+ י פרטים** ו**37 סעיפים בלי תמונה** — זו העב
+ ודה האמיתית\, והיא בלחיצה אחת לכל שורה.\n\
+ n📌 **רק 7 מתוך 43 הסעיפים של ברק מצולמים.** 
+ תמונה שווה יותר מניסוח\, במיוחד מול קבלן
+ .\n\n**סדר מומלץ:** למעלה → מדרגות → למטה →
+  חוץ. אותו סדר שבו המסמך בנוי\, כך שאפשר ל
+ לכת עם הטלפון ולסמן.\n\nhttps://yaelavgil.github.io/avgi
+ l-board/
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:סיור ליקויים — לוודא שלא חסר כלום
+  ברשימות [שנינו]
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:סיור ליקויים — לוודא שלא חסר כלום
+  ברשימות [שנינו]
 END:VALARM
 END:VEVENT
 END:VCALENDAR
