@@ -1,0 +1,1067 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>משימות — לוח האבגילים</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="משימות">
+<meta name="theme-color" content="#6C7A44">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="description" content="לוח קנבן למשימות הבית והשיפוץ — אותן משימות של הלוח, במסך של תהליך.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Karantina:wght@400;700&family=Assistant:wght@400;600;700;800&display=swap">
+
+<style>
+/* הפלטה היא של index.html, מילה במילה — שני המסכים הם אותו לוח,
+   ולכן הם חייבים להרגיש כמו אותו מקום. */
+:root{
+  --bg:#F5F3EA; --card:#FFFDF6; --edge:#E4E0CC; --ink:#2F2E23; --muted:#8A8770;
+  --olive:#6C7A44; --olive-ink:#4E5A2E; --olive-soft:#EAEBD8;
+  --pom:#C0452F; --pom-soft:#F6E3DC; --amber:#B97F1E; --amber-soft:#F4E8CE;
+  --line:#DDD9C6; --chip:#EDEADB; --on:#2F2E23; --on-ink:#F5F3EA;
+  --done:#A7A489; --bar:#FFFDF6;
+  --shadow:0 1px 2px rgba(60,58,38,.06),0 6px 18px rgba(60,58,38,.07);
+  --school:#E3E8F0; --school-ink:#46648C;
+  --health:#DDEBE6; --health-ink:#2E6B58;
+  direction:rtl;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#1F2019; --card:#2A2B21; --edge:#3A3B2D; --ink:#EDEAD9; --muted:#9C9A81;
+    --olive:#A8BA6A; --olive-ink:#C3D38A; --olive-soft:#37402A;
+    --pom:#E07358; --pom-soft:#46281F; --amber:#E0A94F; --amber-soft:#413418;
+    --line:#3B3C2E; --chip:#34352A; --on:#EDEAD9; --on-ink:#1F2019;
+    --done:#6E6C55; --bar:#24251D;
+    --shadow:0 1px 2px rgba(0,0,0,.25),0 6px 18px rgba(0,0,0,.3);
+    --school:#2B3442; --school-ink:#9FB6D9;
+    --health:#243830; --health-ink:#8CC7B2;
+  }
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+html,body{margin:0; height:100%}
+body{
+  background:var(--bg); color:var(--ink);
+  font:400 15px/1.5 Assistant,system-ui,-apple-system,"Segoe UI",sans-serif;
+  display:flex; flex-direction:column; overflow:hidden;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
+}
+button,input,textarea,select{font:inherit; color:inherit}
+button{cursor:pointer; border:0; background:none}
+a{color:var(--olive-ink)}
+
+/* ===== סרגל עליון ===== */
+.top{flex:0 0 auto; background:var(--bar); border-bottom:1px solid var(--line); z-index:30}
+.top .r1{display:flex; align-items:center; gap:8px; padding:8px 12px 6px}
+.brand{font:700 26px/1 Karantina,Assistant,sans-serif; letter-spacing:.5px; white-space:nowrap}
+.brand small{display:block; font:600 10.5px/1.3 Assistant,sans-serif; color:var(--muted); letter-spacing:0}
+.sync{font-size:11px; font-weight:700; color:var(--muted); display:flex; align-items:center; gap:4px; white-space:nowrap}
+.sync i{width:7px; height:7px; border-radius:50%; background:var(--done); display:block}
+.sync.ok i{background:var(--olive)} .sync.err i{background:var(--pom)}
+.grow{flex:1 1 auto}
+.icb{width:34px; height:34px; border-radius:11px; border:1px solid var(--line);
+  background:var(--card); display:grid; place-items:center; font-size:16px; flex:0 0 auto}
+.icb.on{background:var(--olive); border-color:var(--olive); color:#fff}
+.add{height:34px; padding:0 13px; border-radius:11px; background:var(--olive); color:#fff;
+  font-weight:800; font-size:14px; display:flex; align-items:center; gap:5px; flex:0 0 auto}
+
+.search{display:flex; align-items:center; gap:6px; margin:0 12px 8px; background:var(--card);
+  border:1px solid var(--line); border-radius:12px; padding:0 10px; height:34px}
+.search input{flex:1; border:0; background:none; outline:none; font-size:14.5px; min-width:0}
+.search b{color:var(--muted); font-size:14px}
+
+/* שורת הפילטרים נפתחת רק כשצריך — המסך הראשי הוא הכרטיסים */
+/* הסינון לא בולע את הלוח: בטלפון הוא מוגבל לשליש מסך וגולל בעצמו */
+.filters{display:none; padding:0 12px 8px; gap:6px; flex-wrap:wrap;
+  max-height:34vh; overflow-y:auto; align-content:flex-start}
+.filters.on{display:flex}
+.fchip{border:1px solid var(--line); background:var(--card); border-radius:999px;
+  padding:4px 11px; font-size:12.5px; font-weight:700; color:var(--muted)}
+.fchip.on{background:var(--olive-soft); border-color:var(--olive); color:var(--olive-ink)}
+.fsep{width:100%; height:0}
+
+/* פסי העמודות — בנייד זה הניווט הראשי, במחשב זה סימון מיקום */
+.tabs{display:flex; gap:6px; overflow-x:auto; padding:0 12px 9px; scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto; display:flex; align-items:center; gap:6px; border-radius:999px;
+  border:1px solid var(--line); background:var(--card); padding:5px 11px;
+  font-size:12.5px; font-weight:800; color:var(--muted)}
+.tab i{width:8px; height:8px; border-radius:50%; display:block; background:var(--done)}
+.tab b{font-variant-numeric:tabular-nums; font-size:11.5px; opacity:.75}
+.tab.on{background:var(--ink); color:var(--bg); border-color:var(--ink)}
+.tab.on b{opacity:.85}
+
+/* ===== הלוח ===== */
+.board{flex:1 1 auto; display:flex; gap:12px; overflow-x:auto; overflow-y:hidden;
+  padding:12px; align-items:stretch; scroll-snap-type:x mandatory; scrollbar-width:thin}
+.col{flex:0 0 min(88vw,330px); display:flex; flex-direction:column; min-height:0;
+  scroll-snap-align:center; background:var(--chip); border-radius:16px;
+  border:1px solid var(--line)}
+.col.over{background:var(--olive-soft); border-color:var(--olive); border-style:dashed}
+.col>.h{flex:0 0 auto; display:flex; align-items:center; gap:7px; padding:10px 12px 8px}
+.col>.h i{width:9px; height:9px; border-radius:50%; display:block}
+.col>.h span{font-weight:800; font-size:14px}
+.col>.h b{margin-inline-start:auto; font-size:12px; color:var(--muted);
+  font-variant-numeric:tabular-nums; background:var(--card); border-radius:999px;
+  padding:1px 8px; border:1px solid var(--line)}
+.col>.h em{font-style:normal; font-size:11px; color:var(--muted); font-weight:700}
+.stack{flex:1 1 auto; min-height:0; overflow-y:auto; overflow-x:hidden; padding:0 8px 10px;
+  display:flex; flex-direction:column; gap:8px; -webkit-overflow-scrolling:touch}
+/* בלי זה כל הכרטיסים נדחסים לגובה אחיד של פס: פריט בתוך flex-column
+   מתכווץ כברירת מחדל כדי להיכנס, וששים כרטיסים בעמודה אחת הופכים
+   לששים שורות ריקות. */
+.stack>*{flex:0 0 auto}
+.empty{color:var(--muted); font-size:12.5px; font-weight:600; text-align:center;
+  padding:18px 10px; line-height:1.6; border:1px dashed var(--line); border-radius:12px;
+  margin-top:2px}
+.more{align-self:center; margin-top:4px; font-size:12.5px; font-weight:800;
+  color:var(--olive-ink); padding:6px 12px; border-radius:999px; background:var(--card);
+  border:1px solid var(--line)}
+
+/* ===== כרטיס ===== */
+.card{background:var(--card); border:1px solid var(--edge); border-radius:13px;
+  box-shadow:var(--shadow); padding:9px 11px 8px; position:relative;
+  border-inline-start:4px solid var(--line); overflow:hidden}
+.card.urgent{border-inline-start-color:var(--pom)}
+.card.important{border-inline-start-color:var(--amber)}
+.card.isdone{opacity:.62}
+.card.isdone .ttl{text-decoration:line-through; text-decoration-color:var(--done)}
+.card.drag{opacity:.4}
+.card .row1{display:flex; align-items:center; gap:5px; margin-bottom:3px; flex-wrap:wrap}
+.card .ttl{font-weight:700; font-size:14.5px; line-height:1.38; cursor:pointer;
+  display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden}
+.card .sub{font-size:12.5px; color:var(--muted); line-height:1.45; margin-top:3px;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
+.card .foot{display:flex; align-items:center; gap:6px; margin-top:7px; flex-wrap:wrap}
+
+.pill{border-radius:999px; padding:1.5px 8px; font-size:11px; font-weight:800;
+  background:var(--chip); color:var(--muted); white-space:nowrap; line-height:1.55}
+.pill.pri-urgent{background:var(--pom-soft); color:var(--pom)}
+.pill.pri-important{background:var(--amber-soft); color:var(--amber)}
+.pill.cat{background:var(--olive-soft); color:var(--olive-ink)}
+.pill.cat.school{background:var(--school); color:var(--school-ink)}
+.pill.cat.health{background:var(--health); color:var(--health-ink)}
+.pill.late{background:var(--pom-soft); color:var(--pom)}
+.pill.soon{background:var(--amber-soft); color:var(--amber)}
+.pill.who{background:var(--chip); color:var(--ink)}
+.pill.cnt{font-variant-numeric:tabular-nums}
+
+/* כפתור ההעברה הוא הדרך הראשית בנייד: נגיעה אחת פותחת שש אפשרויות */
+.move{display:flex; align-items:center; gap:4px; border:1px solid var(--line);
+  background:var(--bg); border-radius:999px; padding:2.5px 9px; font-size:11.5px;
+  font-weight:800; color:var(--ink); margin-inline-start:auto}
+.move i{width:7px; height:7px; border-radius:50%; display:block}
+.move s{text-decoration:none; color:var(--muted); font-size:9px}
+
+.thumbs{display:flex; gap:4px; margin-top:7px}
+.thumbs img{width:40px; height:40px; object-fit:cover; border-radius:8px;
+  border:1px solid var(--line); background:var(--chip)}
+.thumbs .nmore{width:40px; height:40px; border-radius:8px; border:1px dashed var(--line);
+  display:grid; place-items:center; font-size:11px; font-weight:800; color:var(--muted)}
+
+/* ===== גיליון תחתון (פרטים / בחירת עמודה) ===== */
+.scrim{position:fixed; inset:0; background:rgba(47,46,35,.44); z-index:60;
+  opacity:0; pointer-events:none; transition:opacity .18s}
+.scrim.on{opacity:1; pointer-events:auto}
+.sheet{position:fixed; z-index:61; background:var(--bg); border:1px solid var(--line);
+  display:flex; flex-direction:column; transform:translateY(100%); transition:transform .2s ease;
+  inset-inline:0; bottom:0; max-height:92svh; border-radius:20px 20px 0 0;
+  padding-bottom:env(safe-area-inset-bottom)}
+.sheet.on{transform:none}
+.sheet>.sh{flex:0 0 auto; display:flex; align-items:center; gap:8px; padding:12px 14px 10px;
+  border-bottom:1px solid var(--line)}
+.sheet>.sh h2{margin:0; font-size:16px; font-weight:800; flex:1 1 auto}
+.sheet>.sb{flex:1 1 auto; overflow-y:auto; padding:14px; -webkit-overflow-scrolling:touch}
+.grab{width:38px; height:4px; border-radius:99px; background:var(--line);
+  margin:7px auto 0; flex:0 0 auto}
+@media (min-width:760px){
+  .sheet{inset:auto; top:50%; left:50%; right:auto; transform:translate(-50%,-44%) scale(.97);
+    width:min(620px,94vw); max-height:88vh; border-radius:18px; opacity:0;
+    transition:opacity .18s, transform .18s}
+  .sheet.on{transform:translate(-50%,-50%); opacity:1}
+  .grab{display:none}
+}
+
+.fld{margin-bottom:14px}
+.fld>label{display:block; font-size:12px; font-weight:800; color:var(--muted); margin-bottom:5px}
+.fld input[type=text],.fld input[type=date],.fld textarea{
+  width:100%; border:1px solid var(--line); background:var(--card); border-radius:11px;
+  padding:9px 11px; font-size:15px; outline:none}
+.fld textarea{min-height:110px; resize:vertical; line-height:1.55}
+.fld input:focus,.fld textarea:focus{border-color:var(--olive)}
+.hint{font-size:11.5px; color:var(--muted); margin-top:5px; line-height:1.5}
+.opts{display:flex; gap:6px; flex-wrap:wrap}
+.opt{border:1px solid var(--line); background:var(--card); border-radius:999px;
+  padding:6px 13px; font-size:13px; font-weight:700; color:var(--muted);
+  display:flex; align-items:center; gap:6px}
+.opt i{width:8px; height:8px; border-radius:50%; display:block}
+.opt.on{background:var(--ink); color:var(--bg); border-color:var(--ink)}
+.opt.on.urgent{background:var(--pom); border-color:var(--pom); color:#fff}
+.opt.on.important{background:var(--amber); border-color:var(--amber); color:#fff}
+
+.its{display:flex; flex-direction:column; gap:1px}
+.it{display:flex; gap:9px; align-items:flex-start; padding:8px 2px; border-bottom:1px solid var(--line)}
+.it:last-child{border-bottom:0}
+.it .bx{flex:0 0 auto; width:21px; height:21px; border-radius:6px; border:1.5px solid var(--line);
+  background:var(--card); display:grid; place-items:center; font-size:12px; color:transparent; margin-top:1px}
+.it.done .bx{background:var(--olive); border-color:var(--olive); color:#fff}
+.it .tx{flex:1 1 auto; font-size:13.5px; line-height:1.5; min-width:0; word-break:break-word}
+.it.done .tx{color:var(--muted); text-decoration:line-through}
+.it .tx b{font-weight:800}
+.it .ans{display:block; font-size:12px; color:var(--olive-ink); margin-top:2px; font-weight:700}
+.it .lv1{color:var(--pom); font-weight:800; font-size:11px}
+.it .del{flex:0 0 auto; color:var(--muted); font-size:14px; padding:0 2px}
+.addrow{display:flex; gap:6px; margin-top:8px}
+.addrow input{flex:1; border:1px solid var(--line); background:var(--card);
+  border-radius:11px; padding:8px 11px; outline:none; font-size:14px; min-width:0}
+.addrow button{flex:0 0 auto; background:var(--olive-soft); color:var(--olive-ink);
+  border-radius:11px; padding:0 14px; font-weight:800; border:1px solid var(--olive)}
+
+.gal{display:flex; gap:7px; flex-wrap:wrap}
+.gal img{width:72px; height:72px; object-fit:cover; border-radius:10px;
+  border:1px solid var(--line); background:var(--chip)}
+.gal .ph{width:72px; height:72px; border-radius:10px; border:1px dashed var(--line);
+  display:grid; place-items:center; font-size:11px; color:var(--muted); font-weight:700;
+  text-align:center; padding:4px}
+.lnks{display:flex; flex-direction:column; gap:5px}
+.lnk{display:flex; align-items:center; gap:6px; background:var(--card); border:1px solid var(--line);
+  border-radius:10px; padding:7px 10px; font-size:13px; font-weight:700; text-decoration:none;
+  color:var(--ink); word-break:break-all}
+
+.save{position:sticky; bottom:0; background:var(--bg); padding:10px 0 2px;
+  display:flex; gap:8px; border-top:1px solid var(--line); margin-top:4px;
+  box-shadow:0 -10px 14px -8px rgba(60,58,38,.18)}
+.save button{flex:1 1 auto; height:44px; border-radius:13px; font-weight:800; font-size:15px}
+.save .pri{background:var(--olive); color:#fff}
+.save .sec{background:var(--card); border:1px solid var(--line); flex:0 0 auto; width:52px; font-size:18px}
+
+.toast{position:fixed; inset-inline:0; bottom:calc(16px + env(safe-area-inset-bottom));
+  margin:auto; width:max-content; max-width:88vw; background:var(--ink); color:var(--bg);
+  padding:9px 16px; border-radius:999px; font-size:13.5px; font-weight:700; z-index:90;
+  opacity:0; transform:translateY(10px); transition:.2s; pointer-events:none; text-align:center}
+.toast.on{opacity:1; transform:none}
+.lb{position:fixed; inset:0; background:rgba(20,20,16,.93); z-index:95; display:none;
+  place-items:center; padding:16px}
+.lb.on{display:grid}
+.lb img{max-width:100%; max-height:92vh; border-radius:10px}
+
+@media (min-width:760px){
+  .board{scroll-snap-type:none; padding:14px}
+  .col{flex:0 0 302px}
+  .card[draggable=true]{cursor:grab}
+}
+</style>
+
+<body>
+<div class="top">
+  <div class="r1">
+    <div class="brand">משימות<small>הבית באשל 57</small></div>
+    <div class="grow"></div>
+    <div class="sync" id="sync"><i></i><span>מתחבר…</span></div>
+    <a class="icb" href="./" title="ללוח הראשי" style="text-decoration:none">⌂</a>
+    <button class="icb" id="bFilter" title="סינון">⚙</button>
+    <button class="add" id="bAdd">＋ משימה</button>
+  </div>
+  <div class="search"><b>🔍</b><input id="q" type="search" placeholder="חיפוש בכותרת, בהערות ובסעיפים…" autocomplete="off"></div>
+  <div class="filters" id="filters"></div>
+  <div class="tabs" id="tabs"></div>
+</div>
+
+<div class="board" id="board"></div>
+
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet"><div class="grab"></div><div class="sh"><h2 id="shTitle"></h2><button class="icb" id="shClose">✕</button></div><div class="sb" id="shBody"></div></div>
+<div class="toast" id="toast"></div>
+<div class="lb" id="lb"><img id="lbimg" alt=""></div>
+
+<script>
+document.documentElement.lang='he'; document.documentElement.dir='rtl';
+
+/* =====================================================================
+   אותו מסד, מסך אחר.
+
+   הדף הזה קורא וכותב בדיוק את אותן רשומות של `index.html` ושל
+   `likuyim.html` — `board/tasks/<id>` — ולכן הוא מוסיף שדות ולא
+   מחליף שדות. שלושה צרכנים אחרים קוראים את אותן רשומות:
+     index.html      — הלוח היומי
+     likuyim.html    — דף הליקויים מול ברק
+     tools/build_ics.py — פידי היומן של יעל ורועי
+   לכן `done`, `due`, `owner`, `items`, `notes` ו-`title` מתנהגים כאן
+   בדיוק כמו שם. בפרט: הפיד מוציא אירוע רק למשימה עם `due` שאינה
+   `done` ואינה `ongoing`, ולוקח את השעה מהמחרוזת HH:MM הראשונה
+   ב-`notes` — ולכן עורך ההערות כאן הוא טקסט חופשי ותו לא.
+
+   שלושת השדות החדשים — `st` (עמודה), `pri` (עדיפות), `reporter` (מי
+   העלה, בנפרד מ-`owner` שהוא מי מבצע) — חדשים לגמרי, ואף אחד אחר לא
+   קורא אותם. `index.html` שומר משימה ב-PUT של האובייקט כולו, אבל הוא
+   מחזיק את האובייקט כפי שהגיע מהמסד, ולכן השדות האלה שורדים עריכה
+   שם. למקרה שבכל זאת ייעלמו — ולמשימה חדשה שנוצרה בלוח הישן —
+   `stOf()` ו-`priOf()` יודעים לגזור אותם מ-`list`/`done` כמו שהמיגרציה
+   עשתה, כך שאין מצב של כרטיס בלי עמודה.
+
+   כתיבה כאן היא תמיד PATCH על `board/tasks/<id>.json` עם השדות
+   שהשתנו בלבד — לא PUT. שתי סיבות: היא לא דורסת שדה שמישהו אחר
+   שינה באותו רגע מהטלפון השני, והיא לא יכולה למחוק שדה שהדף הזה
+   לא מכיר.
+   ===================================================================== */
+
+const DB='https://home-picks-47450-default-rtdb.europe-west1.firebasedatabase.app';
+const NODE=DB+'/board/tasks';
+const FMETA=DB+'/board/filemeta', FDATA=DB+'/board/files', FTHUMB=DB+'/board/thumbs';
+const CACHE='av_tasks_cache';
+const MAXB=700*1024;
+
+/* הסדר הוא סדר הזרימה — מאגר בימין, בוצע בשמאל. הגלילה הראשונה
+   נוחתת על ״מוכן לביצוע״ ולא על המאגר: זה המסך שבו יעל עובדת. */
+const COLS=[
+  {k:'backlog',   n:'מאגר',              c:'#A7A489', hint:'נאסף, עוד לא נכנס לתור'},
+  {k:'ready',     n:'מוכן לביצוע',       c:'#6C7A44', hint:'אפשר להתחיל, שום דבר לא חוסם'},
+  {k:'doing',     n:'בתהליך',            c:'#2E6B58', hint:'בעבודה ממש עכשיו'},
+  {k:'waiting-me',n:'ממתין לתשובה שלי',  c:'#C0452F', hint:'תקוע עד שאחליט או אאשר'},
+  {k:'blocked',   n:'ממתין / חסום',      c:'#B97F1E', hint:'מחכה לספק, לחומר או לתאריך'},
+  {k:'done',      n:'בוצע',              c:'#8A8770', hint:'נסגר'}
+];
+const LANDING='ready';
+const COL=k=>COLS.find(c=>c.k===k)||COLS[0];
+const PRIS=[{k:'urgent',n:'דחוף'},{k:'important',n:'חשוב'},{k:'normal',n:'רגיל'}];
+const CATS={reno:'🏠 שיפוץ', home:'🧺 בית', school:'🎒 בי״ס', trip:'✈️ נסיעות',
+            health:'🩺 בריאות', idea:'💡 רעיונות', gift:'🎁 מתנות'};
+const OWNERS=['יעל','רועי','שנינו'];
+
+/* הרשימה הזאת מועתקת מ-index.html בכוונה ולא משותפת איתו: שני עמודים
+   נפרדים בלי צעד בנייה, וקובץ משותף היה עוד בקשת רשת על רשת סלולרית. */
+const SUPPLIERS=[
+  {k:'carlos',n:'קרלוס',ic:'⚡',roots:['t-carlos'],alias:['קרלוס']},
+  {k:'barak',n:'ברק',ic:'🧱',roots:['ong-barak','f01'],alias:['ברק']},
+  {k:'nofar',n:'נופר',ic:'🎨',roots:['ong-nofar','f09'],alias:['נופר']},
+  {k:'golan',n:'גולן',ic:'🪚',roots:['g11','g12'],alias:['גולן']},
+  {k:'rafael',n:'רפאל',ic:'🪑',roots:['w01'],alias:['רפאל']},
+  {k:'izat',n:'עיזאת',ic:'🌳',roots:['t-izat','f07'],alias:['עיזאת']},
+  {k:'gal',n:'גל בטון',ic:'🧩',roots:['t-gal'],alias:['גל','א.א קרמיקה']},
+  {k:'formagio',n:'פורמג׳ו',ic:'🍳',roots:['t-kitchen','k03','p01','p02'],alias:['פורמג׳ו',"פורמג'ו"]},
+  {k:'mahmoud',n:'מחמוד',ic:'🪟',roots:['t-mahmoud'],alias:['מחמוד']},
+  {k:'yaakov',n:'יעקב פרקט',ic:'🪵',roots:['t-parq'],alias:['יעקב פרקט']},
+  {k:'plumb',n:'אינסטלטור',ic:'🚰',roots:['t-plumb'],alias:['אינסטלטור']},
+  {k:'tile',n:'ריצוף',ic:'🧱',roots:['t-tile'],alias:[]},
+  {k:'trelidor',n:'טרלידור',ic:'🛡',roots:['r42'],alias:['טרלידור']},
+  {k:'avishav',n:'אבישב',ic:'❄️',roots:[],alias:['אבישב']}
+];
+const supBy=k=>SUPPLIERS.find(s=>s.k===k);
+/* ‎\b‎ ב-JS מכיר רק אותיות לטיניות, ולכן ״גלילה״ נתפס כ״גל״.
+   הגבול כאן הוא ״לא אות עברית״. */
+function aliasHit(title,alias){
+  const HE='֐-ת';
+  return alias.some(a=>new RegExp('(^|[^'+HE+'])'+a.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'($|[^'+HE+'])')
+    .test(' '+String(title||'')+' '));
+}
+function supplierOf(t,seen){
+  if(!t)return null;
+  if(t.supplier&&supBy(t.supplier))return t.supplier;
+  const byRoot=SUPPLIERS.find(s=>s.roots.includes(t.id));
+  if(byRoot)return byRoot.k;
+  const byName=SUPPLIERS.find(s=>s.alias.length&&aliasHit(t.title,s.alias));
+  if(byName)return byName.k;
+  if(t.parent){
+    const g=seen||new Set();
+    if(!g.has(t.id)){ g.add(t.id); const up=supplierOf(byId(t.parent),g); if(up)return up; }
+  }
+  return null;
+}
+
+/* ===== מצב ===== */
+let tasks=[];
+let live=false;
+const meta={};                       /* filemeta לפי מפתח, נטען פעם אחת */
+const pending=new Set();             /* כתיבות באוויר — עדכון נכנס לא יחזיר אותן אחורה */
+let me=null; try{ me=localStorage.getItem('av_owner')||null; }catch(e){}
+const ui={q:'', cats:new Set(), owner:null, sup:null, filters:false,
+          open:null, col:LANDING, more:{}, landed:false};
+
+const $=s=>document.querySelector(s);
+const el=h=>{const d=document.createElement('div'); d.innerHTML=h.trim(); return d.firstElementChild;};
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const byId=id=>tasks.find(t=>t.id===id);
+let tt; function toast(m,ms){const t=$('#toast'); t.textContent=m; t.classList.add('on');
+  clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('on'),ms||2300);}
+function setSync(txt,cls){ const s=$('#sync'); s.className='sync '+(cls||''); s.lastChild.textContent=txt; }
+
+/* ===== גזירה: עמודה ועדיפות ל-201 המשימות שקדמו לדף הזה =====
+   זה אותו מיפוי בדיוק שהמיגרציה כתבה למסד פעם אחת. הוא נשאר כאן
+   חי כרשת ביטחון: משימה שנוצרה בלוח הישן מגיעה בלי `st`, וכרטיס בלי
+   עמודה הוא כרטיס שנעלם. */
+function stOf(t){
+  if(t.done)return 'done';                      /* done הוא המקור, לא st */
+  if(COLS.some(c=>c.k===t.st)&&t.st!=='done')return t.st;
+  if(t.ongoing)return 'doing';                  /* ong-barak, ong-nofar, t-carlos */
+  if(t.list==='hot'||t.list==='now')return 'ready';
+  return 'backlog';                             /* week / later / soon / someday / ריק */
+}
+function priOf(t){
+  if(PRIS.some(p=>p.k===t.pri))return t.pri;
+  if(t.list==='hot'||t.lv===1)return 'urgent';
+  if(t.list==='now')return 'important';
+  return 'normal';
+}
+const reporterOf=t=>t.reporter||'';
+
+/* ===== תאריכים ===== */
+const TODAY=(()=>{const d=new Date(); d.setHours(0,0,0,0); return d;})();
+function daysUntil(iso){
+  if(!iso)return null;
+  const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(iso); if(!m)return null;
+  const d=new Date(+m[1],+m[2]-1,+m[3]); d.setHours(0,0,0,0);
+  return Math.round((d-TODAY)/86400000);
+}
+/* עברית סופרת אחרת: יום, יומיים, ואז ימים. ״באיחור 2 ימים״ נקרא כמו תרגום מכונה. */
+function days(n){ return n===1?'יום':n===2?'יומיים':n+' ימים'; }
+function dateChip(t){
+  if(!t.due)return null;
+  const du=daysUntil(t.due);
+  const [y,m,d]=t.due.split('-');
+  const pretty=(+d)+'.'+(+m);
+  if(du===null)return {cls:'',txt:'📅 '+pretty};
+  if(du<0)  return {cls:'late',txt:'באיחור '+days(-du)+' · '+pretty};
+  if(du===0)return {cls:'late',txt:'היום · '+pretty};
+  if(du===1)return {cls:'soon',txt:'מחר · '+pretty};
+  if(du<=7) return {cls:'soon',txt:'בעוד '+days(du)+' · '+pretty};
+  return {cls:'',txt:'📅 '+pretty};
+}
+
+/* ===== רשת =====
+   הרשת כאן נופלת מדי פעם — בחצר, מהטלפון. כל כתיבה מנסה שוב ולא
+   נעלמת בשקט. */
+async function req(url,method,body){
+  for(let a=0;a<3;a++){
+    try{
+      const r=await fetch(url,{method,headers:{'Content-Type':'application/json'},
+        body:body===undefined?undefined:JSON.stringify(body)});
+      if(r.ok)return r;
+    }catch(e){}
+    if(a<2)await new Promise(r=>setTimeout(r,700*(a+1)));
+  }
+  return null;
+}
+async function getJSON(url){
+  const sep=url.indexOf('?')>=0?'&':'?';
+  try{ const r=await fetch(url+sep+'t='+Date.now(),{cache:'no-store'}); return r.ok?await r.json():null; }
+  catch(e){ return null; }
+}
+
+/* השמירה היחידה: PATCH של השדות שהשתנו. */
+async function patch(id,fields){
+  const t=byId(id); if(!t)return false;
+  Object.assign(t,fields);                      /* מקומי קודם — המסך לא מחכה לרשת */
+  t.updatedAt=fields.updatedAt=Date.now();
+  pending.add(id);
+  cache(); render();
+  const r=await req(NODE+'/'+encodeURIComponent(id)+'.json','PATCH',fields);
+  setTimeout(()=>pending.delete(id),1500);
+  if(!r){ setSync('לא נשמר','err'); toast('השמירה לא הגיעה לשרת — נסי שוב'); return false; }
+  setSync('מסונכרן','ok');
+  return true;
+}
+function cache(){ try{ localStorage.setItem(CACHE,JSON.stringify(tasks)); }catch(e){} }
+
+/* ===== העברה בין עמודות =====
+   `st` ו-`done` חייבים להסכים: הלוח הישן והיומן קוראים את `done`
+   ולא יודעים ש-`st` קיים. לכן כל מעבר לעמודת ״בוצע״ או ממנה כותב
+   את שניהם באותו PATCH.
+   `pri:urgent` מראה גם את `list:'hot'`, כי ״דחוף״ בדף הזה ו״דחוף
+   והיום״ בלוח הישן הם אותו דבר בעיני יעל — ושני מסכים שסותרים זה
+   את זה על אותה משימה הם בדיוק מה שהיא לא רוצה. ההשפעה מצומצמת:
+   `bucketOf` בלוח הישן מכריע לפי תאריך היעד קודם, ו-`list` נקרא שם
+   רק למשימה בלי תאריך. היציאה מ״דחוף״ מחזירה ל-`week` ולא ל-`now`,
+   כי `now` ממופה שם חזרה לדלי ״דחוף והיום״ — והמשימה הייתה נתקעת
+   בדחוף אחרי שהורדנו לה את הדחיפות. */
+async function moveTo(id,st){
+  const t=byId(id); if(!t||stOf(t)===st)return;
+  const f={st};
+  if(st==='done'){ f.done=true; f.doneAt=t.doneAt||Date.now(); }
+  else if(t.done){ f.done=false; f.doneAt=0; }
+  await patch(id,f);
+  toast('הועברה ל״'+COL(st).n+'״');
+}
+async function setPri(id,pri){
+  const t=byId(id); if(!t)return;
+  const f={pri};
+  if(pri==='urgent'&&t.list!=='hot')f.list='hot';
+  if(pri!=='urgent'&&t.list==='hot')f.list='week';
+  await patch(id,f);
+}
+
+/* ===== סינון ומיון ===== */
+function hay(t){
+  return [t.title,t.notes,...(t.items||[]).map(i=>i.t+' '+(i.ans||''))].join(' ').toLowerCase();
+}
+function visible(t){
+  if(ui.cats.size&&!ui.cats.has(t.cat))return false;
+  if(ui.owner&&t.owner!==ui.owner&&!(ui.owner!=='שנינו'&&t.owner==='שנינו'))return false;
+  if(ui.sup&&supplierOf(t)!==ui.sup)return false;
+  if(ui.q&&!hay(t).includes(ui.q))return false;
+  return true;
+}
+const PRIN={urgent:0,important:1,normal:2};
+/* בתוך עמודה: קודם מה שבוער, אחר כך מה שהכי מאחר, ורק בסוף הסדר
+   הידני של הלוח הישן. בעמודת ״בוצע״ ההפך — האחרון שנסגר למעלה. */
+function sortCol(a,b,k){
+  if(k==='done')return (b.doneAt||b.updatedAt||0)-(a.doneAt||a.updatedAt||0);
+  const p=PRIN[priOf(a)]-PRIN[priOf(b)]; if(p)return p;
+  const da=daysUntil(a.due), db=daysUntil(b.due);
+  if(da!==null&&db!==null&&da!==db)return da-db;
+  if(da!==null&&db===null)return -1;
+  if(da===null&&db!==null)return 1;
+  return (a.order||0)-(b.order||0);
+}
+function grouped(){
+  const g={}; COLS.forEach(c=>g[c.k]=[]);
+  tasks.forEach(t=>{ if(visible(t))g[stOf(t)].push(t); });
+  COLS.forEach(c=>g[c.k].sort((a,b)=>sortCol(a,b,c.k)));
+  return g;
+}
+
+/* ===== ציור ===== */
+const DONE_PAGE=25;      /* 98 כרטיסים סגורים הם קיר. נפתחים לפי דרישה. */
+const DRAGGABLE=matchMedia('(pointer:fine)').matches;
+
+function cardEl(t){
+  const st=stOf(t), pri=priOf(t), dc=dateChip(t);
+  const its=t.items||[], nd=its.filter(i=>i.done).length;
+  const sup=supBy(supplierOf(t));
+  const atts=attsOf(t.id);
+  const c=el('<div class="card"></div>');
+  c.className='card '+(t.done?'isdone ':'')+(pri!=='normal'?pri:'');
+  c.dataset.id=t.id;
+  if(DRAGGABLE)c.draggable=true;
+
+  const r1=el('<div class="row1"></div>');
+  if(pri!=='normal')r1.appendChild(el(`<span class="pill pri-${pri}">${pri==='urgent'?'דחוף':'חשוב'}</span>`));
+  if(CATS[t.cat])r1.appendChild(el(`<span class="pill cat ${esc(t.cat)}">${esc(CATS[t.cat])}</span>`));
+  if(sup)r1.appendChild(el(`<span class="pill">${sup.ic} ${esc(sup.n)}</span>`));
+  if(r1.children.length)c.appendChild(r1);
+
+  c.appendChild(el(`<div class="ttl">${esc(t.title||'ללא כותרת')}</div>`));
+  const sub=plain(t.notes);
+  if(sub)c.appendChild(el(`<div class="sub">${esc(sub)}</div>`));
+
+  if(atts.length){
+    const g=el('<div class="thumbs"></div>');
+    atts.slice(0,3).forEach(m=>{ const i=el('<img alt="">'); g.appendChild(i); fillThumb(i,m.fid); });
+    if(atts.length>3)g.appendChild(el(`<div class="nmore">+${atts.length-3}</div>`));
+    c.appendChild(g);
+  }
+
+  const f=el('<div class="foot"></div>');
+  if(dc)f.appendChild(el(`<span class="pill ${dc.cls}">${esc(dc.txt)}</span>`));
+  if(its.length)f.appendChild(el(`<span class="pill cnt">☑ ${nd}/${its.length}</span>`));
+  if(Array.isArray(t.links)&&t.links.length)f.appendChild(el(`<span class="pill cnt">🔗 ${t.links.length}</span>`));
+  if(t.owner)f.appendChild(el(`<span class="pill who">👤 ${esc(t.owner)}</span>`));
+  /* הכפתור אומר מה הוא עושה ולא איפה הכרטיס נמצא — שם העמודה כתוב
+     ממילא בראש העמודה שהכרטיס יושב בה, והחזרה עליו בכל כרטיס היא רעש. */
+  const mv=el('<button class="move">↔ העברה<s>▾</s></button>');
+  mv.onclick=e=>{ e.stopPropagation(); openMove(t.id); };
+  f.appendChild(mv);
+  c.appendChild(f);
+
+  c.onclick=()=>openDetail(t.id);
+  if(DRAGGABLE){
+    c.ondragstart=e=>{ e.dataTransfer.setData('text/plain',t.id); e.dataTransfer.effectAllowed='move';
+      dragId=t.id; setTimeout(()=>c.classList.add('drag'),0); };
+    c.ondragend=()=>{ c.classList.remove('drag'); dragId=null;
+      document.querySelectorAll('.col.over').forEach(x=>x.classList.remove('over')); };
+  }
+  return c;
+}
+let dragId=null;
+
+/* הכותרת של הכרטיס מציגה טקסט, לא Markdown — הסימונים של ההערות
+   (**, `, •) היו נקראים כרעש בשתי שורות קצרות. */
+function plain(s){
+  return String(s||'').replace(/\*\*/g,'').replace(/`/g,'').replace(/^[•·\s]+/gm,'')
+    .replace(/\s*\n+\s*/g,' · ').trim();
+}
+
+/* הכרטיסייה שמסומנת היא זו שבאמת מול העיניים, גם כשהגיעו אליה בגלילה */
+const io=new IntersectionObserver(es=>{
+  let best=null;
+  es.forEach(e=>{ if(e.isIntersecting&&(!best||e.intersectionRatio>best.intersectionRatio))best=e; });
+  if(best){ const k=best.target.dataset.col; if(k&&k!==ui.col){ ui.col=k; renderTabs(lastG||grouped()); } }
+},{root:document.getElementById('board'),threshold:[.55]});
+
+let lastG=null;
+function render(){
+  const g=lastG=grouped();
+  const board=$('#board');
+  const sx=board.scrollLeft;
+  /* רועי מסמן סעיף מהטלפון שלו, העדכון מגיע ב-SSE, והלוח נבנה מחדש.
+     בלי לשמור את הגלילה יעל הייתה נזרקת לראש העמודה באמצע קריאה של
+     הכרטיס החמישים. */
+  const sy={};
+  board.querySelectorAll('.col').forEach(c=>{ sy[c.dataset.col]=c.querySelector('.stack').scrollTop; });
+  board.textContent='';
+  COLS.forEach(c=>{
+    const col=el('<div class="col"></div>'); col.dataset.col=c.k;
+    const list=g[c.k];
+    const h=el(`<div class="h"><i style="background:${c.c}"></i><span>${esc(c.n)}</span><b>${list.length}</b></div>`);
+    col.appendChild(h);
+    const st=el('<div class="stack"></div>');
+    const lim=c.k==='done'?(ui.more[c.k]||DONE_PAGE):list.length;
+    if(!list.length)st.appendChild(el(`<div class="empty">${esc(c.hint)}</div>`));
+    list.slice(0,lim).forEach(t=>st.appendChild(cardEl(t)));
+    if(list.length>lim){
+      const b=el(`<button class="more">עוד ${list.length-lim} ↓</button>`);
+      b.onclick=()=>{ ui.more[c.k]=lim+DONE_PAGE*2; render(); };
+      st.appendChild(b);
+    }
+    col.appendChild(st);
+    if(sy[c.k])requestAnimationFrame(()=>{ st.scrollTop=sy[c.k]; });
+    if(DRAGGABLE){
+      col.ondragover=e=>{ e.preventDefault(); e.dataTransfer.dropEffect='move'; col.classList.add('over'); };
+      col.ondragleave=()=>col.classList.remove('over');
+      col.ondrop=e=>{ e.preventDefault(); col.classList.remove('over');
+        const id=e.dataTransfer.getData('text/plain')||dragId; if(id)moveTo(id,c.k); };
+    }
+    board.appendChild(col);
+  });
+  /* הציור בונה מחדש את כל הכרטיסים, ולכן גם המשקיף צריך להתחבר
+     מחדש — בלי הניתוק הוא היה אוסף עמודות מנותקות מכל ציור וציור. */
+  io.disconnect();
+  document.querySelectorAll('.col').forEach(c=>io.observe(c));
+  if(!ui.landed&&tasks.length){
+    ui.landed=true;
+    const t=board.querySelector(`.col[data-col="${LANDING}"]`);
+    if(t)t.scrollIntoView({block:'nearest',inline:'center'});
+  }else{
+    board.scrollLeft=sx;
+  }
+  renderTabs(g);
+  renderFilters();
+}
+function renderTabs(g){
+  const w=$('#tabs'); w.textContent='';
+  COLS.forEach(c=>{
+    const b=el(`<button class="tab${ui.col===c.k?' on':''}"><i style="background:${c.c}"></i>${esc(c.n)}<b>${g[c.k].length}</b></button>`);
+    b.onclick=()=>{ ui.col=c.k;
+      const target=$(`.col[data-col="${c.k}"]`);
+      if(target)target.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+      renderTabs(g); };
+    w.appendChild(b);
+  });
+}
+function renderFilters(){
+  const w=$('#filters'); w.classList.toggle('on',ui.filters);
+  if(!ui.filters){ w.textContent=''; return; }
+  w.textContent='';
+  const chip=(label,on,fn)=>{ const b=el(`<button class="fchip${on?' on':''}">${esc(label)}</button>`); b.onclick=fn; w.appendChild(b); };
+  Object.keys(CATS).forEach(k=>chip(CATS[k],ui.cats.has(k),()=>{
+    ui.cats.has(k)?ui.cats.delete(k):ui.cats.add(k); render(); }));
+  w.appendChild(el('<div class="fsep"></div>'));
+  OWNERS.forEach(o=>chip('👤 '+o,ui.owner===o,()=>{ ui.owner=ui.owner===o?null:o; render(); }));
+  w.appendChild(el('<div class="fsep"></div>'));
+  const used=[...new Set(tasks.map(t=>supplierOf(t)).filter(Boolean))];
+  SUPPLIERS.filter(s=>used.includes(s.k)).forEach(s=>chip(s.ic+' '+s.n,ui.sup===s.k,()=>{
+    ui.sup=ui.sup===s.k?null:s.k; render(); }));
+  if(ui.cats.size||ui.owner||ui.sup){
+    w.appendChild(el('<div class="fsep"></div>'));
+    chip('✕ נקי הכול',false,()=>{ ui.cats.clear(); ui.owner=null; ui.sup=null; render(); });
+  }
+}
+
+/* ===== תמונות =====
+   Storage לא מופעל בפרויקט (Spark), ולכן התמונה יושבת במסד עצמו:
+   מטא תחת filemeta (קל, נטען פעם אחת), הקובץ תחת files (כבד, רק
+   בלחיצה) וממוזערת תחת thumbs. `likuyim.html` שומר תמונה תחת
+   המפתח `<taskId>__<itemKey>` ו-`index.html` תחת `<taskId>` לבדו,
+   ולכן הכרטיס מאסף את שניהם. */
+function attsOf(id){
+  const out=[];
+  Object.keys(meta).forEach(k=>{
+    if(k===id||k.startsWith(id+'__'))out.push(...meta[k]);
+  });
+  return out;
+}
+async function loadMeta(){
+  const j=await getJSON(FMETA+'.json');
+  if(!j)return;
+  Object.keys(meta).forEach(k=>delete meta[k]);
+  Object.keys(j).forEach(k=>{ meta[k]=Object.keys(j[k]||{}).map(f=>Object.assign({fid:f},j[k][f])); });
+}
+const thumbCache={};
+async function fillThumb(img,fid){
+  if(thumbCache[fid]){ img.src=thumbCache[fid]; return; }
+  let j=await getJSON(FTHUMB+'/'+fid+'.json');
+  let d=j&&(j.data||j);
+  if(typeof d!=='string'){ j=await getJSON(FDATA+'/'+fid+'.json'); d=j&&(j.data||j); }
+  if(typeof d==='string'){ thumbCache[fid]=d; img.src=d; }
+}
+async function openFull(fid){
+  $('#lbimg').removeAttribute('src'); $('#lb').classList.add('on');
+  const j=await getJSON(FDATA+'/'+fid+'.json'); const d=j&&(j.data||j);
+  if(typeof d==='string')$('#lbimg').src=d; else { $('#lb').classList.remove('on'); toast('התמונה לא נטענה'); }
+}
+$('#lb').onclick=()=>$('#lb').classList.remove('on');
+
+/* תמונה מהנייד היא 4–12 מגה ולא נכנסת ל-Realtime DB בלי הקטנה.
+   פענוח אחד, שני גדלים: פענוח שני של התוצאה הוא מה שנפל בשטח
+   והשאיר ריבועים ריקים במקום ממוזערות. השחרור בסוף אינו ניקיון
+   יופי — ספארי מחזיק את התמונה המפוענחת עד שהאוסף רץ, ולולאה של
+   כמה תמונות חוצה את תקרת הזיכרון של הטאב. */
+function shrink(file){
+  return new Promise(res=>{
+    if(/pdf|svg/i.test(file.type)||/\.(pdf|svg)$/i.test(file.name||''))return res(null);
+    const img=new Image(), url=URL.createObjectURL(file);
+    const done=(cs,val)=>{ cs.forEach(c=>{ if(c)c.width=c.height=0; });
+      img.onload=img.onerror=null; img.removeAttribute('src'); URL.revokeObjectURL(url); res(val); };
+    img.onload=()=>{
+      const draw=max=>{
+        const sc=Math.min(1,max/Math.max(img.width,img.height));
+        const c=document.createElement('canvas');
+        c.width=Math.round(img.width*sc); c.height=Math.round(img.height*sc);
+        c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+        return c;
+      };
+      let cf=null,ct=null;
+      try{
+        cf=draw(1600); const full=cf.toDataURL('image/jpeg',0.72);
+        let thumb=null;
+        try{ ct=draw(240); thumb=ct.toDataURL('image/jpeg',0.6); }catch(e){}
+        done([cf,ct],{full,thumb});
+      }catch(e){ done([cf,ct],null); }
+    };
+    img.onerror=()=>done([],null);
+    img.src=url;
+  });
+}
+async function upload(taskId,files,after){
+  for(const f of files){
+    try{
+      const got=await shrink(f);
+      if(!got){ toast('רק תמונות — '+f.name); continue; }
+      if(got.full.length>MAXB){ toast(f.name+' גדולה מדי גם אחרי הקטנה'); continue; }
+      const fid='f'+Date.now()+Math.floor(Math.random()*999);
+      const a=await req(FDATA+'/'+fid+'.json','PUT',{data:got.full});
+      if(!a){ toast('ההעלאה נפלה — '+f.name); continue; }
+      if(got.thumb)await req(FTHUMB+'/'+fid+'.json','PUT',{data:got.thumb});
+      const m={fid,task:taskId,name:f.name,type:'image',size:got.full.length,
+               at:new Date().toISOString(),by:me||'יעל'};
+      await req(FMETA+'/'+encodeURIComponent(taskId)+'/'+fid+'.json','PUT',m);
+      (meta[taskId]=meta[taskId]||[]).push(m);
+      if(got.thumb)thumbCache[fid]=got.thumb;
+      toast('צורפה ✓');
+    }catch(e){ toast('הצירוף נכשל — '+f.name); }
+  }
+  if(after)after();
+}
+
+/* ===== גיליון ===== */
+function sheet(title,build){
+  $('#shTitle').textContent=title;
+  const b=$('#shBody'); b.textContent=''; build(b);
+  b.scrollTop=0;
+  $('#sheet').classList.add('on'); $('#scrim').classList.add('on');
+}
+function closeSheet(){ $('#sheet').classList.remove('on'); $('#scrim').classList.remove('on'); ui.open=null; }
+$('#scrim').onclick=closeSheet; $('#shClose').onclick=closeSheet;
+addEventListener('keydown',e=>{ if(e.key==='Escape'){ if($('#lb').classList.contains('on'))$('#lb').classList.remove('on'); else closeSheet(); } });
+
+/* בחירת עמודה — הדרך הראשית בנייד. נגיעה אחת פותחת, נגיעה אחת מעבירה. */
+function openMove(id){
+  const t=byId(id); if(!t)return;
+  const cur=stOf(t);
+  sheet(t.title||'משימה',b=>{
+    b.appendChild(el('<div class="fld"><label>להעביר לעמודה</label></div>'));
+    const w=b.lastChild;
+    const o=el('<div class="opts" style="flex-direction:column;align-items:stretch"></div>');
+    COLS.forEach(c=>{
+      const btn=el(`<button class="opt${c.k===cur?' on':''}" style="justify-content:flex-start">`+
+        `<i style="background:${c.c}"></i><span style="flex:1;text-align:start">${esc(c.n)}</span>`+
+        `<s style="text-decoration:none;font-size:11px;opacity:.7">${esc(c.hint)}</s></button>`);
+      btn.onclick=()=>{ closeSheet(); if(c.k!==cur)moveTo(id,c.k); };
+      o.appendChild(btn);
+    });
+    w.appendChild(o);
+  });
+}
+
+function openDetail(id){
+  const t=byId(id); if(!t)return;
+  ui.open=id;
+  sheet('פרטי משימה',b=>{
+    const st=stOf(t), pri=priOf(t);
+
+    /* עמודה */
+    const fSt=el('<div class="fld"><label>עמודה</label><div class="opts"></div></div>');
+    COLS.forEach(c=>{
+      const o=el(`<button class="opt${c.k===st?' on':''}"><i style="background:${c.c}"></i>${esc(c.n)}</button>`);
+      o.onclick=()=>{ moveTo(id,c.k).then(()=>openDetail(id)); };
+      fSt.lastChild.appendChild(o);
+    });
+    b.appendChild(fSt);
+
+    /* עדיפות */
+    const fPr=el('<div class="fld"><label>עדיפות</label><div class="opts"></div></div>');
+    PRIS.forEach(p=>{
+      const o=el(`<button class="opt ${p.k}${p.k===pri?' on':''}">${esc(p.n)}</button>`);
+      o.onclick=()=>{ setPri(id,p.k).then(()=>openDetail(id)); };
+      fPr.lastChild.appendChild(o);
+    });
+    b.appendChild(fPr);
+
+    /* כותרת */
+    const fT=el('<div class="fld"><label>כותרת</label><input type="text"></div>');
+    const iT=fT.querySelector('input'); iT.value=t.title||'';
+    b.appendChild(fT);
+
+    /* הערות — טקסט חופשי בכוונה: פיד היומן קורא מכאן את השעה. */
+    const fN=el('<div class="fld"><label>הסבר והערות</label><textarea></textarea>'+
+      '<div class="hint">שעה שכתובה כאן בצורה <b>14:30</b> היא שעת התזכורת ביומן. בלי שעה — 9:00.</div></div>');
+    const iN=fN.querySelector('textarea'); iN.value=t.notes||'';
+    b.appendChild(fN);
+
+    /* תאריך יעד */
+    const dc=dateChip(t);
+    const fD=el('<div class="fld"><label>תאריך יעד</label><input type="date">'+
+      (dc&&dc.cls==='late'?`<div class="hint" style="color:var(--pom);font-weight:800">${esc(dc.txt)}</div>`:'')+'</div>');
+    const iD=fD.querySelector('input'); iD.value=(t.due||'').slice(0,10);
+    b.appendChild(fD);
+
+    /* אחראי ומדווח — שני תפקידים, שתי שורות */
+    let own=t.owner||'', rep=reporterOf(t);
+    const pick=(label,cur,set)=>{
+      const f=el(`<div class="fld"><label>${esc(label)}</label><div class="opts"></div></div>`);
+      OWNERS.concat(['']).forEach(o=>{
+        const btn=el(`<button class="opt${o===cur?' on':''}">${esc(o||'— ריק')}</button>`);
+        btn.onclick=()=>{ set(o); f.querySelectorAll('.opt').forEach(x=>x.classList.remove('on')); btn.classList.add('on'); };
+        f.lastChild.appendChild(btn);
+      });
+      return f;
+    };
+    b.appendChild(pick('אחראי לביצוע',own,v=>own=v));
+    b.appendChild(pick('מי העלה (מדווח)',rep,v=>rep=v));
+
+    /* תתי־משימות — סימון נשמר מיד, בלי שלב אישור */
+    const its=(t.items||[]).slice();
+    const fI=el(`<div class="fld"><label>תתי־משימות <b style="color:var(--olive-ink)">${its.filter(i=>i.done).length}/${its.length}</b></label><div class="its"></div></div>`);
+    const box=fI.querySelector('.its');
+    if(!its.length)box.appendChild(el('<div class="hint">אין עדיין. הוסיפי למטה.</div>'));
+    its.forEach(it=>{
+      const r=el(`<div class="it${it.done?' done':''}"><button class="bx">✓</button><div class="tx"></div><button class="del">✕</button></div>`);
+      r.querySelector('.tx').innerHTML=itemHtml(it);
+      r.querySelector('.bx').onclick=async()=>{
+        const live=byId(id); const tgt=(live.items||[]).find(x=>x.k===it.k); if(!tgt)return;
+        tgt.done=!tgt.done; tgt.doneAt=tgt.done?(tgt.doneAt||Date.now()):0;
+        await patch(id,{items:live.items}); openDetail(id);
+      };
+      r.querySelector('.del').onclick=async()=>{
+        const live=byId(id);
+        await patch(id,{items:(live.items||[]).filter(x=>x.k!==it.k)}); openDetail(id);
+      };
+      box.appendChild(r);
+    });
+    const add=el('<div class="addrow"><input type="text" placeholder="תת־משימה חדשה…"><button>הוספה</button></div>');
+    const addIt=async()=>{
+      const v=add.querySelector('input').value.trim(); if(!v)return;
+      const live=byId(id);
+      const row={k:'x'+Date.now().toString(36)+Math.floor(Math.random()*99),t:v,done:false,lv:2,ans:''};
+      await patch(id,{items:(live.items||[]).concat([row])}); openDetail(id);
+    };
+    add.querySelector('button').onclick=addIt;
+    add.querySelector('input').onkeydown=e=>{ if(e.key==='Enter')addIt(); };
+    fI.appendChild(add);
+    b.appendChild(fI);
+
+    /* תמונות */
+    const atts=attsOf(id);
+    const fG=el('<div class="fld"><label>תמונות</label><div class="gal"></div></div>');
+    const gal=fG.querySelector('.gal');
+    atts.forEach(m=>{ const i=el('<img alt="">'); i.onclick=()=>openFull(m.fid); gal.appendChild(i); fillThumb(i,m.fid); });
+    const ph=el('<label class="ph">＋<br>תמונה<input type="file" accept="image/*" multiple hidden></label>');
+    ph.querySelector('input').onchange=e=>{
+      const fs=[...e.target.files]; e.target.value='';
+      if(fs.length)upload(id,fs,()=>openDetail(id));
+    };
+    gal.appendChild(ph);
+    b.appendChild(fG);
+
+    /* קישורים */
+    const links=(Array.isArray(t.links)?t.links:[]).slice();
+    const fL=el('<div class="fld"><label>קישורים</label><div class="lnks"></div></div>');
+    const lw=fL.querySelector('.lnks');
+    links.forEach((l,i)=>{
+      if(!l||!l.url)return;
+      const ic=/\.pdf($|\?)/i.test(l.url)?'📄':/\.(png|jpe?g|webp|gif|heic)($|\?)/i.test(l.url)?'🖼'
+        :/drive\.google|docs\.google/.test(l.url)?'📁':/wa\.me|whatsapp/.test(l.url)?'💬':'🔗';
+      const row=el(`<div style="display:flex;gap:6px;align-items:center"></div>`);
+      const a=el(`<a class="lnk" style="flex:1" target="_blank" rel="noopener">${ic} ${esc(l.label||l.url)}</a>`);
+      a.href=l.url;
+      const d=el('<button class="del" style="color:var(--muted)">✕</button>');
+      d.onclick=async()=>{ await patch(id,{links:links.filter((_,j)=>j!==i)}); openDetail(id); };
+      row.appendChild(a); row.appendChild(d); lw.appendChild(row);
+    });
+    const la=el('<div class="addrow"><input type="text" placeholder="הדביקי כתובת…" inputmode="url"><button>הוספה</button></div>');
+    const addLink=async()=>{
+      const v=la.querySelector('input').value.trim(); if(!v)return;
+      await patch(id,{links:links.concat([{url:v,label:''}])}); openDetail(id);
+    };
+    la.querySelector('button').onclick=addLink;
+    la.querySelector('input').onkeydown=e=>{ if(e.key==='Enter')addLink(); };
+    fL.appendChild(la);
+    b.appendChild(fL);
+
+    /* שמירה — כפתור אחד, ואומר מה הוא עושה */
+    const sv=el('<div class="save"><button class="pri">שמירה</button><button class="sec" title="מחיקה">🗑</button></div>');
+    sv.querySelector('.pri').onclick=async()=>{
+      const f={};
+      if(iT.value.trim()!==(t.title||''))f.title=iT.value.trim();
+      if(iN.value!==(t.notes||''))f.notes=iN.value;
+      if((iD.value||'')!==((t.due||'').slice(0,10)))f.due=iD.value||null;
+      if(own!==(t.owner||''))f.owner=own;
+      if(rep!==reporterOf(t))f.reporter=rep;
+      if(!Object.keys(f).length){ closeSheet(); return; }
+      closeSheet();
+      if(await patch(id,f))toast('נשמר ✓');
+    };
+    sv.querySelector('.sec').onclick=async()=>{
+      if(!confirm('למחוק את "'+(t.title||'')+'"? אי אפשר לבטל.'))return;
+      closeSheet();
+      const r=await req(NODE+'/'+encodeURIComponent(id)+'.json','DELETE');
+      if(r){ tasks=tasks.filter(x=>x.id!==id); cache(); render(); toast('נמחקה'); }
+      else toast('המחיקה נכשלה');
+    };
+    b.appendChild(sv);
+  });
+}
+/* תתי־המשימות נכתבו בלוח הישן עם **הדגשה** ועם *(r06 · הערה)*.
+   כאן מציגים את ההדגשה ומנקים את מפתחות ההפניה — הם קיצור פנימי
+   של הלוח הישן ולא טקסט שיעל רוצה לקרוא בכרטיס. */
+function itemHtml(it){
+  const lv=(it.lv||2)===1?'<span class="lv1">דחוף · </span>':'';
+  let s=esc(String(it.t||'').replace(/\*\(([^)]*)\)\*/g,(w,inner)=>{
+    const note=inner.split('·').slice(1).join('·').trim();
+    return note?' — '+note:'';
+  }));
+  s=s.replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>').replace(/`([^`]+)`/g,'<b>$1</b>');
+  return lv+s+(it.ans?`<span class="ans">↩ ${esc(it.ans)}</span>`:'');
+}
+
+/* ===== משימה חדשה ===== */
+function openNew(){
+  sheet('משימה חדשה',b=>{
+    const fT=el('<div class="fld"><label>כותרת</label><input type="text" placeholder="מה צריך לעשות?"></div>');
+    const iT=fT.querySelector('input'); b.appendChild(fT);
+    const fN=el('<div class="fld"><label>הסבר</label><textarea placeholder="פרטים, טלפון, שעה…"></textarea></div>');
+    const iN=fN.querySelector('textarea'); b.appendChild(fN);
+
+    let cat='reno', st=ui.col==='done'?'ready':ui.col, pri='normal', own=me||'', rep=me||'';
+    const row=(label,opts,cur,set,cls)=>{
+      const f=el(`<div class="fld"><label>${esc(label)}</label><div class="opts"></div></div>`);
+      opts.forEach(o=>{
+        const btn=el(`<button class="opt ${cls?o.k:''}${o.k===cur?' on':''}">${esc(o.n)}</button>`);
+        btn.onclick=()=>{ set(o.k); f.querySelectorAll('.opt').forEach(x=>x.classList.remove('on')); btn.classList.add('on'); };
+        f.lastChild.appendChild(btn);
+      });
+      b.appendChild(f);
+    };
+    row('תחום',Object.keys(CATS).map(k=>({k,n:CATS[k]})),cat,v=>cat=v);
+    row('עמודה',COLS.map(c=>({k:c.k,n:c.n})),st,v=>st=v);
+    row('עדיפות',PRIS,pri,v=>pri=v,true);
+    const fD=el('<div class="fld"><label>תאריך יעד</label><input type="date"></div>');
+    const iD=fD.querySelector('input'); b.appendChild(fD);
+    row('אחראי לביצוע',OWNERS.concat(['']).map(o=>({k:o,n:o||'— ריק'})),own,v=>own=v);
+    row('מי העלה (מדווח)',OWNERS.concat(['']).map(o=>({k:o,n:o||'— ריק'})),rep,v=>rep=v);
+
+    const sv=el('<div class="save"><button class="pri">יצירת המשימה</button></div>');
+    sv.querySelector('button').onclick=async()=>{
+      const title=iT.value.trim();
+      if(!title){ toast('צריך כותרת'); iT.focus(); return; }
+      const id='n'+Date.now().toString(36)+Math.floor(Math.random()*99);
+      const maxOrder=tasks.reduce((m,t)=>Math.max(m,t.order||0),0);
+      /* `list` נכתב גם הוא: הלוח הישן ממיין לפיו משימה בלי תאריך יעד,
+         ובלעדיו היא נופלת שם לדלי ברירת מחדל. 'now' לא מופיע כאן
+         בכוונה — הוא ממופה שם לדלי ״דחוף והיום״, וכל משימה חדשה
+         הייתה נוחתת כדחופה. */
+      const t={id,title,notes:iN.value||'',cat,st,pri,owner:own,reporter:rep,
+        due:iD.value||null,done:false,order:maxOrder+10,
+        list:pri==='urgent'?'hot':(st==='backlog'?'later':'week'),
+        items:[],updatedAt:Date.now()};
+      closeSheet();
+      tasks.push(t); pending.add(id); cache(); render();
+      const r=await req(NODE+'/'+encodeURIComponent(id)+'.json','PUT',t);
+      setTimeout(()=>pending.delete(id),1500);
+      if(r){ toast('נוצרה ✓'); setSync('מסונכרן','ok'); }
+      else { toast('לא נשמר לשרת — נסי שוב'); setSync('לא נשמר','err'); }
+    };
+    b.appendChild(sv);
+    setTimeout(()=>iT.focus(),250);
+  });
+}
+
+/* ===== סרגל ===== */
+$('#bAdd').onclick=openNew;
+$('#bFilter').onclick=()=>{ ui.filters=!ui.filters; $('#bFilter').classList.toggle('on',ui.filters); render(); };
+let qt; $('#q').oninput=e=>{ clearTimeout(qt); qt=setTimeout(()=>{ ui.q=e.target.value.trim().toLowerCase(); render(); },160); };
+
+/* ===== טעינה וסנכרון ===== */
+function fromData(d){ return Object.keys(d||{}).filter(k=>d[k]&&typeof d[k]==='object')
+  .map(k=>Object.assign({},d[k],{id:k})); }
+
+/* עדכון שמגיע מהטלפון השני. `put` מחליף את מה שיש בנתיב, `patch`
+   ממזג לתוכו — ויחס אליהם כאל אותו דבר מוחק בשקט כל שדה שלא הוזכר. */
+function applyRemote(path,data,isPatch){
+  if(path==='/'){
+    if(!data)return;
+    const next=fromData(data);
+    tasks=next.map(d=>pending.has(d.id)?(byId(d.id)||d):d);
+  }else{
+    const seg=path.replace(/^\//,'').split('/').filter(Boolean);
+    const id=seg[0]; if(!id||pending.has(id))return;
+    const prev=byId(id), i=tasks.findIndex(x=>x.id===id);
+    if(seg.length===1){
+      if(data===null&&!isPatch){ tasks=tasks.filter(x=>x.id!==id); }
+      else{
+        const merged=isPatch?Object.assign({},prev||{},data,{id}):Object.assign({id},data);
+        if(i>-1)tasks[i]=merged; else tasks.push(merged);
+      }
+    }else{
+      if(!prev)return;
+      const copy=Object.assign({},prev);
+      if(data===null)delete copy[seg[1]]; else copy[seg[1]]=data;
+      tasks[i]=copy;
+    }
+  }
+  cache(); setSync('מסונכרן','ok');
+  if(!ui.open)render();
+}
+async function pull(){
+  const d=await getJSON(NODE+'.json');
+  if(!d){ if(!live)setSync('אין חיבור','err'); return; }
+  tasks=fromData(d).map(t=>pending.has(t.id)?(byId(t.id)||t):t);
+  live=true; cache(); setSync('מסונכרן','ok');
+  if(!ui.open)render();
+}
+
+(async function(){
+  try{ const c=localStorage.getItem(CACHE); if(c)tasks=JSON.parse(c)||[]; }catch(e){}
+  render();
+  await pull();
+  /* מחכים למטא לפני הפתיחה הישירה: בלי זה גלריית התמונות נפתחת ריקה
+     ולא מתמלאת, כי הגיליון נבנה פעם אחת ולא מצייר את עצמו מחדש. */
+  await loadMeta(); render();
+  /* פתיחה ישירה על משימה אחת, כמו בלוח: ‎?t=r43 */
+  const deep=new URLSearchParams(location.search).get('t');
+  if(deep&&byId(deep))openDetail(deep);
+  /* Firebase משדר שינויים ב-server-sent events — העדכון מהטלפון השני
+     מגיע תוך שנייה, בלי SDK ובלי התחברות */
+  let es=null;
+  try{
+    es=new EventSource(NODE+'.json');
+    const on=isPatch=>e=>{ try{ const m=JSON.parse(e.data); applyRemote(m.path,m.data,isPatch); }catch(x){} };
+    es.addEventListener('put',on(false));
+    es.addEventListener('patch',on(true));
+    es.onopen=()=>{ live=true; setSync('מסונכרן','ok'); };
+    es.onerror=()=>{ if(es.readyState===2){ es=null; setInterval(pull,20000); } };
+  }catch(e){ setInterval(pull,20000); }
+  addEventListener('visibilitychange',()=>{ if(!document.hidden)pull(); });
+})();
+</script>
+</body>
