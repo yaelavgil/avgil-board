@@ -135,6 +135,7 @@ h1{font-family:Karantina,Assistant,sans-serif;font-weight:700;font-size:36px;lin
   border:1px solid var(--amber);border-radius:999px;padding:1px 7px;margin-inline-start:6px;
   vertical-align:middle;white-space:nowrap}
 .pill.sug{background:var(--amber-soft);border-color:var(--amber);color:var(--amber)}
+.lk .where2{margin:3px 0 0;font-size:13.5px;color:var(--muted)}
 .lk .lnk{margin:5px 0 0;font-size:14px}
 .tapedit.match{font-weight:700;color:var(--olive-ink);background:var(--olive-soft);
   border:1px solid var(--line2);margin:0;padding:7px 9px}
@@ -713,13 +714,22 @@ function shotCard(it,num){
       if(typeof d==='string'){ $('#lbimg').src=d; $('#lb').classList.add('on'); } };
   } else fillThumb(im,it.fid);
 
-  /* מיקום */
+  /* מיקום.
+     עד 20.11 היה כאן ✓/✕ משלו, ומעליו ✓ נוסף על הכרטיס. אותה מילה על
+     שני כפתורים, ברמות שונות, במרחק שתי שורות — ואי אפשר היה לדעת מה
+     כל אחד מהם סוגר. גרוע מזה: בחירת חדר צבעה גלולה ירוקה שנראית כמו
+     ״נשמר״, בזמן שהשדה עצמו עוד לא עודכן והשורה למטה עדיין אמרה ״בלי
+     מיקום״ — המסך סתר את עצמו.
+     מעכשיו: נגיעה בחדר היא השמירה. אין ✓ על שדה. ✓ אחד בכרטיס, והוא
+     זה שכותב לסדר היום. */
   const locLine=el('<p class="where"></p>');
   body.appendChild(locLine);
+  const loc2Line=el('<p class="where2"></p>');
+  body.appendChild(loc2Line);
   const paintLoc=()=>{
     locLine.innerHTML='';
     const sug=!it.loc&&it.sugLoc?it.sugLoc:'';
-    const txt=it.loc?(it.loc2?`${esc(it.loc)} · ${esc(it.loc2)}`:esc(it.loc)):esc(sug);
+    const txt=it.loc?esc(it.loc):esc(sug);
     /* מיקום חסר הוא הדבר היחיד שמסומן באדום. אפשר לשמור בלעדיו, אבל
        בלי המיקום הליקוי לא מוצא את מקומו במסמך — ולכן הוא צועק. */
     const b=el(`<button class="tapedit ${it.loc?'':(sug?'ghosttxt':'needloc')}">${
@@ -730,20 +740,44 @@ function shotCard(it,num){
   const editLoc=()=>{
     locLine.innerHTML='';
     const box=el('<div class="ed"></div>');
-    let nl=it.loc||it.sugLoc||lastLoc||'', nl2=it.loc2||'';
-    box.appendChild(locPicker(nl,v=>{ nl=v; }));
-    const f2=el(`<div class="fld"><label>איפה בדיוק בחדר</label>
-      <input placeholder="למשל: מתחת למזגן" autocomplete="off"></div>`);
-    f2.querySelector('input').value=nl2;
-    f2.querySelector('input').addEventListener('input',e=>{ nl2=e.target.value; });
-    box.appendChild(f2);
-    box.appendChild(okCancel(
-      /* אחרי שהתמונה כבר בסדר היום, עריכה מתעדכנת שם מיד. לפני כן —
-         רק נשמרת במכשיר, כי מה שנכתב ללוח נכתב באישור בלבד. */
-      async()=>{ it.loc=nl; it.loc2=nl2; if(nl)lastLoc=nl;
-        saveQueue(); c.repaint(); if(it.k)await sync(it,c); },
-      ()=>paintLoc()));
+    box.appendChild(el('<p class="sughd">נגיעה בחדר שומרת אותו מיד</p>'));
+    /* הגלולה בבוחר מראה רק מה שבאמת שמור — it.loc ולא הצעה. כך היא
+       כבר לא מבטיחה שמירה שלא קרתה. */
+    box.appendChild(locPicker(it.loc||'',async v=>{
+      if(!v){ return; }
+      it.loc=v; lastLoc=v; saveQueue();
+      /* הבחירה סוגרת את הבוחר מעצמה: paintLoc מוחק את התיבה הזאת. */
+      c.repaint(); if(it.k)await sync(it,c);
+    }));
+    const back=el('<button class="mini">✕ סגירה בלי שינוי</button>');
+    back.onclick=()=>paintLoc();
+    box.appendChild(el('<div class="okrow"></div>')).appendChild(back);
     locLine.appendChild(box);
+  };
+  /* ״איפה בדיוק בחדר״ יצא משדה בתוך עורך המיקום לשורה משל עצמו, מאותה
+     סיבה: שדה שנפתח יחד עם בוחר החדרים גרר אחריו כפתור אישור משותף. */
+  const paintLoc2=()=>{
+    loc2Line.innerHTML='';
+    if(!it.loc&&!it.sugLoc){ loc2Line.style.display='none'; return; }
+    loc2Line.style.display='';
+    const b=el(`<button class="tapedit ${it.loc2?'sublnk':'ghosttxt'}">${
+      it.loc2?'📌 '+esc(it.loc2):'איפה בדיוק בחדר — נגיעה להוספה'}</button>`);
+    b.onclick=()=>editLoc2();
+    loc2Line.appendChild(b);
+  };
+  const editLoc2=()=>{
+    loc2Line.innerHTML='';
+    const f=el(`<div class="fld"><label>איפה בדיוק בחדר</label>
+      <input placeholder="למשל: מתחת למזגן" autocomplete="off"></div>`);
+    const i=f.querySelector('input'); i.value=it.loc2||'';
+    i.addEventListener('input',()=>{ it.loc2=i.value; saveQueue(); });
+    /* יציאה מהשדה היא השמירה. מצייר מחדש רק את השורה הזאת ולא את כל
+       הכרטיס — אחרת נגיעה בכפתור אחר היתה מוחקת אותו לפני שהלחיצה
+       מגיעה אליו, והנגיעה הראשונה היתה נבלעת. */
+    i.addEventListener('blur',async()=>{ it.loc2=i.value.trim(); saveQueue();
+      paintLoc2(); c.paintSt(); if(it.k)await sync(it,c); });
+    i.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); i.blur(); } });
+    loc2Line.appendChild(f); i.focus();
   };
 
   /* השיוך לסעיף קיים — הקו המרכזי של המסך. ההצעה מוצגת ממולאת ומסומנת
@@ -822,18 +856,21 @@ function shotCard(it,num){
   };
   const editNote=()=>{
     noteLine.innerHTML='';
-    const box=el('<div class="ed"></div>');
     const f=el(`<div class="fld"><textarea placeholder="מה רואים בתמונה ומה צריך לתקן"></textarea></div>`);
     const ta=f.querySelector('textarea'); ta.value=it.note||'';
-    box.appendChild(f);
-    box.appendChild(okCancel(
-      async()=>{ it.note=ta.value;
-        /* מי שטרח להקליד הסבר התכוון לליקוי חדש. בלי הקביעה הזאת
-           ההצעה היתה גוברת על מה שהוא כתב, והטקסט שלו היה נעלם. */
-        if((it.note||'').trim()&&!linkK())it.link='new';
-        saveQueue(); c.repaint(); if(it.k)await sync(it,c); },
-      ()=>paintNote()));
-    noteLine.appendChild(box);
+    const take=()=>{
+      it.note=ta.value;
+      /* מי שטרח להקליד הסבר התכוון לליקוי חדש. בלי הקביעה הזאת
+         ההצעה היתה גוברת על מה שהוא כתב, והטקסט שלו היה נעלם. */
+      const was=it.link;
+      if((it.note||'').trim()&&!linkK())it.link='new';
+      saveQueue(); if(was!==it.link)paintLink(); c.paintSt();
+    };
+    ta.addEventListener('input',take);
+    /* כמו בשדה המיקום: היציאה מהשדה שומרת, בלי ✓ משלו. */
+    ta.addEventListener('blur',async()=>{ ta.value=ta.value.trim(); take();
+      paintNote(); if(it.k)await sync(it,c); });
+    noteLine.appendChild(f);
     ta.focus();
   };
 
@@ -842,26 +879,30 @@ function shotCard(it,num){
   c.paintSt=()=>{
     st.innerHTML='';
     /* ״חסר מיקום או הסבר״ לא אומר מה חסר כאן ועכשיו. הודעה שאומרת
-       בדיוק מה נשאר חוסכת ניחוש מול כל תמונה. */
+       בדיוק מה נשאר חוסכת ניחוש מול כל תמונה.
+       המילה ״אישור״ לא מופיעה כאן יותר: הצ׳יפ מתאר מצב, והכפתור שלידו
+       הוא הפעולה היחידה בכרטיס שכותבת לסדר היום — ולכן הוא אומר מה
+       הוא עושה ולא ״מאשר״. */
     const noNote=!(it.note||'').trim();
+    const k=linkK();
+    const ready=!!(k||it.sugK||!noNote);
     if(it.k){
-      st.appendChild(el(`<span class="pill ok">✓ ${
-        it.link&&it.link!=='new'?'צורפה לסעיף':'בסדר היום'}</span>`));
+      st.appendChild(el(`<span class="pill ok">✓ ${k?'צורפה לסעיף':'בסדר היום'}</span>`));
       /* נשמר, וזה עדיין לא שלם. בלי התזכורת הזאת ״✓״ נראה כמו סוף הסיפור
          והליקוי היה נשאר לנצח בלי מקום. */
       if(!it.loc)st.appendChild(el('<span class="pill hot">עדיין חסר מיקום</span>'));
     }
     else if(it.saving)st.appendChild(el('<span class="pill">שומר…</span>'));
-    else if(linkK())st.appendChild(el(`<span class="pill">מחכה לאישור${
-      it.loc?'':' · בלי מיקום'}</span>`));
-    else if(it.link==='new')st.appendChild(el(`<span class="pill ${noNote?'hot':''}">${
-      noNote?'חסר הסבר':'מחכה לאישור'+(it.loc?'':' · בלי מיקום')}</span>`));
-    else if(it.sugK)st.appendChild(el('<span class="pill sug">הצעה — מחכה לאישור</span>'));
-    else st.appendChild(el('<span class="pill hot">חסר שיוך או הסבר</span>'));
-    /* אישור של תמונה אחת. ״אישור הכול״ למטה עושה את זה לכולן, וזה
-       הכפתור למי שרוצה לאשר אחת ולהמשיך להסתכל. */
-    if(!it.k&&(linkK()||it.sugK||!noNote)){
-      const ok=el('<button class="mini go2">✓ מאשר</button>');
+    else if(!ready)st.appendChild(el(`<span class="pill hot">${
+      it.link==='new'?'חסר הסבר':'חסר שיוך או הסבר'}</span>`));
+    else if(!k&&it.sugK)st.appendChild(el(`<span class="pill sug">הצעה — עוד לא נשמר${
+      it.loc||it.sugLoc?'':' · בלי מיקום'}</span>`));
+    else st.appendChild(el(`<span class="pill">עוד לא נשמר${
+      it.loc||it.sugLoc?'':' · בלי מיקום'}</span>`));
+    /* כתיבה של תמונה אחת לסדר היום. ״אישור הכול״ למטה עושה את זה לכולן. */
+    if(!it.k&&ready){
+      const ok=el(`<button class="mini go2">${
+        k||it.sugK?'צירוף לסעיף ←':'הוספה לסדר היום ←'}</button>`);
       ok.onclick=async()=>{ ok.disabled=true; ok.textContent='שומר…'; await approveOne(it,c); };
       st.appendChild(ok);
     }
@@ -870,8 +911,8 @@ function shotCard(it,num){
     st.appendChild(rm);
   };
 
-  c.repaint=()=>{ paintLoc(); paintLink(); paintNote(); c.paintSt(); };
-  paintLoc(); paintLink(); paintNote(); c.paintSt();
+  c.repaint=()=>{ paintLoc(); paintLoc2(); paintLink(); paintNote(); c.paintSt(); };
+  c.repaint();
   return c;
 }
 
@@ -943,10 +984,12 @@ function renderReview(app){
   app.appendChild(el(`<a class="go ghost noprint" style="text-align:center;text-decoration:none" href="./">↩ חזרה לסדר היום מול ברק</a>`));
 }
 
-/* ✓ ו-✕ ליד כל עריכה. בלי זה אין דרך לבטל נגיעה בטעות. */
-function okCancel(onOk,onCancel){
+/* נשאר רק במקום אחד: עריכה שכותבת ישירות לסדר היום. בכרטיס תמונה אין
+   אישור על שדה — נגיעה היא השמירה — כדי שלא יהיו שני כפתורי ״אישור״
+   על אותו מסך, ברמות שונות, בלי שום דבר שמסביר במה הם נבדלים. */
+function okCancel(onOk,onCancel,label){
   const r=el('<div class="okrow"></div>');
-  const ok=el('<button class="mini go2">✓ אישור</button>');
+  const ok=el(`<button class="mini go2">✓ ${esc(label||'שמירה')}</button>`);
   const no=el('<button class="mini">✕ ביטול</button>');
   ok.onclick=async()=>{ ok.disabled=true; ok.textContent='שומר…'; await onOk(); };
   no.onclick=onCancel;
@@ -1160,8 +1203,12 @@ function locFixRow(it){
   const edit=()=>{
     line.innerHTML='';
     const box=el('<div class="ed"></div>');
-    let nl=lastLoc||'', nl2='';
-    box.appendChild(locPicker(nl,v=>{ nl=v; }));
+    /* כאן, בשונה מכרטיס תמונה, הכפתור באמת כותב לסדר היום — הליקוי כבר
+       שמור שם וזו עריכה שלו. לכן נשאר כפתור אחד, והוא אומר מה הוא עושה.
+       הבוחר מתחיל ריק ולא על lastLoc, כדי שגלולה ירוקה לא תבטיח חדר
+       שאיש לא בחר. */
+    let nl='', nl2='';
+    box.appendChild(locPicker('',v=>{ nl=v; }));
     const f2=el(`<div class="fld"><label>איפה בדיוק בחדר</label>
       <input placeholder="למשל: מתחת למזגן" autocomplete="off"></div>`);
     f2.querySelector('input').addEventListener('input',e=>{ nl2=e.target.value; });
@@ -1175,7 +1222,7 @@ function locFixRow(it){
       const ok=await upsertItem(Object.assign({},it,patch));
       if(ok){ lastLoc=nl; toast('המיקום נשמר ✓'); render(); }
       else { toast('השמירה נכשלה — נסו שוב'); paint(); }
-    },()=>paint()));
+    },()=>paint(),'שמירת המיקום'));
     line.appendChild(box);
   };
   paint(); row.appendChild(line);
