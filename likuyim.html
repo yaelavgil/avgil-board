@@ -78,6 +78,19 @@ h1{font-family:Karantina,Assistant,sans-serif;font-weight:700;font-size:36px;lin
 .chips button.on{background:var(--olive);color:#fff;border-color:var(--olive)}
 .chips button.new{border-style:dashed;border-color:var(--olive);color:var(--olive-ink);font-weight:800}
 .locsearch{margin:0 0 8px}
+.combo{display:flex;gap:6px;align-items:stretch}
+.combo input{flex:1;min-width:0}
+.combo .ddbtn{flex:0 0 auto;font:inherit;font-size:15px;font-weight:800;padding:0 14px;border-radius:9px;
+  border:1px solid var(--line2);background:var(--card);color:var(--olive-ink);cursor:pointer}
+.combo .ddbtn[aria-expanded=true]{background:var(--olive);color:#fff;border-color:var(--olive)}
+.ddlist{display:flex;flex-direction:column;gap:5px;max-height:260px;overflow:auto;margin:0 0 8px;padding:6px;
+  border:1px solid var(--line2);border-radius:10px;background:var(--card)}
+.ddlist[hidden]{display:none}
+.ddlist .ddrow{font:inherit;font-size:13.5px;text-align:right;padding:8px 10px;border-radius:8px;
+  border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.ddlist .ddrow:hover{background:var(--olive-soft)}
+.ddlist .ddrow.on{background:var(--olive);color:#fff;border-color:var(--olive)}
+.tapedit.match .lnkhd{font-size:11.5px;font-weight:800;color:var(--muted)}
 
 .go{display:block;width:100%;border:none;border-radius:13px;background:var(--olive);color:#fff;
   padding:15px;font:inherit;font-weight:800;font-size:17px;cursor:pointer;margin:14px 0 0}
@@ -368,7 +381,8 @@ function saveQueue(){
     if(!QUEUE.length)return localStorage.removeItem(QKEY);
     const slim=QUEUE.map(x=>({fid:x.fid,name:x.name,type:x.type,size:x.size,
       loc:x.loc||'',loc2:x.loc2||'',note:x.note||'',k:x.k||null,at:x.at||0,
-      back:x.back?1:0,link:x.link||null,okd:x.okd?1:0}));
+      back:x.back?1:0,link:x.link||null,okd:x.okd?1:0,
+      tgt:x.tgt||null,moved:x.moved||null}));
     localStorage.setItem(QKEY,JSON.stringify({q:slim,at:Date.now()}));
   }catch(e){}
 }
@@ -423,8 +437,11 @@ async function rememberLoc(name){
 
    עריכה חוזרת של אותו ליקוי מעדכנת את הפריט הקיים לפי k ולא מוסיפה
    כפילות — בלי זה, כל תיקון של ניסוח היה יוצר סעיף חדש בלוח. */
-async function upsertItem(item){
-  const live=await getJSON(TNODE+'/items.json');
+async function upsertItem(item,tid,allowEmpty){
+  /* ברירת המחדל היא סדר היום מול ברק. עם tid כותבים לסעיפים של משימה אחרת
+     בלוח — אותו כלל בטיחות: מושכים את המערך החי, מוסיפים לפי k, כותבים רק items. */
+  const node=tid&&tid!==TASK?DB+'/board/tasks/'+encodeURIComponent(tid):TNODE;
+  const live=await getJSON(node+'/items.json');
   /* Firebase מחזיר מערך צפוף כמערך, ומערך עם חורים כאובייקט ממופתח.
      שתי הצורות חייבות להתקבל — אחרת קריאה תקינה בצורה השנייה היתה
      נראית כמו ״אין פריטים״, והכתיבה שאחריה היתה מוחקת את כולם. */
@@ -432,6 +449,13 @@ async function upsertItem(item){
   if(Array.isArray(live))base=live.filter(x=>x);
   else if(live&&typeof live==='object')base=Object.keys(live)
     .sort((a,z)=>(+a)-(+z)).map(k=>live[k]).filter(x=>x);
+  /* משימה שעוד אין לה סעיפים מחזירה null בדיוק כמו רשת שנפלה. כשמותר
+     (משימה אחרת), מבדילים ביניהם: אם הכותרת של המשימה נקראת — היא קיימת
+     והרשת חיה, והמערך פשוט עוד ריק. */
+  if(!base&&allowEmpty&&live===null){
+    const ttl=await getJSON(node+'/title.json');
+    if(ttl)base=[];
+  }
   /* קריאה שנכשלה מחזירה null. במצב הזה אסור לכתוב: מערך חדש עם פריט
      אחד היה מוחק 47 פריטים חיים. עדיף להיכשל גלוי ושהוא ינסה שוב. */
   if(!base){ toast('אין חיבור — הפרטים לא נשמרו, נסה שוב'); return false; }
@@ -447,8 +471,8 @@ async function upsertItem(item){
     arr=base.concat([item]);
     if(arr.length<=base.length)return false;
   }
-  const ok=await put(TNODE+'/items.json',arr);
-  if(ok){ await put(TNODE+'/updatedAt.json',Date.now()); TASKOBJ&&(TASKOBJ.items=arr); }
+  const ok=await put(node+'/items.json',arr);
+  if(ok){ await put(node+'/updatedAt.json',Date.now()); if(node===TNODE&&TASKOBJ)TASKOBJ.items=arr; }
   return ok;
 }
 
@@ -775,7 +799,7 @@ function shotCard(it,num){
        הכרטיס — אחרת נגיעה בכפתור אחר היתה מוחקת אותו לפני שהלחיצה
        מגיעה אליו, והנגיעה הראשונה היתה נבלעת. */
     i.addEventListener('blur',async()=>{ it.loc2=i.value.trim(); saveQueue();
-      paintLoc2(); c.paintSt(); if(it.k)await sync(it,c); });
+      paintLoc2(); c.paintSt(); if(it.k&&!it.saving)await sync(it,c); });
     i.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); i.blur(); } });
     loc2Line.appendChild(f); i.focus();
   };
@@ -787,54 +811,177 @@ function shotCard(it,num){
   const linkK=()=>it.link&&it.link!=='new'?it.link:null;
   const paintLink=()=>{
     linkLine.innerHTML='';
+    /* תמיד כתוב במפורש לאן התמונה הולכת: לסעיף ששמו מופיע כאן, ליקוי חדש,
+       או — כשעוד לא נבחר — הוראה לבחור. ״שיוך לסעיף קיים״ בלי שם הסעיף
+       לא אמר איפה הצירוף ייפול. */
+    if(it.tgt){
+      const g=it.tgt, tt=esc(taskTitle(g.title));
+      const what=g.newTask?`🆕 משימה חדשה: <b>${tt}</b><br>התמונה תהיה הסעיף הראשון שלה`
+        :g.k==='new'?`➡️ <b>סעיף חדש</b> במשימה: ${tt}`
+        :`➡️ יצורף לסעיף: ${esc(g.ktext||'')}<br>במשימה: ${tt}`;
+      const b=el(`<button class="tapedit match"><span class="lnkhd">שיוך למשימה אחרת בלוח</span><br>${what}</button>`);
+      b.onclick=()=>pickLink(); linkLine.appendChild(b); return;
+    }
     if(it.link==='new'){
-      const b=el('<button class="tapedit sublnk">ליקוי חדש — <u>שיוך לסעיף קיים</u></button>');
+      const b=el('<button class="tapedit sublnk">🆕 יירשם כ<b>ליקוי חדש</b> · <u>לצרף במקום זה לסעיף קיים</u></button>');
       b.onclick=()=>pickLink(); linkLine.appendChild(b); return;
     }
     const k=linkK()||it.sugK;
     if(k&&itemByK(k)){
-      const b=el(`<button class="tapedit match">🔗 ${esc(shortOf(itemByK(k)))}${
+      const b=el(`<button class="tapedit match"><span class="lnkhd">יצורף לסעיף:</span><br>🔗 ${esc(shortOf(itemByK(k)))}${
         linkK()?'':' <span class="sugtag">מוצע</span>'}</button>`);
       b.onclick=()=>pickLink(); linkLine.appendChild(b); return;
     }
-    const b=el('<button class="tapedit ghosttxt">שיוך לסעיף קיים, או ליקוי חדש</button>');
+    const b=el('<button class="tapedit needloc">🔗 לאיזה סעיף לצרף? — נגיעה לבחירה (או ליקוי חדש)</button>');
     b.onclick=()=>pickLink(); linkLine.appendChild(b);
+  };
+  /* בוחר משימה אחרת: חיפוש/רשימה של כל המשימות הפתוחות, ואחרי הבחירה — הסעיפים
+     שלה (רשימה נפתחת + חיפוש), או סעיף חדש בה. ובתחתית: משימה חדשה בשם
+     שנכתב כאן, והתמונה היא הסעיף הראשון שלה. */
+  const chooseTgt=g=>{
+    it.tgt=g; it.link=null; saveQueue(); c.repaint();
+    if(g.k==='new')editNote();
+  };
+  const pickTask=async()=>{
+    linkLine.innerHTML='';
+    const box=el('<div class="ed"></div>');
+    box.appendChild(el('<p class="sughd">שיוך למשימה אחרת בלוח</p>'));
+    const msg=el('<p class="lede">טוען את המשימות…</p>');
+    box.appendChild(msg); linkLine.appendChild(box);
+    const cancel=el('<button class="mini">✕ ביטול</button>');
+    cancel.onclick=()=>pickLink();
+    const all=await loadAllTasks();
+    if(!all){
+      msg.textContent='אין חיבור — נסו שוב';
+      box.appendChild(el('<div class="okrow"></div>')).appendChild(cancel); return;
+    }
+    msg.remove();
+    const norm=x=>String(x||'').toLowerCase();
+    const showTasks=()=>{
+      box.innerHTML='';
+      box.appendChild(el('<p class="sughd">לאיזו משימה לשייך את התמונה?</p>'));
+      const search=el('<div class="fld locsearch"><input placeholder="חיפוש משימה… (למשל: פרקט)" autocomplete="off"></div>');
+      const inp=search.querySelector('input');
+      const list=el('<div class="ddlist"></div>');
+      const paint=()=>{
+        list.innerHTML='';
+        const q=norm(inp.value.trim());
+        const rows=all.tasks.filter(t=>!t.done&&t.id!==TASK&&(!q||norm(t.title).indexOf(q)>=0))
+          .sort((a,b)=>(itemsOfTask(b).length>0)-(itemsOfTask(a).length>0)||(a.order||0)-(b.order||0));
+        if(!rows.length)list.appendChild(el('<div class="empty-state">אין משימה פתוחה שמכילה את זה</div>'));
+        rows.slice(0,60).forEach(t=>{
+          const n=itemsOfTask(t).filter(i=>!i.done).length;
+          const r=el(`<button type="button" class="ddrow">${esc(taskTitle(t.title))}${
+            n?` <span class="sugtag">${n} סעיפים</span>`:''}</button>`);
+          r.onclick=()=>showSubs(t);
+          list.appendChild(r);
+        });
+      };
+      inp.addEventListener('input',paint);
+      box.appendChild(search); box.appendChild(list);
+      /* משימה חדשה */
+      const nw=el(`<div class="fld locsearch combo"><input placeholder="או שם של משימה חדשה…" autocomplete="off">
+        <button type="button" class="ddbtn">➕ משימה חדשה</button></div>`);
+      const ni=nw.querySelector('input');
+      nw.querySelector('button').onclick=()=>{
+        const v=ni.value.trim();
+        if(!v){ toast('כתבו קודם שם למשימה החדשה'); ni.focus(); return; }
+        chooseTgt({newTask:true,title:v});
+      };
+      box.appendChild(nw);
+      box.appendChild(el('<div class="okrow"></div>')).appendChild(cancel);
+      paint();
+    };
+    const showSubs=t=>{
+      box.innerHTML='';
+      box.appendChild(el(`<p class="sughd">המשימה: ${esc(taskTitle(t.title))}</p>`));
+      const search=el('<div class="fld locsearch"><input placeholder="חיפוש בסעיפים של המשימה…" autocomplete="off"></div>');
+      const inp=search.querySelector('input');
+      const list=el('<div class="ddlist"></div>');
+      const paint=()=>{
+        list.innerHTML='';
+        const q=norm(inp.value.trim());
+        const nb=el('<button type="button" class="ddrow xnew">➕ סעיף חדש במשימה הזאת (התמונה היא הסעיף)</button>');
+        nb.onclick=()=>chooseTgt({task:t.id,title:t.title,k:'new'});
+        list.appendChild(nb);
+        itemsOfTask(t).filter(i=>!i.done&&(!q||norm(i.t).indexOf(q)>=0||norm(shortOf(i)).indexOf(q)>=0))
+          .forEach(i=>{
+            const r=el(`<button type="button" class="ddrow">${esc(shortOf(i))}</button>`);
+            r.onclick=()=>chooseTgt({task:t.id,title:t.title,k:i.k,ktext:shortOf(i)});
+            list.appendChild(r);
+          });
+      };
+      inp.addEventListener('input',paint);
+      box.appendChild(search); box.appendChild(list);
+      const back=el('<button class="mini">← משימה אחרת</button>');
+      back.onclick=()=>showTasks();
+      const row=el('<div class="okrow"></div>'); row.appendChild(back); row.appendChild(cancel);
+      box.appendChild(row);
+      paint();
+    };
+    showTasks();
   };
   const pickLink=()=>{
     linkLine.innerHTML='';
     const box=el('<div class="ed"></div>');
     const chips=el('<div class="chips"></div>');
-    const search=el('<div class="fld locsearch"><input placeholder="סינון כל הסעיפים הפתוחים…" autocomplete="off"></div>');
-    const inp=search.querySelector('input');
+    /* כל הסעיפים הפתוחים בסדר היום: ▾ פותח את הרשימה המלאה, וכתיבה מסננת
+       אותה. הסעיפים הקרובים למיקום של התמונה עולים למעלה ומסומנים ״קרוב״. */
+    const search=el(`<div class="fld locsearch combo"><input placeholder="חיפוש בכל הסעיפים…" autocomplete="off">
+      <button type="button" class="ddbtn" aria-expanded="false" aria-label="פתיחת רשימת כל הסעיפים">▾ כל הסעיפים</button></div>`);
+    const inp=search.querySelector('input'), ddb=search.querySelector('.ddbtn');
+    const dd=el('<div class="ddlist" hidden></div>');
+    let ddOpen=false;
+    const pickItem=async i=>{
+      it.link=i.k; it.tgt=null;
+      if(!it.loc&&it.sugLoc)it.loc=it.sugLoc;
+      saveQueue(); c.repaint();
+      if(it.k)await sync(it,c);
+    };
+    const paintDD=()=>{
+      dd.innerHTML=''; dd.hidden=!ddOpen;
+      ddb.setAttribute('aria-expanded',ddOpen?'true':'false');
+      if(!ddOpen)return;
+      const q=inp.value.trim();
+      const near=new Set((it.sugList||[]).map(x=>x.k));
+      const all=openItems().filter(i=>!q||i.t.indexOf(q)>=0||shortOf(i).indexOf(q)>=0)
+        .sort((a,b)=>(near.has(b.k)?1:0)-(near.has(a.k)?1:0));
+      if(!all.length){ dd.appendChild(el('<div class="empty-state">אין סעיף פתוח שמכיל את זה</div>')); return; }
+      all.forEach(i=>{
+        const r=el(`<button type="button" class="ddrow${it.link===i.k?' on':''}">${esc(shortOf(i))}${
+          near.has(i.k)?' <span class="sugtag">קרוב</span>':''}</button>`);
+        r.onclick=()=>pickItem(i);
+        dd.appendChild(r);
+      });
+    };
+    ddb.onclick=()=>{ ddOpen=!ddOpen; paintDD(); if(ddOpen)inp.focus(); };
+    inp.addEventListener('keydown',e=>{ if(e.key==='Escape'){ ddOpen=false; paintDD(); } });
     const paintChips=()=>{
       chips.innerHTML='';
-      const q=inp.value.trim();
-      /* בלי סינון — ההצעות למיקום הזה. עם סינון — כל הסעיפים הפתוחים,
-         כי הסעיף הנכון יכול להיות כזה שההתאמה לא תפסה. */
-      const list=q?openItems().filter(i=>i.t.indexOf(q)>=0)
-        :(it.sugList&&it.sugList.length?it.sugList
-          :candidates(it.loc||it.sugLoc||'',it.note||'',null).map(x=>x.i));
-      list.slice(0,q?12:4).forEach(i=>{
+      /* ההצעות למיקום הזה. שאר הסעיפים — ברשימה הנפתחת למטה. */
+      const list=it.sugList&&it.sugList.length?it.sugList
+          :candidates(it.loc||it.sugLoc||'',it.note||'',null).map(x=>x.i);
+      list.slice(0,4).forEach(i=>{
         const b=el(`<button type="button" class="${it.link===i.k?'on':''}">${esc(shortOf(i))}</button>`);
         /* בחירה היא בחירה, לא שמירה. שום דבר לא נכתב לסדר היום עד
            שרועי לוחץ ✓ — על הכרטיס או על ״אישור הכול״ למטה. */
-        b.onclick=async()=>{
-          it.link=i.k;
-          if(!it.loc&&it.sugLoc)it.loc=it.sugLoc;
-          saveQueue(); c.repaint();
-          if(it.k)await sync(it,c);
-        };
+        b.onclick=()=>pickItem(i);
         chips.appendChild(b);
       });
-      if(!list.length)chips.appendChild(el(`<div class="empty-state">${
-        q?'אין סעיף פתוח שמכיל את זה':'אין סעיף קיים שמתאים למיקום הזה'}</div>`));
+      if(!list.length)chips.appendChild(el('<div class="empty-state">אין סעיף קרוב למיקום הזה — פתחו את הרשימה או חפשו</div>'));
       const nb=el('<button type="button" class="new">➕ ליקוי חדש</button>');
-      nb.onclick=()=>{ it.link='new'; saveQueue(); paintLink(); paintNote(); editNote(); };
+      nb.onclick=()=>{ it.link='new'; it.tgt=null; saveQueue(); paintLink(); paintNote(); editNote(); };
       chips.appendChild(nb);
     };
-    inp.addEventListener('input',paintChips);
+    inp.addEventListener('input',()=>{ ddOpen=true; paintDD(); });
     box.appendChild(el('<p class="sughd">מה בסדר היום מתאים לתמונה הזאת</p>'));
-    box.appendChild(chips); box.appendChild(search);
+    box.appendChild(chips); box.appendChild(search); box.appendChild(dd);
+    /* תמונה שלא שייכת לסדר היום מול ברק בכלל (למשל הפרקט של יעקב). */
+    if(!it.k){
+      const other=el('<button type="button" class="mini xother">➡️ משימה אחרת בלוח — או משימה חדשה</button>');
+      other.onclick=()=>pickTask();
+      box.appendChild(other);
+    }
     const no=el('<button class="mini">✕ ביטול</button>');
     no.onclick=()=>paintLink();
     box.appendChild(el('<div class="okrow"></div>')).appendChild(no);
@@ -848,7 +995,7 @@ function shotCard(it,num){
   body.appendChild(noteLine);
   const paintNote=()=>{
     noteLine.innerHTML='';
-    if(linkK()){ noteLine.style.display='none'; return; }
+    if(linkK()||(it.tgt&&!it.tgt.newTask&&it.tgt.k&&it.tgt.k!=='new')){ noteLine.style.display='none'; return; }
     noteLine.style.display='';
     const b=el(`<button class="tapedit ${it.note?'':'ghosttxt'}">${it.note?esc(it.note):'מה הליקוי — נגיעה לכתיבה'}</button>`);
     b.onclick=()=>editNote();
@@ -863,13 +1010,13 @@ function shotCard(it,num){
       /* מי שטרח להקליד הסבר התכוון לליקוי חדש. בלי הקביעה הזאת
          ההצעה היתה גוברת על מה שהוא כתב, והטקסט שלו היה נעלם. */
       const was=it.link;
-      if((it.note||'').trim()&&!linkK())it.link='new';
+      if((it.note||'').trim()&&!linkK()&&!it.tgt)it.link='new';
       saveQueue(); if(was!==it.link)paintLink(); c.paintSt();
     };
     ta.addEventListener('input',take);
     /* כמו בשדה המיקום: היציאה מהשדה שומרת, בלי ✓ משלו. */
     ta.addEventListener('blur',async()=>{ ta.value=ta.value.trim(); take();
-      paintNote(); if(it.k)await sync(it,c); });
+      paintNote(); if(it.k&&!it.saving)await sync(it,c); });
     noteLine.appendChild(f);
     ta.focus();
   };
@@ -883,30 +1030,42 @@ function shotCard(it,num){
        המילה ״אישור״ לא מופיעה כאן יותר: הצ׳יפ מתאר מצב, והכפתור שלידו
        הוא הפעולה היחידה בכרטיס שכותבת לסדר היום — ולכן הוא אומר מה
        הוא עושה ולא ״מאשר״. */
-    const noNote=!(it.note||'').trim();
+    /* מה הכפתור עושה נקבע ב-plan(), אותו מקום שבו approveOne ו״אישור הכול״
+       מחליטים מה לכתוב. קודם התווית נקבעה מ-sugK והפעולה מ-it.link — כשהמשתמש
+       לחץ ״ליקוי חדש״ בלי להקליד הסבר, נשאר כפתור ״צירוף לסעיף״ שלחיצה עליו
+       לא עשתה כלום. */
+    const p=plan(it);
     const k=linkK();
-    const ready=!!(k||it.sugK||!noNote);
+    const ready=!!p;
     if(it.k){
-      st.appendChild(el(`<span class="pill ok">✓ ${k?'צורפה לסעיף':'בסדר היום'}</span>`));
+      st.appendChild(el(`<span class="pill ok">✓ ${it.moved?'הועברה למשימה: '+esc(taskTitle(it.moved.title)):(k?'צורפה לסעיף':'בסדר היום')}</span>`));
       /* נשמר, וזה עדיין לא שלם. בלי התזכורת הזאת ״✓״ נראה כמו סוף הסיפור
          והליקוי היה נשאר לנצח בלי מקום. */
-      if(!it.loc)st.appendChild(el('<span class="pill hot">עדיין חסר מיקום</span>'));
+      if(!it.loc&&!it.moved)st.appendChild(el('<span class="pill hot">עדיין חסר מיקום</span>'));
     }
     else if(it.saving)st.appendChild(el('<span class="pill">שומר…</span>'));
     else if(!ready)st.appendChild(el(`<span class="pill hot">${
-      it.link==='new'?'חסר הסבר':'חסר שיוך או הסבר'}</span>`));
-    else if(!k&&it.sugK)st.appendChild(el(`<span class="pill sug">הצעה — עוד לא נשמר${
+      it.tgt?(it.tgt.newTask?'חסר שם למשימה החדשה':(it.tgt.k==='new'?'חסר הסבר לסעיף החדש':'בחרו סעיף במשימה'))
+      :it.link==='new'?'חסר הסבר לליקוי החדש':'חסר שיוך — בחרו סעיף או ליקוי חדש'}</span>`));
+    else if(p==='attach'&&!k)st.appendChild(el(`<span class="pill sug">הצעה — עוד לא נשמר${
       it.loc||it.sugLoc?'':' · בלי מיקום'}</span>`));
     else st.appendChild(el(`<span class="pill">עוד לא נשמר${
       it.loc||it.sugLoc?'':' · בלי מיקום'}</span>`));
-    /* כתיבה של תמונה אחת לסדר היום. ״אישור הכול״ למטה עושה את זה לכולן. */
+    /* כתיבה של תמונה אחת לסדר היום. ״אישור הכול״ למטה עושה את זה לכולן.
+       mousedown לא מעביר את הפוקוס מהשדה הפתוח: בלי זה ה-blur של השדה צייר
+       מחדש את שורת המצב והכפתור הוחלף לפני שהלחיצה הגיעה אליו — והיו צריכים
+       ללחוץ פעמיים. הטקסט כבר נשמר ב-input, לכן אין מה לחכות ל-blur. */
+    const keepFocus=b=>b.addEventListener('mousedown',e=>e.preventDefault());
     if(!it.k&&ready){
       const ok=el(`<button class="mini go2">${
-        k||it.sugK?'צירוף לסעיף ←':'הוספה לסדר היום ←'}</button>`);
-      ok.onclick=async()=>{ ok.disabled=true; ok.textContent='שומר…'; await approveOne(it,c); };
+        ({attach:'צירוף לסעיף ←',xattach:'צירוף לסעיף במשימה האחרת ←',xnew:'הוספה כסעיף חדש במשימה ←',
+          xtask:'פתיחת משימה חדשה ←'})[p]||'הוספה כליקוי חדש ←'}</button>`);
+      keepFocus(ok);
+      ok.onclick=async()=>{ if(it.saving)return; ok.disabled=true; ok.textContent='שומר…'; await approveOne(it,c); };
       st.appendChild(ok);
     }
     const rm=el('<button class="mini">הסרה</button>');
+    keepFocus(rm);
     rm.onclick=()=>removeOne(QUEUE.indexOf(it));
     st.appendChild(rm);
   };
@@ -947,7 +1106,7 @@ function renderReview(app){
   /* ההסבר שלמעלה הוא מה שהופך את ״מוצע״ למובן. בלעדיו נראה שהדף החליט
      משהו בשם רועי, ולא שהוא מציע לו. */
   const pend=QUEUE.filter(x=>!x.k);
-  const matched=pend.filter(x=>(x.link&&x.link!=='new')||x.sugK).length;
+  const matched=pend.filter(x=>plan(x)==='attach').length;
   if(pend.length)app.appendChild(el(`<p class="lede noprint">לכל תמונה מוצע המיקום
     של התמונה שלפניה והסעיף שמתאים לה בסדר היום. ${matched?`<b>${matched}</b> מתוך
     ${pend.length} קיבלו הצעה.`:''} עברו עליהן, תקנו מה שלא מתאים, ואשרו למטה.</p>`));
@@ -966,7 +1125,7 @@ function renderReview(app){
 
   /* הכפתור סופר רק את מה שבאמת ניתן לאישור. ״אישור כל 19״ שישמור
      ארבע הוא הבטחה שלא מתקיימת. */
-  const can=pend.filter(x=>(x.link&&x.link!=='new')||x.sugK||(x.note||'').trim()).length;
+  const can=pend.filter(x=>plan(x)).length;
   if(can){
     const all=el(`<button class="go noprint">✓ אישור ${
       can===1?(pend.length===1?'התמונה':'התמונה המוכנה')
@@ -1014,6 +1173,8 @@ function paintLede(){
 /* שתי דרכים שתמונה נכנסת לסדר היום, ושתיהן נשמרות מעצמן:
    צירוף לסעיף קיים (הרוב, בסיור מול ברק), או ליקוי חדש. */
 async function sync(it,card){
+  /* תמונה שהועברה למשימה אחרת כבר נכתבה שם; עריכה כאן לא נוגעת בה. */
+  if(it.moved||it.tgt)return;
   const k=it.link&&it.link!=='new'?it.link:null;
   /* מיקום אינו תנאי לשמירה — ראה commitOne. התנאי היחיד הוא שיהיה ברור
      לאיזה ליקוי התמונה שייכת: סעיף קיים, או הסבר שרועי כתב. */
@@ -1049,10 +1210,108 @@ async function attachOne(it){
   return a&&b;
 }
 
+/* מה ייכתב לסדר היום בשביל התמונה הזאת: 'attach' (צירוף לסעיף קיים — או
+   המוצע, או שנבחר), 'new' (ליקוי חדש, רק עם הסבר) או null (עוד חסר משהו).
+   הכפתור, הצ׳יפ, מונה ״אישור הכול״ ושתי פעולות האישור כולן קוראות לזה, כדי
+   שמה שכתוב על הכפתור הוא בדיוק מה שהוא עושה. */
+function plan(it){
+  const note=(it.note||'').trim();
+  /* שיוך למשימה אחרת בלוח (it.tgt): xattach = לסעיף קיים שלה, xnew = סעיף
+     חדש בה, xtask = משימה חדשה שהתמונה היא הסעיף הראשון שלה. */
+  if(it.tgt){
+    const g=it.tgt;
+    if(g.newTask)return (g.title||'').trim()?'xtask':null;
+    if(!g.task)return null;
+    if(g.k==='new')return note?'xnew':null;
+    return g.k?'xattach':null;
+  }
+  if(it.link==='new')return note?'new':null;
+  const k=it.link||it.sugK;
+  if(k&&itemByK(k))return 'attach';
+  return note?'new':null;
+}
+
+/* ===== שיוך למשימה אחרת =====
+   התמונה היא קובץ במסד ואין לה בעלים עד שנרשם לה מטא תחת <משימה>__<סעיף>.
+   ״העברה״ היא בדיוק זה: לכתוב את המטא תחת המשימה האחרת ולהוסיף לה סעיף
+   (או להשלים לסעיף קיים את ה-fid). הקובץ עצמו לא זז ושום דבר לא נמחק;
+   ואחרי שהמטא נכתבה התמונה כבר לא נחשבת יתומה, ולכן לא תחזור למסך. */
+let ALLT=null;
+async function loadAllTasks(force){
+  if(ALLT&&!force)return ALLT;
+  const j=await getJSON(DB+'/board/tasks.json');
+  if(!j||typeof j!=='object')return null;
+  const tasks=(Array.isArray(j)?j:Object.values(j)).filter(t=>t&&t.id&&t.title);
+  let maxOrder=0;
+  tasks.forEach(t=>{ if(typeof t.order==='number'&&t.order>maxOrder)maxOrder=t.order; });
+  ALLT={tasks,maxOrder};
+  return ALLT;
+}
+const itemsOfTask=t=>{
+  const v=t&&t.items;
+  const a=Array.isArray(v)?v:(v&&typeof v==='object'?Object.keys(v).sort((x,y)=>x-y).map(k=>v[k]):[]);
+  return a.filter(i=>i&&i.t);
+};
+const taskTitle=t=>String(t||'').replace(/\s+/g,' ').trim();
+async function moveOne(it){
+  const g=it.tgt, note=(it.note||'').trim();
+  const mk=()=>'lk'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+  const text=()=>note?`${it.loc?`📍 ${it.loc} · `:''}**${note}**${it.loc2?` *(${it.loc2})*`:''}`
+    :`📸 ${taskTitle(g.title)}`;
+  const metaFor=(tid,k)=>({fid:it.fid,task:tid+'__'+k,name:it.name||note||g.ktext||taskTitle(g.title),
+    type:it.type,size:it.size,at:new Date().toISOString(),by:'roi'});
+  const putMeta=(tid,k)=>put(`${FMETA}/${encodeURIComponent(tid+'__'+k)}/${it.fid}.json`,metaFor(tid,k));
+  let tid=g.task, k=g.k, ok=false;
+  if(g.newTask){
+    const all=await loadAllTasks(true);
+    if(!all){ toast('אין חיבור — נסו שוב'); return false; }
+    tid='t'+Date.now()+Math.floor(Math.random()*99);
+    k=mk();
+    const item={k,lv:1,done:false,ans:'',t:text(),fid:it.fid,loc:it.loc||'',loc2:it.loc2||'',at:Date.now(),by:'roi'};
+    /* אותה צורה שהלוח עצמו יוצר (addTask), כולל order בסוף הרשימה. */
+    const t={id:tid,title:taskTitle(g.title),notes:'',cat:'reno',due:null,list:'now',
+      order:all.maxOrder+10,done:false,owner:'שנינו',ongoing:true,items:[item],updatedAt:Date.now()};
+    const a=await putMeta(tid,k);
+    const b=a&&await put(`${DB}/board/tasks/${encodeURIComponent(tid)}.json`,t);
+    ok=!!(a&&b);
+    if(ok)ALLT=null;
+  } else if(k==='new'){
+    k=mk();
+    const item={k,lv:1,done:false,ans:'',t:text(),fid:it.fid,loc:it.loc||'',loc2:it.loc2||'',at:Date.now(),by:'roi'};
+    const a=await putMeta(tid,k);
+    const b=a&&await upsertItem(item,tid,true);
+    ok=!!(a&&b);
+    if(ok)ALLT=null;
+  } else {
+    /* סעיף קיים במשימה אחרת: הנוסח שלו לא נוגעים בו. fid נוסף רק אם אין לו עוד. */
+    const live=await getJSON(`${DB}/board/tasks/${encodeURIComponent(tid)}/items.json`);
+    const arr=Array.isArray(live)?live:(live&&typeof live==='object'?Object.values(live):[]);
+    const cur=arr.find(x=>x&&x.k===k);
+    if(!cur){ toast('הסעיף לא נמצא במשימה — נסו לרענן'); return false; }
+    const a=await putMeta(tid,k);
+    const b=a&&await upsertItem(Object.assign({},cur,{fid:cur.fid||it.fid}),tid,true);
+    ok=!!(a&&b);
+    if(ok)ALLT=null;
+  }
+  if(ok){ it.k='moved'; it.moved={task:tid,title:taskTitle(g.title),k}; }
+  return ok;
+}
+async function doMove(it,card){
+  it.saving=true; card.paintSt&&card.paintSt();
+  const ok=await moveOne(it);
+  it.saving=false;
+  if(!ok)toast('ההעברה נכשלה — אין חיבור. הפרטים נשמרו במכשיר, נסו שוב');
+  else toast('התמונה הועברה ל: '+taskTitle(it.moved.title),3000);
+  saveQueue();
+  card.repaint?card.repaint():card.paintSt&&card.paintSt();
+  paintLede();
+}
+
 /* אישור של תמונה אחת: מה שמוצע נהפך למה שנשמר. */
 async function approveOne(it,card){
   if(!it.loc&&it.sugLoc)it.loc=it.sugLoc;
-  if(!it.link&&it.sugK)it.link=it.sugK;
+  if((plan(it)||'')[0]==='x'){ saveQueue(); await doMove(it,card); return; }
+  if(plan(it)==='attach'&&!it.link)it.link=it.sugK;
   if(it.loc)lastLoc=it.loc;
   saveQueue();
   await sync(it,card);
@@ -1071,11 +1330,12 @@ async function approveAll(btn){
     const it=pend[n];
     btn.textContent=`שומר ${n+1} מתוך ${pend.length}…`;
     if(!it.loc&&it.sugLoc)it.loc=it.sugLoc;
-    if(!it.link&&it.sugK)it.link=it.sugK;
-    const k=it.link&&it.link!=='new'?it.link:null;
-    if(k||(it.note||'').trim())it.okd=1;
-    if(k){ if(await attachOne(it))done++; else left++; }
-    else if((it.note||'').trim()){ if(await commitOne(it))done++; else left++; }
+    const p=plan(it);
+    if(p==='attach'&&!it.link)it.link=it.sugK;
+    if(p)it.okd=1;
+    if(p&&p[0]==='x'){ if(await moveOne(it))done++; else left++; }
+    else if(p==='attach'){ if(await attachOne(it))done++; else left++; }
+    else if(p==='new'){ if(await commitOne(it))done++; else left++; }
     else left++;
     saveQueue();
   }
