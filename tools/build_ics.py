@@ -66,7 +66,9 @@ def main():
             ev + ['END:VCALENDAR']) + '\r\n'
         with open(os.path.join(OUT, fname), 'w', encoding='utf-8', newline='') as fh:
             fh.write(ics)
-        print(f'{fname}: {len(ev)//13} אירועים')
+        # 18 שורות לאירוע: VEVENT, שבעה שדות, ושתי תזכורות בנות חמש.
+        # היה כתוב 13 וזה דיווח 56 אירועים על קובץ שבו 41.
+        print(f'{fname}: {len(ev)//18} אירועים')
 
 if __name__ == '__main__':
     main()
